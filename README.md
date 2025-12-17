@@ -3,6 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/fastLowess.svg?style=flat-square)](https://pypi.org/project/fastLowess/)
 [![License](https://img.shields.io/badge/License-AGPL--3.0%20OR%20Commercial-blue.svg)](LICENSE)
 [![Python Versions](https://img.shields.io/pypi/pyversions/fastLowess.svg?style=flat-square)](https://pypi.org/project/fastLowess/)
+[![Documentation Status](https://readthedocs.org/projects/fastlowess-py/badge/?version=latest)](https://fastlowess-py.readthedocs.io/en/latest/?badge=latest)
 
 **High-performance LOWESS (Locally Weighted Scatterplot Smoothing) for Python** — 5-287× faster than statsmodels with robust statistics, confidence intervals, and parallel execution. Built on the [fastLowess](https://github.com/thisisamirv/fastLowess) Rust crate.
 
@@ -15,6 +16,8 @@
 - 🔬 **Scientific**: Validated against R and Python implementations
 
 ## Quick Start
+
+For full documentation including advanced usage, API reference, and examples, visit [fastlowess-py.readthedocs.io](https://fastlowess-py.readthedocs.io/).
 
 ```python
 import numpy as np
