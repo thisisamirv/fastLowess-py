@@ -240,33 +240,32 @@ def main():
     result = fastLowess.smooth(x, y, iterations=5)
     results["more_robust"] = format_result(result)
 
-    # Scenario 5: auto_converge (not directly available in Python API, use default)
-    # Note: auto_converge is a Rust-only feature, use equivalent behavior
-    result = fastLowess.smooth(x, y)
+    # Scenario 5: auto_converge
+    result = fastLowess.smooth(x, y, auto_converge=1e-4)
     results["auto_converge"] = format_result(result)
 
-    # Scenario 6: cross_validate
-    optimal_frac, result = fastLowess.cross_validate(
+    # Scenario 6: cross_validate (k-fold)
+    result = fastLowess.smooth(
         x, y,
-        fractions=[0.2, 0.4, 0.6],
+        cv_fractions=[0.2, 0.4, 0.6],
         cv_method="kfold",
         cv_k=5,
     )
     results["cross_validate"] = format_result(result)
 
     # Scenario 7: kfold_cv (same as cross_validate)
-    optimal_frac, result = fastLowess.cross_validate(
+    result = fastLowess.smooth(
         x, y,
-        fractions=[0.2, 0.4, 0.6],
+        cv_fractions=[0.2, 0.4, 0.6],
         cv_method="kfold",
         cv_k=5,
     )
     results["kfold_cv"] = format_result(result)
 
     # Scenario 8: loocv
-    optimal_frac, result = fastLowess.cross_validate(
+    result = fastLowess.smooth(
         x, y,
-        fractions=[0.2, 0.4, 0.6],
+        cv_fractions=[0.2, 0.4, 0.6],
         cv_method="loocv",
     )
     results["loocv"] = format_result(result)

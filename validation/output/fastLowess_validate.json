@@ -1055,7 +1055,7 @@
     "residuals": null,
     "robustness_weights": null,
     "diagnostics": null,
-    "iterations_used": null,
+    "iterations_used": 3,
     "fraction_used": 0.5,
     "cv_scores": null
   },
