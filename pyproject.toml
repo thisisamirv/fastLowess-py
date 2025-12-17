@@ -31,6 +31,15 @@ dependencies = ["numpy>=1.20.0"]
 
 [tool.maturin]
 module-name = "fastLowess"
+include = [
+    "fastLowess/**",
+    "src/**",
+    "Cargo.toml",
+    "pyproject.toml",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -4,11 +4,11 @@
 [![License](https://img.shields.io/badge/License-AGPL--3.0%20OR%20Commercial-blue.svg)](LICENSE)
 [![Python Versions](https://img.shields.io/pypi/pyversions/fastLowess.svg?style=flat-square)](https://pypi.org/project/fastLowess/)
 
-**High-performance LOWESS (Locally Weighted Scatterplot Smoothing) for Python** — 40-500× faster than statsmodels with robust statistics, confidence intervals, and parallel execution. Built on the [lowess-rs](https://github.com/thisisamirv/lowess) Rust core.
+**High-performance LOWESS (Locally Weighted Scatterplot Smoothing) for Python** — 5-287× faster than statsmodels with robust statistics, confidence intervals, and parallel execution. Built on the [fastLowess](https://github.com/thisisamirv/fastLowess) Rust crate.
 
 ## Why This Package?
 
-- ⚡ **Blazingly Fast**: 40-500× faster than statsmodels, sub-millisecond smoothing for 1000 points
+- ⚡ **Blazingly Fast**: 5-287× faster than statsmodels, sub-millisecond smoothing for 1000 points
 - 🎯 **Production-Ready**: Comprehensive error handling, numerical stability, extensive testing
 - 📊 **Feature-Rich**: Confidence/prediction intervals, multiple kernels, cross-validation
 - 🚀 **Scalable**: Parallel execution, streaming mode, delta optimization
@@ -18,21 +18,22 @@
 
 ```python
 import numpy as np
-import lowess_py
+import fastLowess
 
 x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
 y = np.array([2.0, 4.1, 5.9, 8.2, 9.8])
 
 # Basic smoothing
-smoothed = lowess_py.smooth(x, y, fraction=0.5)
+result = fastLowess.smooth(x, y, fraction=0.5)
 
-print(f"Smoothed: {smoothed}")
+print(f"Smoothed: {result.y}")
+print(f"Fraction used: {result.fraction_used}")
 ```
 
 ## Installation
 
 ```bash
-pip install lowess-py
+pip install fastLowess
 ```
 
 ## Features at a Glance
@@ -53,17 +54,17 @@ pip install lowess-py
 
 ```python
 import numpy as np
-import lowess_py
+import fastLowess
 
 x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
-y = np.array([2.0, 4.1, 5.9, 8.2, 9.8])
+y = np.array([2.0, 4.1, 100.0, 8.2, 9.8])  # Outlier at index 2
 
 # Use robust iterations to downweight outliers
-result = lowess_py.lowess(
+result = fastLowess.smooth(
     x, y,
-    fraction=0.3,
+    fraction=0.7,
     iterations=5,  # Robust iterations
-    compute_robustness_weights=True
+    return_robustness_weights=True
 )
 
 # Check which points were downweighted
@@ -76,11 +77,11 @@ if result.robustness_weights is not None:
 ### 2. Uncertainty Quantification
 
 ```python
-result = lowess_py.lowess(
+result = fastLowess.smooth(
     x, y,
     fraction=0.5,
-    confidence_level=0.95,
-    prediction_level=0.95
+    confidence_intervals=0.95,
+    prediction_intervals=0.95
 )
 
 # Access confidence bands
@@ -92,15 +93,15 @@ for i in range(len(x)):
 ### 3. Automatic Parameter Selection (Cross-Validation)
 
 ```python
-# Let cross-validation find the optimal smoothing fraction
-fraction, result = lowess_py.cross_validate(
+# Cross-validation is integrated into smooth() via cv_fractions
+result = fastLowess.smooth(
     x, y,
-    fractions=[0.2, 0.3, 0.5, 0.7],
-    method="kfold",
-    k=5
+    cv_fractions=[0.2, 0.3, 0.5, 0.7],  # Fractions to test
+    cv_method="kfold",                   # "kfold" or "loocv"
+    cv_k=5                               # Number of folds
 )
 
-print(f"Optimal fraction: {fraction}")
+print(f"Optimal fraction: {result.fraction_used}")
 print(f"CV RMSE scores: {result.cv_scores}")
 ```
 
@@ -109,29 +110,29 @@ print(f"CV RMSE scores: {result.cv_scores}")
 ```python
 # Streaming mode for very large datasets
 # Keeps memory usage constant by processing in chunks
-result = lowess_py.smooth_streaming(
+result = fastLowess.smooth_streaming(
     x, y,
     fraction=0.3,
-    chunk_size=1000
+    chunk_size=5000,
+    overlap=500
 )
 ```
 
 ### 5. Production Monitoring (Diagnostics)
 
 ```python
-result = lowess_py.lowess(
+result = fastLowess.smooth(
     x, y,
     fraction=0.5,
     iterations=3,
-    compute_diagnostics=True
+    return_diagnostics=True
 )
 
 if result.diagnostics:
     diag = result.diagnostics
     print(f"RMSE: {diag.rmse:.4f}")
+    print(f"MAE: {diag.mae:.4f}")
     print(f"R²: {diag.r_squared:.4f}")
-    if diag.effective_df < 2.0:
-        print("Warning: Very low degrees of freedom")
 ```
 
 ## Parameter Selection Guide
@@ -144,7 +145,7 @@ The `fraction` parameter controls the window size.
 - **0.4-0.6**: Balanced, general-purpose
 - **0.7-1.0**: Global, smooth trends only
 - **Default: 0.67** (2/3, Cleveland's choice)
-- **Use CV** when uncertain (via `cross_validate`)
+- **Use CV** when uncertain (via `cv_fractions`)
 
 ### Robustness Iterations
 
@@ -158,10 +159,15 @@ The `iterations` parameter controls resistance to outliers.
 
 ### Kernel Function
 
-- **Tricube** (default): Best all-around, smooth, efficient
-- **Epanechnikov**: Theoretically optimal MSE
-- **Gaussian**: Very smooth, no compact support
-- **Uniform**: Fastest, least smooth (moving average)
+The `weight_function` parameter controls the kernel.
+
+- **"tricube"** (default): Best all-around, smooth, efficient
+- **"epanechnikov"**: Theoretically optimal MSE
+- **"gaussian"**: Very smooth, no compact support
+- **"uniform"**: Fastest, least smooth (moving average)
+- **"biweight"**: Similar to tricube
+- **"triangle"**: Linear decay
+- **"cosine"**: Smooth cosine weighting
 
 ### Delta Optimization
 
@@ -177,93 +183,142 @@ Errors from the underlying Rust implementation are raised as standard Python exc
 
 ```python
 try:
-    lowess_py.smooth(x, y, fraction=1.5)
+    fastLowess.smooth(x, y, fraction=1.5)
 except ValueError as e:
     print(f"Error: {e}")  # "fraction must be <= 1.0"
 ```
 
-## API Overview
+## API Reference
 
-### `lowess_py.smooth`
+### `fastLowess.smooth`
+
+The primary interface for LOWESS smoothing. Processes the entire dataset in memory with optional parallel execution.
 
 ```python
-def smooth(x, y, fraction=0.5, robust=True):
-    """Simple smoothing interface."""
+def smooth(
+    x, y,
+    fraction=0.67,                    # Smoothing fraction (0, 1]
+    iterations=3,                     # Robustness iterations
+    delta=None,                       # Interpolation threshold
+    weight_function="tricube",        # Kernel function
+    robustness_method="bisquare",     # Outlier method
+    confidence_intervals=None,        # CI level (e.g., 0.95)
+    prediction_intervals=None,        # PI level (e.g., 0.95)
+    return_diagnostics=False,         # Compute RMSE, R², etc.
+    return_residuals=False,           # Include residuals
+    return_robustness_weights=False,  # Include weights
+    zero_weight_fallback="use_local_mean",
+    auto_converge=None,               # Auto-convergence tolerance
+    max_iterations=None,              # Max iterations (default: 20)
+    cv_fractions=None,                # Fractions for CV
+    cv_method="kfold",                # "kfold" or "loocv"
+    cv_k=5                            # Folds for k-fold CV
+) -> LowessResult
 ```
 
-- Returns: `numpy.ndarray` (smoothed y values)
+### `fastLowess.smooth_streaming`
 
-### `lowess_py.lowess`
+Streaming LOWESS for large datasets. Processes data in chunks to maintain constant memory usage.
 
 ```python
-def lowess(x, y, fraction=0.5, iterations=3, delta=None,
-           weight_function="tricube", robustness_method="bisquare",
-           confidence_level=None, prediction_level=None,
-           compute_diagnostics=False, compute_residuals=False,
-           compute_robustness_weights=False):
-    """Full control interface."""
+def smooth_streaming(
+    x, y,
+    fraction=0.3,                     # Smoothing fraction
+    chunk_size=5000,                  # Points per chunk
+    overlap=None,                     # Overlap (default: 10%)
+    iterations=3,                     # Robustness iterations
+    weight_function="tricube",        # Kernel function
+    robustness_method="bisquare",     # Outlier method
+    parallel=True                     # Enable parallelism
+) -> LowessResult
 ```
 
-- Returns: `LowessResult`
+### `fastLowess.smooth_online`
 
-### `lowess_py.cross_validate`
+Online LOWESS with sliding window for real-time data streams.
 
 ```python
-def cross_validate(x, y, fractions=None, method="simple", k=5):
-    """Optimize smoothing fraction."""
+def smooth_online(
+    x, y,
+    fraction=0.2,                     # Fraction within window
+    window_capacity=100,              # Max points in window
+    min_points=3,                     # Min points before smoothing
+    iterations=3,                     # Robustness iterations
+    weight_function="tricube",        # Kernel function
+    robustness_method="bisquare",     # Outlier method
+    parallel=False                    # Enable parallelism
+) -> LowessResult
 ```
 
 ### `LowessResult` Structure
 
-The `LowessResult` object returned by `lowess()` contains:
+The `LowessResult` object returned by all functions contains:
 
-| Field                | Type        | Description                      |
-| -------------------- | ----------- | -------------------------------- |
-| `y`                  | array       | Smoothed y values                |
-| `x`                  | array       | Sorted x values                  |
-| `confidence_lower`   | array/None  | CI lower bound                   |
-| `confidence_upper`   | array/None  | CI upper bound                   |
-| `residuals`          | array/None  | Raw residuals ($y - y_{smooth}$) |
-| `robustness_weights` | array/None  | Final outlier weights            |
-| `diagnostics`        | object/None | Fit statistics (RMSE, R², etc.)  |
-| `fraction_used`      | float       | Fraction actually used           |
+| Field                | Type        | Description                         |
+| -------------------- | ----------- | ----------------------------------- |
+| `x`                  | array       | Sorted x values                     |
+| `y`                  | array       | Smoothed y values                   |
+| `fraction_used`      | float       | Fraction actually used              |
+| `iterations_used`    | int/None    | Robustness iterations performed     |
+| `standard_errors`    | array/None  | Standard errors (if CI/PI enabled)  |
+| `confidence_lower`   | array/None  | CI lower bound                      |
+| `confidence_upper`   | array/None  | CI upper bound                      |
+| `prediction_lower`   | array/None  | PI lower bound                      |
+| `prediction_upper`   | array/None  | PI upper bound                      |
+| `residuals`          | array/None  | Raw residuals (y - y_smooth)        |
+| `robustness_weights` | array/None  | Final outlier weights [0, 1]        |
+| `diagnostics`        | object/None | Fit statistics (RMSE, R², etc.)     |
+| `cv_scores`          | array/None  | CV scores for tested fractions      |
+
+### `Diagnostics` Structure
+
+| Field          | Type       | Description                      |
+| -------------- | ---------- | -------------------------------- |
+| `rmse`         | float      | Root Mean Squared Error          |
+| `mae`          | float      | Mean Absolute Error              |
+| `r_squared`    | float      | Coefficient of determination     |
+| `residual_sd`  | float      | Residual standard deviation      |
+| `aic`          | float/None | Akaike Information Criterion     |
+| `aicc`         | float/None | Corrected AIC                    |
+| `effective_df` | float/None | Effective degrees of freedom     |
 
 ## Advanced Features
 
 ### Streaming Processing
 
-For datasets too large to fit in memory, use the streaming interface:
+For datasets too large to fit in memory:
 
 ```python
-import lowess_py
+import fastLowess
 
 # Process data in chunks to keep memory usage constant
-result = lowess_py.smooth_streaming(
+result = fastLowess.smooth_streaming(
     x, y,
     fraction=0.3,
-    chunk_size=1000  # Process 1000 points at a time
+    chunk_size=5000,
+    overlap=500
 )
 ```
 
-This is particularly useful for:
+Use cases:
 
 - Very large datasets (millions of points)
 - Memory-constrained environments
-- Real-time data processing pipelines
+- Batch processing pipelines
 
 ### Online/Incremental Updates
 
 For real-time smoothing with a sliding window:
 
 ```python
-import lowess_py
+import fastLowess
 
 # Initialize online smoother with a sliding window
-result = lowess_py.smooth_online(
+result = fastLowess.smooth_online(
     x, y,
     fraction=0.2,
-    window_size=100,  # Keep last 100 points
-    min_points=20     # Minimum points before smoothing starts
+    window_capacity=100,  # Keep last 100 points
+    min_points=3          # Minimum points before smoothing starts
 )
 ```
 
@@ -278,27 +333,26 @@ Use cases:
 This implementation has been extensively validated against:
 
 1. **R's stats::lowess**: Numerical agreement to machine precision
-2. **Python's statsmodels**: Validated on 44 test scenarios
+2. **Python's statsmodels**: Validated on multiple test scenarios
 3. **Cleveland's original paper**: Reproduces published examples
-
-See the `validation/` directory in the [repository](https://github.com/thisisamirv/lowess) for cross-language comparison scripts.
 
 ## Performance Benchmarks
 
 Comparison against Python's `statsmodels` (pure Python/NumPy vs Rust extension):
 
-| Dataset Size  | statsmodels | lowess-py (Rust) | Speedup |
-| ------------- | ----------- | ---------------- | ------- |
-| 100 points    | 2.71 ms     | 0.15 ms          | **18×** |
-| 1,000 points  | 36.32 ms    | 1.47 ms          | **25×** |
-| 5,000 points  | 373.15 ms   | 6.97 ms          | **53×** |
-| 10,000 points | 1,245.80 ms | 12.68 ms         | **98×** |
+| Dataset Size  | statsmodels | fastLowess | Speedup  |
+| ------------- | ----------- | ---------- | -------- |
+| 100 points    | 1.79 ms     | 0.13 ms    | **14×**  |
+| 500 points    | 9.86 ms     | 0.26 ms    | **38×**  |
+| 1,000 points  | 22.80 ms    | 0.39 ms    | **59×**  |
+| 5,000 points  | 229.76 ms   | 2.04 ms    | **112×** |
+| 10,000 points | 742.99 ms   | 2.59 ms    | **287×** |
 
 _Benchmarks conducted on Intel Core Ultra 7 268V. Performance may vary by system._
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
@@ -319,11 +373,11 @@ See the [LICENSE](LICENSE) file for details.
 ## Citation
 
 ```bibtex
-@software{lowess_py_2025,
+@software{fastLowess_2025,
   author = {Valizadeh, Amir},
-  title = {lowess-py: High-performance LOWESS for Python},
+  title = {fastLowess: High-performance LOWESS for Python},
   year = {2025},
-  url = {https://github.com/thisisamirv/lowess},
+  url = {https://github.com/thisisamirv/fastLowess-py},
   version = {0.1.0}
 }
 ```
@@ -332,4 +386,4 @@ See the [LICENSE](LICENSE) file for details.
 
 **Amir Valizadeh**  
 📧 <thisisamirv@gmail.com>
-🔗 [GitHub](https://github.com/thisisamirv/lowess)
+🔗 [GitHub](https://github.com/thisisamirv/fastLowess-py)

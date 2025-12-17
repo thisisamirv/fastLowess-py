@@ -18,15 +18,15 @@ homepage = "https://github.com/thisisamirv/fastLowess-py"
 keywords = ["lowess", "smoothing", "statistics", "regression", "bioinformatics"]
 categories = ["science", "algorithms"]
 
-# Build
 include = [
     "src/**/*",
     "docs/**/*.svg",
+    "fastLowess/**/*",
     "Cargo.toml",
     "README.md",
     "LICENSE",
     "CHANGELOG.md",
-]
+] # Build
 
 [dependencies]
 fastLowess = { version = "0.1.0", features = ["dev"] }
