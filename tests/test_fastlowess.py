@@ -146,62 +146,6 @@ class TestSmooth:
             assert len(result.y) == len(x)
 
 
-class TestCrossValidate:
-    """Tests for the cross_validate() function."""
-
-    def test_basic_cv(self):
-        """Test basic cross-validation."""
-        x = np.linspace(0, 10, 30)
-        y = 2 * x + np.random.normal(0, 0.5, 30)
-
-        fraction, result = fastLowess.cross_validate(
-            x, y,
-            fractions=[0.3, 0.5, 0.7]
-        )
-
-        assert fraction in [0.3, 0.5, 0.7]
-        assert isinstance(result, fastLowess.LowessResult)
-
-    def test_cv_kfold(self):
-        """Test k-fold cross-validation."""
-        np.random.seed(42)
-        x = np.linspace(0, 10, 30)
-        y = 2 * x + np.random.normal(0, 0.5, 30)
-
-        fraction, result = fastLowess.cross_validate(
-            x, y,
-            fractions=[0.3, 0.5],
-            cv_method="kfold",
-            cv_k=5
-        )
-
-        assert fraction in [0.3, 0.5]
-
-    def test_cv_loocv(self):
-        """Test leave-one-out cross-validation."""
-        x = np.linspace(0, 10, 15)
-        y = 2 * x + 1
-
-        fraction, result = fastLowess.cross_validate(
-            x, y,
-            fractions=[0.3, 0.5, 0.7],
-            cv_method="loocv"
-        )
-
-        assert fraction in [0.3, 0.5, 0.7]
-
-    def test_cv_returns_scores(self):
-        """Test that CV returns scores."""
-        x = np.linspace(0, 10, 20)
-        y = 2 * x + 1
-
-        fraction, result = fastLowess.cross_validate(
-            x, y,
-            fractions=[0.3, 0.5, 0.7]
-        )
-
-        assert result.cv_scores is not None
-        assert len(result.cv_scores) == 3
 
 
 class TestSmoothStreaming:
@@ -401,7 +345,7 @@ class TestErrorHandling:
         y = np.array([2.0, 4.0, 6.0, 8.0, 10.0])
 
         with pytest.raises(ValueError):
-            fastLowess.cross_validate(x, y, fractions=[0.5], cv_method="invalid")
+            fastLowess.smooth(x, y, cv_fractions=[0.5], cv_method="invalid")
 
 
 class TestEdgeCases:
@@ -449,6 +393,79 @@ class TestEdgeCases:
 
         result = fastLowess.smooth(x, y, fraction=0.5)
         np.testing.assert_allclose(result.y, y, rtol=1e-10)
+
+
+class TestCrossValidation:
+    """Tests for cross-validation via smooth()."""
+
+    def test_cv_basic(self):
+        """Test basic cross-validation selects a fraction."""
+        x = np.linspace(0, 10, 50)
+        y = 2 * x + np.sin(x)
+
+        result = fastLowess.smooth(x, y, cv_fractions=[0.2, 0.3, 0.5, 0.7])
+        
+        assert result.fraction_used in [0.2, 0.3, 0.5, 0.7]
+        assert result.cv_scores is not None
+        assert len(result.cv_scores) == 4
+        assert len(result.y) == len(x)
+
+    def test_cv_kfold(self):
+        """Test k-fold cross-validation."""
+        x = np.linspace(0, 10, 30)
+        y = x ** 2
+
+        result = fastLowess.smooth(
+            x, y, 
+            cv_fractions=[0.3, 0.5], 
+            cv_method="kfold", 
+            cv_k=5
+        )
+        
+        assert result.fraction_used in [0.3, 0.5]
+        assert result.cv_scores is not None
+
+    def test_cv_loocv(self):
+        """Test leave-one-out cross-validation."""
+        x = np.linspace(0, 10, 20)
+        y = np.sin(x)
+
+        result = fastLowess.smooth(
+            x, y, 
+            cv_fractions=[0.4, 0.6], 
+            cv_method="loocv"
+        )
+        
+        assert result.fraction_used in [0.4, 0.6]
+        assert result.cv_scores is not None
+
+    def test_cv_with_other_params(self):
+        """Test CV works with other parameters."""
+        x = np.linspace(0, 10, 40)
+        y = 2 * x + 0.5 * np.sin(x)
+
+        result = fastLowess.smooth(
+            x, y,
+            cv_fractions=[0.3, 0.5, 0.7],
+            iterations=2,
+            return_diagnostics=True,
+            return_residuals=True
+        )
+        
+        assert result.fraction_used in [0.3, 0.5, 0.7]
+        assert result.diagnostics is not None
+        assert result.residuals is not None
+
+    def test_cv_single_fraction(self):
+        """Test CV with single fraction still works."""
+        x = np.linspace(0, 10, 25)
+        y = x + np.random.normal(0, 0.1, 25)
+
+        result = fastLowess.smooth(x, y, cv_fractions=[0.5])
+        
+        assert result.fraction_used == 0.5
+        assert result.cv_scores is not None
+        assert len(result.cv_scores) == 1
 
 
 if __name__ == "__main__":

@@ -277,6 +277,17 @@ impl PyLowessResult {
 ///     Whether to include robustness weights in output.
 /// zero_weight_fallback : str, optional
 ///     Fallback when all weights are zero: "use_local_mean", "return_original", "return_none".
+/// auto_converge : float, optional
+///     Tolerance for auto-convergence (disabled by default).
+/// max_iterations : int, optional
+///     Maximum robustness iterations (default: 20).
+/// cv_fractions : list of float, optional
+///     Fractions to test for cross-validation (disabled by default).
+///     When provided, enables cross-validation to select optimal fraction.
+/// cv_method : str, optional
+///     CV method: "loocv" (leave-one-out) or "kfold". Default: "kfold".
+/// cv_k : int, optional
+///     Number of folds for k-fold CV (default: 5).
 ///
 /// Returns
 /// -------
@@ -295,7 +306,12 @@ impl PyLowessResult {
     return_diagnostics=false,
     return_residuals=false,
     return_robustness_weights=false,
-    zero_weight_fallback="use_local_mean"
+    zero_weight_fallback="use_local_mean",
+    auto_converge=None,
+    max_iterations=None,
+    cv_fractions=None,
+    cv_method="kfold",
+    cv_k=5
 ))]
 #[allow(clippy::too_many_arguments)]
 fn smooth<'py>(
@@ -312,6 +328,11 @@ fn smooth<'py>(
     return_residuals: bool,
     return_robustness_weights: bool,
     zero_weight_fallback: &str,
+    auto_converge: Option<f64>,
+    max_iterations: Option<usize>,
+    cv_fractions: Option<Vec<f64>>,
+    cv_method: &str,
+    cv_k: usize,
 ) -> PyResult<PyLowessResult> {
     let x_slice = x.as_slice().map_err(to_py_error)?;
     let y_slice = y.as_slice().map_err(to_py_error)?;
@@ -351,6 +372,29 @@ fn smooth<'py>(
         builder = builder.return_robustness_weights();
     }
 
+    if let Some(tol) = auto_converge {
+        builder = builder.auto_converge(tol);
+    }
+
+    if let Some(mi) = max_iterations {
+        builder = builder.max_iterations(mi);
+    }
+
+    // Cross-validation if fractions are provided
+    if let Some(fractions) = cv_fractions {
+        let (cv_strategy, k_opt) = match cv_method.to_lowercase().as_str() {
+            "simple" | "loo" | "loocv" | "leave_one_out" => (CrossValidationStrategy::LOOCV, None),
+            "kfold" | "k_fold" | "k-fold" => (CrossValidationStrategy::KFold, Some(cv_k)),
+            _ => {
+                return Err(PyValueError::new_err(format!(
+                    "Unknown CV method: {}. Valid options: loocv, kfold",
+                    cv_method
+                )));
+            }
+        };
+        builder = builder.cross_validate(&fractions, cv_strategy, k_opt);
+    }
+
     let result = builder
         .adapter(Batch)
         .build()
@@ -359,63 +403,6 @@ fn smooth<'py>(
         .map_err(to_py_error)?;
 
     Ok(PyLowessResult { inner: result })
-}
-
-/// Cross-validation to find optimal smoothing fraction.
-///
-/// Parameters
-/// ----------
-/// x : array_like
-///     Independent variable values.
-/// y : array_like
-///     Dependent variable values.
-/// fractions : list of float, optional
-///     Fractions to test (default: [0.2, 0.3, 0.4, 0.5, 0.6, 0.7]).
-/// cv_method : str, optional
-///     CV method: "loocv" (leave-one-out) or "kfold".
-/// cv_k : int, optional
-///     Number of folds for k-fold CV (default: 5).
-///
-/// Returns
-/// -------
-/// tuple
-///     (optimal_fraction, LowessResult)
-#[pyfunction]
-#[pyo3(signature = (x, y, fractions=None, cv_method="kfold", cv_k=5))]
-fn cross_validate<'py>(
-    x: PyReadonlyArray1<'py, f64>,
-    y: PyReadonlyArray1<'py, f64>,
-    fractions: Option<Vec<f64>>,
-    cv_method: &str,
-    cv_k: usize,
-) -> PyResult<(f64, PyLowessResult)> {
-    let x_slice = x.as_slice().map_err(to_py_error)?;
-    let y_slice = y.as_slice().map_err(to_py_error)?;
-
-    let frac_list = fractions.unwrap_or_else(|| vec![0.2, 0.3, 0.4, 0.5, 0.6, 0.7]);
-
-    let (cv_strategy, k_opt) = match cv_method.to_lowercase().as_str() {
-        "simple" | "loo" | "loocv" | "leave_one_out" => (CrossValidationStrategy::LOOCV, None),
-        "kfold" | "k_fold" | "k-fold" => (CrossValidationStrategy::KFold, Some(cv_k)),
-        _ => {
-            return Err(PyValueError::new_err(format!(
-                "Unknown CV method: {}. Valid options: loocv, kfold",
-                cv_method
-            )));
-        }
-    };
-
-    let result = LowessBuilder::<f64>::new()
-        .cross_validate(&frac_list, cv_strategy, k_opt)
-        .adapter(Batch)
-        .build()
-        .map_err(to_py_error)?
-        .fit(x_slice, y_slice)
-        .map_err(to_py_error)?;
-
-    let optimal_fraction = result.fraction_used;
-
-    Ok((optimal_fraction, PyLowessResult { inner: result }))
 }
 
 /// Streaming LOWESS for large datasets.
@@ -622,7 +609,6 @@ fn fastLowess(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyLowessResult>()?;
     m.add_class::<PyDiagnostics>()?;
     m.add_function(wrap_pyfunction!(smooth, m)?)?;
-    m.add_function(wrap_pyfunction!(cross_validate, m)?)?;
     m.add_function(wrap_pyfunction!(smooth_streaming, m)?)?;
     m.add_function(wrap_pyfunction!(smooth_online, m)?)?;
     Ok(())

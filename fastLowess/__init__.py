@@ -139,6 +139,24 @@ smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
         - "use_local_mean" (default): Use mean of neighborhood
         - "return_original": Return original y value
         - "return_none": Return NaN (for explicit handling)
+        
+    auto_converge : float, optional
+        Tolerance for auto-convergence. When set, iterations stop when
+        the maximum change between iterations is below this threshold.
+        Default: None (disabled).
+    max_iterations : int, optional
+        Maximum robustness iterations. Default: 20.
+    cv_fractions : list of float, optional
+        Fractions to test for cross-validation. When provided, enables
+        cross-validation to select optimal fraction. The result's
+        `fraction_used` will contain the selected fraction and `cv_scores`
+        will contain the scores for each tested fraction.
+        Default: None (disabled).
+    cv_method : str, optional
+        Cross-validation method: "loocv" (leave-one-out) or "kfold".
+        Default: "kfold".
+    cv_k : int, optional
+        Number of folds for k-fold CV. Default: 5.
     
     Returns
     -------
@@ -153,38 +171,6 @@ smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
     >>> y = 2 * x + np.random.normal(0, 1, 100)
     >>> result = fastLowess.smooth(x, y, fraction=0.3, confidence_intervals=0.95)
     >>> print(f"Smoothed {len(result.y)} points")
-
-
-cross_validate(x, y, fractions=None, cv_method="kfold", cv_k=5)
-    Cross-validation to find optimal smoothing fraction.
-    
-    Parameters
-    ----------
-    x : array_like
-        Independent variable values.
-    y : array_like
-        Dependent variable values.
-    fractions : list of float, optional
-        Fractions to test. Default: [0.2, 0.3, 0.4, 0.5, 0.6, 0.7].
-    cv_method : str, optional
-        Cross-validation method:
-        
-        - "kfold": K-fold cross-validation (default)
-        - "loocv": Leave-one-out cross-validation
-        
-    cv_k : int, optional
-        Number of folds for k-fold CV. Default: 5.
-    
-    Returns
-    -------
-    tuple
-        (optimal_fraction, LowessResult) - the best fraction and fitted result.
-    
-    Examples
-    --------
-    >>> optimal_frac, result = fastLowess.cross_validate(x, y, fractions=[0.2, 0.3, 0.5])
-    >>> print(f"Best fraction: {optimal_frac}")
-
 
 smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None, 
                  iterations=3, weight_function="tricube", 
@@ -353,8 +339,7 @@ Choosing the Right Function
 | Function          | Use Case                                                 |
 +===================+==========================================================+
 | smooth()          | Primary interface - batch processing with all options    |
-+-------------------+----------------------------------------------------------+
-| cross_validate()  | Automatic fraction selection via cross-validation        |
+|                   | Includes cross-validation via cv_fractions parameter     |
 +-------------------+----------------------------------------------------------+
 | smooth_streaming()| Large datasets (>100K points), memory-constrained envs   |
 +-------------------+----------------------------------------------------------+
@@ -394,7 +379,6 @@ parallel LOWESS smoothing with NumPy integration.
 # Import from native extension
 from .fastLowess import (
     smooth,
-    cross_validate,
     smooth_streaming,
     smooth_online,
     LowessResult,
@@ -403,7 +387,6 @@ from .fastLowess import (
 
 __all__ = [
     "smooth",
-    "cross_validate",
     "smooth_streaming",
     "smooth_online",
     "LowessResult",
