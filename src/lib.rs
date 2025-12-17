@@ -256,7 +256,7 @@ impl PyLowessResult {
 /// y : array_like
 ///     Dependent variable values.
 /// fraction : float, optional
-///     Smoothing fraction (default: 0.5).
+///     Smoothing fraction (default: 0.67).
 /// iterations : int, optional
 ///     Number of robustness iterations (default: 3).
 /// delta : float, optional
@@ -296,7 +296,7 @@ impl PyLowessResult {
 #[pyfunction]
 #[pyo3(signature = (
     x, y,
-    fraction=0.5,
+    fraction=0.67,
     iterations=3,
     delta=None,
     weight_function="tricube",

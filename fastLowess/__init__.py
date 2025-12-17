@@ -78,7 +78,7 @@ smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
         Dependent variable values (1D array, same length as x).
     fraction : float, optional
         Smoothing fraction - the proportion of data used for each local fit.
-        Range: (0, 1]. Default: 0.5.
+        Range: (0, 1]. Default: 0.67.
         
         - 0.1-0.3: Fine detail, may be noisy
         - 0.3-0.5: Moderate smoothing (good for most cases)
