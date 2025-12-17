@@ -1,0 +1,170 @@
+# Run all local checks (formatting, linting, building, tests, docs)
+check: fmt clippy build test doc
+	@echo "All checks completed successfully!"
+
+# Run all checks including Python linting
+check-all: check lint-py
+	@echo "All checks (Rust + Python) completed successfully!"
+
+# --- Formatting ---
+fmt: fmt-rust fmt-py
+	@echo "Formatting check complete!"
+
+fmt-rust:
+	@echo "Checking Rust code formatting..."
+	@cargo fmt --all -- --check
+
+fmt-py:
+	@echo "Checking Python code formatting with ruff..."
+	@ruff format --check fastLowess/ tests/ || true
+
+fmt-fix: fmt-fix-rust fmt-fix-py
+	@echo "Formatting complete!"
+
+fmt-fix-rust:
+	@echo "Formatting Rust code..."
+	@cargo fmt --all
+
+fmt-fix-py:
+	@echo "Formatting Python code with ruff..."
+	@ruff format fastLowess/ tests/
+
+# --- Linter ---
+clippy: clippy-default clippy-serial
+
+clippy-default:
+	@echo "Running clippy (default / parallel)..."
+	@cargo clippy --all-targets -- -D warnings
+
+clippy-serial:
+	@echo "Running clippy (serial / no parallel)..."
+	@cargo clippy --all-targets --no-default-features -- -D warnings
+	@echo "Clippy check complete!"
+
+lint-py:
+	@echo "Linting Python code with ruff..."
+	@ruff check fastLowess/ tests/
+	@echo "Python lint complete!"
+
+lint-py-fix:
+	@echo "Fixing Python lint issues with ruff..."
+	@ruff check --fix fastLowess/ tests/
+	@echo "Python lint fix complete!"
+
+# --- Build ---
+build: build-default build-serial
+
+build-default:
+	@echo "Building crate (default / parallel)..."
+	@cargo build
+
+build-serial:
+	@echo "Building crate (serial / no parallel)..."
+	@cargo build --no-default-features
+	@echo "Build complete!"
+
+# --- Maturin (Python package) ---
+develop:
+	@echo "Building and installing Python package (development mode)..."
+	@maturin develop
+	@echo "Development install complete!"
+
+develop-release:
+	@echo "Building and installing Python package (release mode)..."
+	@maturin develop --release
+	@echo "Development install (release) complete!"
+
+wheel:
+	@echo "Building Python wheel..."
+	@maturin build
+	@echo "Wheel build complete!"
+
+wheel-release:
+	@echo "Building Python wheel (release)..."
+	@maturin build --release
+	@echo "Wheel build (release) complete!"
+
+# --- Test ---
+test: test-python
+
+test-rust:
+	@echo "Running Rust tests..."
+	@cargo test
+	@echo "Rust tests complete!"
+
+test-python:
+	@echo "Running Python tests..."
+	@python -m pytest tests -v
+	@echo "Python tests complete!"
+
+test-python-fast:
+	@echo "Running Python tests (fast, no verbose)..."
+	@python -m pytest tests
+	@echo "Python tests complete!"
+
+test-all: test-rust test-python
+	@echo "All tests complete!"
+
+# --- Documentation ---
+doc: doc-default doc-serial
+	@echo "Documentation build complete!"
+
+doc-default:
+	@echo "Building documentation (default / parallel)..."
+	@RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
+
+doc-serial:
+	@echo "Building documentation (serial / no parallel)..."
+	@RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --no-default-features
+
+# --- Clean ---
+clean: clean-rust clean-python
+	@echo "Clean complete!"
+
+clean-rust:
+	@echo "Performing cargo clean..."
+	@cargo clean
+
+clean-python:
+	@echo "Cleaning Python build artifacts..."
+	@rm -rf target/wheels
+	@rm -rf .pytest_cache
+	@rm -rf __pycache__
+	@rm -rf fastLowess/__pycache__
+	@rm -rf tests/__pycache__
+	@rm -rf *.egg-info
+	@rm -rf .ruff_cache
+
+# --- Help ---
+help:
+	@echo "Available targets:"
+	@echo "  check          - Run all Rust checks (fmt, clippy, build, test, doc)"
+	@echo "  check-all      - Run all checks (Rust + Python linting)"
+	@echo ""
+	@echo "Formatting:"
+	@echo "  fmt            - Check Rust and Python formatting"
+	@echo "  fmt-fix        - Fix Rust and Python formatting"
+	@echo ""
+	@echo "Linting:"
+	@echo "  clippy         - Run Rust clippy"
+	@echo "  lint-py        - Run Python ruff linter"
+	@echo "  lint-py-fix    - Fix Python lint issues"
+	@echo ""
+	@echo "Building:"
+	@echo "  build          - Build Rust crate"
+	@echo "  develop        - Build and install Python package (dev mode)"
+	@echo "  develop-release- Build and install Python package (release)"
+	@echo "  wheel          - Build Python wheel"
+	@echo "  wheel-release  - Build Python wheel (release)"
+	@echo ""
+	@echo "Testing:"
+	@echo "  test           - Run Python tests"
+	@echo "  test-rust      - Run Rust tests"
+	@echo "  test-python    - Run Python tests (verbose)"
+	@echo "  test-all       - Run all tests"
+	@echo ""
+	@echo "Other:"
+	@echo "  doc            - Build Rust documentation"
+	@echo "  clean          - Clean all build artifacts"
+	@echo "  help           - Show this help message"
+
