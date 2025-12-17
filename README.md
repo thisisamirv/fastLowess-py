@@ -1,8 +1,11 @@
 # FastLowess Validation & Benchmarking Workspace
 
-This workspace is dedicated to validating the correctness and benchmarking the performance of the [fastLowess](https://github.com/thisisamirv/fastLowess) Rust crate against the reference Python implementation (`statsmodels`).
+This workspace is dedicated to validating the correctness and benchmarking the performance of the [fastLowess](https://github.com/thisisamirv/fastLowess-py) python package against the reference Python implementation (`statsmodels`).
 
-It builds the `fastLowess` crate from the `develop` branch (git dependency) to ensure the latest changes are tested.
+It installs the `fastLowess` package from the `develop` branch (git dependency) to ensure the latest changes are tested.
+
+> [!IMPORTANT]
+> Before running benchmarks or validation, run `make install` to install the latest version of the `fastLowess` package from the git develop branch.
 
 ## structure
 
@@ -13,14 +16,13 @@ It builds the `fastLowess` crate from the `develop` branch (git dependency) to e
 
 Benchmarks measure execution time across various scenarios (basic smoothing, robustness iterations, pathological cases, etc.).
 
-### 1. Run Rust Benchmarks
+### 1. Run FastLowess Benchmarks
 
 ```bash
-cd benchmarks/fastLowess
-cargo run --release
+python3 benchmarks/fastLowess/benchmark.py
 ```
 
-*Output: `benchmarks/output/rust_benchmark.json`*
+*Output: `benchmarks/output/fastLowess_benchmark.json`*
 
 ### 2. Run Statsmodels Benchmarks
 
@@ -44,16 +46,15 @@ python3 compare_benchmark.py
 
 ## How to Run Validation
 
-Validation ensures the Rust implementation produces results identical (or acceptable close) to `statsmodels`.
+Validation ensures the `fastLowess` implementation produces results identical (or acceptable close) to `statsmodels`.
 
-### 1. Run Rust Validation
+### 1. Run FastLowess Validation
 
 ```bash
-cd validation/fastLowess
-cargo run --release
+python3 validation/fastLowess/validate.py
 ```
 
-*Output: `validation/output/rust_validate.json`*
+*Output: `validation/output/fastLowess_validate.json`*
 
 ### 2. Run Statsmodels Validation
 
@@ -77,5 +78,4 @@ python3 compare_validation.py
 
 ## Requirements
 
-- **Rust**: Latest stable.
 - **Python**: 3.x with `numpy`, `scipy`, `statsmodels` installed.

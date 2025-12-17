@@ -1,0 +1,294 @@
+{
+  "basic_smoothing": [
+    {
+      "name": "basic_smoothing_100",
+      "size": 100,
+      "iterations": 10,
+      "mean_time_ms": 0.13143950018275063,
+      "std_time_ms": 0.06619060452570988,
+      "median_time_ms": 0.13734250023844652,
+      "min_time_ms": 0.066612999944482,
+      "max_time_ms": 0.303513999824645
+    },
+    {
+      "name": "basic_smoothing_500",
+      "size": 500,
+      "iterations": 10,
+      "mean_time_ms": 0.2576734001195291,
+      "std_time_ms": 0.04274711324261813,
+      "median_time_ms": 0.25192449993483024,
+      "min_time_ms": 0.1695280006970279,
+      "max_time_ms": 0.3173220011376543
+    },
+    {
+      "name": "basic_smoothing_1000",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.38844409991725115,
+      "std_time_ms": 0.14220636324048191,
+      "median_time_ms": 0.3283815003669588,
+      "min_time_ms": 0.2489769995008828,
+      "max_time_ms": 0.6679060006717918
+    },
+    {
+      "name": "basic_smoothing_5000",
+      "size": 5000,
+      "iterations": 10,
+      "mean_time_ms": 2.0434687998204026,
+      "std_time_ms": 1.5657867278312287,
+      "median_time_ms": 1.3268629991216585,
+      "min_time_ms": 0.9552829997119261,
+      "max_time_ms": 6.267221000598511
+    },
+    {
+      "name": "basic_smoothing_10000",
+      "size": 10000,
+      "iterations": 10,
+      "mean_time_ms": 2.5923372000761447,
+      "std_time_ms": 0.648692482725166,
+      "median_time_ms": 2.396074500211398,
+      "min_time_ms": 1.8462450007064035,
+      "max_time_ms": 4.000642000391963
+    }
+  ],
+  "fraction_variations": [
+    {
+      "name": "fraction_0.1",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.3623944001446944,
+      "std_time_ms": 0.09320287826305279,
+      "median_time_ms": 0.3355469998496119,
+      "min_time_ms": 0.2747310008999193,
+      "max_time_ms": 0.5760359999840148
+    },
+    {
+      "name": "fraction_0.2",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.7018859998424887,
+      "std_time_ms": 0.4973910232344001,
+      "median_time_ms": 0.5174669995540171,
+      "min_time_ms": 0.38045499968575314,
+      "max_time_ms": 2.076897999359062
+    },
+    {
+      "name": "fraction_0.3",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.5113641000207281,
+      "std_time_ms": 0.2701921605063259,
+      "median_time_ms": 0.40104349955072394,
+      "min_time_ms": 0.3347350011608796,
+      "max_time_ms": 1.278288998946664
+    },
+    {
+      "name": "fraction_0.5",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.7610230997670442,
+      "std_time_ms": 0.4384376790564179,
+      "median_time_ms": 0.6383539994203602,
+      "min_time_ms": 0.3712500001711305,
+      "max_time_ms": 1.9443500004854286
+    },
+    {
+      "name": "fraction_0.67",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.6336225997074507,
+      "std_time_ms": 0.20631239130148324,
+      "median_time_ms": 0.5816020002384903,
+      "min_time_ms": 0.3799799997068476,
+      "max_time_ms": 0.9251970004697796
+    },
+    {
+      "name": "fraction_0.8",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.977568300186249,
+      "std_time_ms": 0.7280794974300496,
+      "median_time_ms": 0.5466924994834699,
+      "min_time_ms": 0.4367700003058417,
+      "max_time_ms": 2.7719900008378318
+    }
+  ],
+  "robustness_iterations": [
+    {
+      "name": "iterations_0",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.15722830012236955,
+      "std_time_ms": 0.15149307660021571,
+      "median_time_ms": 0.1021765001496533,
+      "min_time_ms": 0.0730459996702848,
+      "max_time_ms": 0.5995809988235123
+    },
+    {
+      "name": "iterations_1",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.2697237996471813,
+      "std_time_ms": 0.2554650453945729,
+      "median_time_ms": 0.18625150005391333,
+      "min_time_ms": 0.1466570010961732,
+      "max_time_ms": 1.0320479996153153
+    },
+    {
+      "name": "iterations_2",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.5790855997474864,
+      "std_time_ms": 0.4099669885872085,
+      "median_time_ms": 0.3981495001426083,
+      "min_time_ms": 0.22256299962464254,
+      "max_time_ms": 1.4816069997323211
+    },
+    {
+      "name": "iterations_3",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.5557502003284753,
+      "std_time_ms": 0.5318340118030276,
+      "median_time_ms": 0.3054335011256626,
+      "min_time_ms": 0.2637010002217721,
+      "max_time_ms": 1.9938750010624062
+    },
+    {
+      "name": "iterations_5",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.8796198002528399,
+      "std_time_ms": 0.46031336025737035,
+      "median_time_ms": 0.635318499917048,
+      "min_time_ms": 0.46941200162109453,
+      "max_time_ms": 1.7640139994909987
+    },
+    {
+      "name": "iterations_10",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 1.2620268998944084,
+      "std_time_ms": 0.7947658998695345,
+      "median_time_ms": 1.0220324993497343,
+      "min_time_ms": 0.8307120006065816,
+      "max_time_ms": 3.625246999945375
+    }
+  ],
+  "delta_parameter": [
+    {
+      "name": "delta_none",
+      "size": 5000,
+      "iterations": 10,
+      "mean_time_ms": 16.381750099753845,
+      "std_time_ms": 0.6025017898622207,
+      "median_time_ms": 16.261994499473076,
+      "min_time_ms": 15.563637000013841,
+      "max_time_ms": 17.482944000221323
+    },
+    {
+      "name": "delta_auto",
+      "size": 5000,
+      "iterations": 10,
+      "mean_time_ms": 0.6350126001052558,
+      "std_time_ms": 0.11431871181053696,
+      "median_time_ms": 0.60074200064264,
+      "min_time_ms": 0.5339819999790052,
+      "max_time_ms": 0.953665999986697
+    },
+    {
+      "name": "delta_small",
+      "size": 5000,
+      "iterations": 10,
+      "mean_time_ms": 2.2123902997918776,
+      "std_time_ms": 0.5975422031945894,
+      "median_time_ms": 1.8893074993684422,
+      "min_time_ms": 1.7751850009517511,
+      "max_time_ms": 3.824499999609543
+    },
+    {
+      "name": "delta_large",
+      "size": 5000,
+      "iterations": 10,
+      "mean_time_ms": 0.40574880003987346,
+      "std_time_ms": 0.2616536832331036,
+      "median_time_ms": 0.30556100045942003,
+      "min_time_ms": 0.29601200003526174,
+      "max_time_ms": 1.1831880001409445
+    }
+  ],
+  "pathological_cases": [
+    {
+      "name": "clustered_x",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.15607109999109525,
+      "std_time_ms": 0.048939886681290956,
+      "median_time_ms": 0.1397104997522547,
+      "min_time_ms": 0.10757999916677363,
+      "max_time_ms": 0.28350700085866265
+    },
+    {
+      "name": "extreme_outliers",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.7704320001721499,
+      "std_time_ms": 0.4554821251332794,
+      "median_time_ms": 0.5271770005492726,
+      "min_time_ms": 0.44935400001122616,
+      "max_time_ms": 1.7334290005237563
+    },
+    {
+      "name": "constant_y",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.40506140030629467,
+      "std_time_ms": 0.29037887020979936,
+      "median_time_ms": 0.30254149987740675,
+      "min_time_ms": 0.20108799981244374,
+      "max_time_ms": 1.2492539990489604
+    },
+    {
+      "name": "high_noise",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.46105519995762734,
+      "std_time_ms": 0.11864319880338382,
+      "median_time_ms": 0.39926199951878516,
+      "min_time_ms": 0.36878500031889416,
+      "max_time_ms": 0.69064499984961
+    }
+  ],
+  "realistic_scenarios": [
+    {
+      "name": "financial_timeseries",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.2046401003099163,
+      "std_time_ms": 0.034521641647815904,
+      "median_time_ms": 0.21053400087112095,
+      "min_time_ms": 0.162128999363631,
+      "max_time_ms": 0.28454400126065593
+    },
+    {
+      "name": "scientific_data",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 0.6233049996808404,
+      "std_time_ms": 0.3574845091012567,
+      "median_time_ms": 0.5065369996373192,
+      "min_time_ms": 0.3030839998245938,
+      "max_time_ms": 1.5611819999321597
+    },
+    {
+      "name": "genomic_methylation",
+      "size": 1000,
+      "iterations": 10,
+      "mean_time_ms": 2.3592092997205327,
+      "std_time_ms": 1.6401813549411355,
+      "median_time_ms": 1.6026204993977444,
+      "min_time_ms": 0.8910630003811093,
+      "max_time_ms": 5.640293000396923
+    }
+  ]
+}

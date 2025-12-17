@@ -42,23 +42,23 @@ def build_map(entries):
         out[name] = e
     return out
 
-def compare_category(rust_entries, stats_entries):
-    rust_map = build_map(rust_entries)
+def compare_category(fastLowess_entries, stats_entries):
+    fastLowess_map = build_map(fastLowess_entries)
     stats_map = build_map(stats_entries)
-    common = sorted(set(rust_map.keys()) & set(stats_map.keys()))
+    common = sorted(set(fastLowess_map.keys()) & set(stats_map.keys()))
     rows = []
     speedups = []
     for name in common:
-        r_entry = rust_map[name]
+        r_entry = fastLowess_map[name]
         s_entry = stats_map[name]
         r_val, r_size = pick_time_value(r_entry)
         s_val, s_size = pick_time_value(s_entry)
 
         row = {
             "name": name,
-            "rust_value_ms": r_val,
+            "fastLowess_value_ms": r_val,
             "stats_value_ms": s_val,
-            "rust_size": r_size,
+            "fastLowess_size": r_size,
             "stats_size": s_size,
             "notes": []
         }
@@ -72,25 +72,25 @@ def compare_category(rust_entries, stats_entries):
         if r_val == 0 or s_val == 0:
             speedup = None
         else:
-            speedup = s_val / r_val  # >1 => Rust faster by this factor
-        row["speedup_stats_over_rust"] = speedup
+            speedup = s_val / r_val  # >1 => fastLowess faster by this factor
+        row["speedup_stats_over_fastLowess"] = speedup
         if speedup is not None:
             row["log2_speedup"] = math.log2(speedup) if speedup > 0 else None
-            row["percent_change_stats_vs_rust"] = ((s_val - r_val) / r_val) * 100.0
+            row["percent_change_stats_vs_fastLowess"] = ((s_val - r_val) / r_val) * 100.0
             speedups.append(speedup)
 
         # absolute diffs
         row["absolute_diff_ms"] = None if r_val is None or s_val is None else (s_val - r_val)
-        row["abs_percent_vs_rust"] = None if r_val == 0 else abs(row["absolute_diff_ms"]) / r_val * 100.0
+        row["abs_percent_vs_fastLowess"] = None if r_val == 0 else abs(row["absolute_diff_ms"]) / r_val * 100.0
 
         # per-point normalization if size available and >0
         size = r_size or s_size
         if size:
             try:
                 size_i = int(size)
-                row["rust_ms_per_point"] = r_val / size_i
+                row["fastLowess_ms_per_point"] = r_val / size_i
                 row["stats_ms_per_point"] = s_val / size_i
-                row["speedup_per_point"] = None if row["rust_ms_per_point"] == 0 else row["stats_ms_per_point"] / row["rust_ms_per_point"]
+                row["speedup_per_point"] = None if row["fastLowess_ms_per_point"] == 0 else row["stats_ms_per_point"] / row["fastLowess_ms_per_point"]
             except Exception:
                 row["notes"].append("bad_size")
 
@@ -116,35 +116,35 @@ def main():
     out_dir = workspace / "output"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    rust_path = out_dir / "rust_benchmark.json"
+    fastLowess_path = out_dir / "fastLowess_benchmark.json"
     stats_path = out_dir / "statsmodels_benchmark.json"
 
-    if not rust_path.exists() or not stats_path.exists():
+    if not fastLowess_path.exists() or not stats_path.exists():
         missing = []
-        if not rust_path.exists():
-            missing.append(str(rust_path))
+        if not fastLowess_path.exists():
+            missing.append(str(fastLowess_path))
         if not stats_path.exists():
             missing.append(str(stats_path))
         print("Missing files:", ", ".join(missing))
         return
 
-    rust = load_json(rust_path)
+    fastLowess = load_json(fastLowess_path)
     stats = load_json(stats_path)
 
-    all_keys = sorted(set(rust.keys()) | set(stats.keys()))
+    all_keys = sorted(set(fastLowess.keys()) | set(stats.keys()))
     comparison = {}
     overall_speedups = []
 
     # detailed rows for CSV
     csv_rows = []
     csv_fieldnames = [
-        "category","name","rust_value_ms","stats_value_ms","speedup_stats_over_rust",
-        "log2_speedup","percent_change_stats_vs_rust","absolute_diff_ms","abs_percent_vs_rust",
-        "rust_size","stats_size","rust_ms_per_point","stats_ms_per_point","speedup_per_point","notes"
+        "category","name","fastLowess_value_ms","stats_value_ms","speedup_stats_over_fastLowess",
+        "log2_speedup","percent_change_stats_vs_fastLowess","absolute_diff_ms","abs_percent_vs_fastLowess",
+        "fastLowess_size","stats_size","fastLowess_ms_per_point","stats_ms_per_point","speedup_per_point","notes"
     ]
 
     for key in all_keys:
-        r_entries = rust.get(key, [])
+        r_entries = fastLowess.get(key, [])
         s_entries = stats.get(key, [])
         rows, summary = compare_category(r_entries, s_entries)
         comparison[key] = {"rows": rows, "summary": summary}
@@ -154,40 +154,40 @@ def main():
             csv_rows.append({
                 "category": key,
                 "name": row.get("name"),
-                "rust_value_ms": row.get("rust_value_ms"),
+                "fastLowess_value_ms": row.get("fastLowess_value_ms"),
                 "stats_value_ms": row.get("stats_value_ms"),
-                "speedup_stats_over_rust": row.get("speedup_stats_over_rust"),
+                "speedup_stats_over_fastLowess": row.get("speedup_stats_over_fastLowess"),
                 "log2_speedup": row.get("log2_speedup"),
-                "percent_change_stats_vs_rust": row.get("percent_change_stats_vs_rust"),
+                "percent_change_stats_vs_fastLowess": row.get("percent_change_stats_vs_fastLowess"),
                 "absolute_diff_ms": row.get("absolute_diff_ms"),
-                "abs_percent_vs_rust": row.get("abs_percent_vs_rust"),
-                "rust_size": row.get("rust_size"),
+                "abs_percent_vs_fastLowess": row.get("abs_percent_vs_fastLowess"),
+                "fastLowess_size": row.get("fastLowess_size"),
                 "stats_size": row.get("stats_size"),
-                "rust_ms_per_point": row.get("rust_ms_per_point"),
+                "fastLowess_ms_per_point": row.get("fastLowess_ms_per_point"),
                 "stats_ms_per_point": row.get("stats_ms_per_point"),
                 "speedup_per_point": row.get("speedup_per_point"),
                 "notes": ";".join(row.get("notes", []))
             })
 
-    print("\nBenchmark comparison (statsmodels_ms / rust_ms):")
+    print("\nBenchmark comparison (statsmodels_ms / fastLowess_ms):")
     for key, data in comparison.items():
         s = data["summary"]
         print(f"- {key}: compared={s['compared']}, median_speedup={s['median_speedup']}, mean_speedup={s['mean_speedup']}")
 
     # Top wins and regressions across all categories
-    all_rows = [r for cat in comparison.values() for r in cat["rows"] if r.get("speedup_stats_over_rust") is not None]
+    all_rows = [r for cat in comparison.values() for r in cat["rows"] if r.get("speedup_stats_over_fastLowess") is not None]
     if all_rows:
-        sorted_by_speed = sorted(all_rows, key=lambda r: r["speedup_stats_over_rust"] or 0, reverse=True)
-        sorted_by_regression = sorted(all_rows, key=lambda r: r["speedup_stats_over_rust"] or 0)
+        sorted_by_speed = sorted(all_rows, key=lambda r: r["speedup_stats_over_fastLowess"] or 0, reverse=True)
+        sorted_by_regression = sorted(all_rows, key=lambda r: r["speedup_stats_over_fastLowess"] or 0)
 
-        print("\nTop 10 Rust wins (largest stats_ms / rust_ms):")
+        print("\nTop 10 fastLowess wins (largest stats_ms / fastLowess_ms):")
         for r in sorted_by_speed[:10]:
-            print(f"  {r['name']}: stats={r['stats_value_ms']:.4f}ms, rust={r['rust_value_ms']:.4f}ms, speedup={r['speedup_stats_over_rust']:.2f}x")
+            print(f"  {r['name']}: stats={r['stats_value_ms']:.4f}ms, fastLowess={r['fastLowess_value_ms']:.4f}ms, speedup={r['speedup_stats_over_fastLowess']:.2f}x")
 
-        print("\nTop 10 regressions (statsmodels faster than Rust):")
+        print("\nTop 10 regressions (statsmodels faster than fastLowess):")
         for r in sorted_by_regression[:10]:
-            if r["speedup_stats_over_rust"] < 1.0:
-                print(f"  {r['name']}: stats={r['stats_value_ms']:.4f}ms, rust={r['rust_value_ms']:.4f}ms, speedup={r['speedup_stats_over_rust']:.2f}x")
+            if r["speedup_stats_over_fastLowess"] < 1.0:
+                print(f"  {r['name']}: stats={r['stats_value_ms']:.4f}ms, fastLowess={r['fastLowess_value_ms']:.4f}ms, speedup={r['speedup_stats_over_fastLowess']:.2f}x")
 
     # Print detailed per-category rows to console
     print("\nDetailed per-category results:")
@@ -197,19 +197,19 @@ def main():
             continue
         print(f"\nCategory: {cat} (compared={data['summary']['compared']})")
         # header
-        print(f"{'name':60} {'rust_ms':>10} {'stats_ms':>10} {'speedup':>8} {'%chg':>8} {'notes'}")
+        print(f"{'name':60} {'fastLowess_ms':>10} {'stats_ms':>10} {'speedup':>8} {'%chg':>8} {'notes'}")
         for r in rows:
             name = (r.get("name") or "")[:60].ljust(60)
-            rust_v = r.get("rust_value_ms")
+            fastLowess_v = r.get("fastLowess_value_ms")
             stats_v = r.get("stats_value_ms")
-            sp = r.get("speedup_stats_over_rust")
-            pct = r.get("percent_change_stats_vs_rust")
+            sp = r.get("speedup_stats_over_fastLowess")
+            pct = r.get("percent_change_stats_vs_fastLowess")
             notes = ";".join(r.get("notes", []))
-            rust_s = f"{rust_v:.4f}" if isinstance(rust_v, (int, float)) else "N/A"
+            fastLowess_s = f"{fastLowess_v:.4f}" if isinstance(fastLowess_v, (int, float)) else "N/A"
             stats_s = f"{stats_v:.4f}" if isinstance(stats_v, (int, float)) else "N/A"
             sp_s = f"{sp:.2f}x" if isinstance(sp, (int, float)) else "N/A"
             pct_s = f"{pct:.1f}%" if isinstance(pct, (int, float)) else "N/A"
-            print(f"{name} {rust_s:>10} {stats_s:>10} {sp_s:>8} {pct_s:>8} {notes}")
+            print(f"{name} {fastLowess_s:>10} {stats_s:>10} {sp_s:>8} {pct_s:>8} {notes}")
 
 if __name__ == "__main__":
     main()
