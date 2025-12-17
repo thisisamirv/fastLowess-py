@@ -3,7 +3,7 @@ requires = ["maturin>=1.0,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "fastLowess"
+name = "fastlowess"
 version = "0.1.0"
 description = "High-level, fast LOWESS smoothing built on top of the fastLowess Rust crate."
 authors = [{ name = "Amir Valizadeh", email = "thisisamirv@gmail.com" }]
