@@ -66,10 +66,10 @@ smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
        return_residuals=False, return_robustness_weights=False,
        zero_weight_fallback="use_local_mean")
     LOWESS smoothing with the batch adapter.
-    
+
     This is the primary interface for LOWESS smoothing. Processes the entire
     dataset in memory with optional parallel execution.
-    
+
     Parameters
     ----------
     x : array_like
@@ -79,28 +79,28 @@ smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
     fraction : float, optional
         Smoothing fraction - the proportion of data used for each local fit.
         Range: (0, 1]. Default: 0.67.
-        
+
         - 0.1-0.3: Fine detail, may be noisy
         - 0.3-0.5: Moderate smoothing (good for most cases)
         - 0.5-0.7: Heavy smoothing, emphasizes trends
         - 0.7-1.0: Very smooth, may over-smooth
-        
+
     iterations : int, optional
         Number of robustness iterations for outlier resistance.
         Default: 3.
-        
+
         - 0: No robustness (fastest, sensitive to outliers)
         - 1-3: Light to moderate robustness (recommended)
         - 4-6: Strong robustness (for contaminated data)
         - 7+: Very strong (may over-smooth)
-        
+
     delta : float, optional
         Interpolation optimization threshold. Points within delta distance
         reuse the previous fit. Larger values are faster but less accurate.
         Default: None (automatic: 1% of x-range for large datasets).
     weight_function : str, optional
         Kernel function for distance weighting. Options:
-        
+
         - "tricube" (default): Classic LOWESS kernel
         - "epanechnikov": Optimal MSE kernel
         - "gaussian": Smooth, infinite support
@@ -108,14 +108,14 @@ smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
         - "biweight": Similar to tricube
         - "triangle": Linear decay
         - "cosine": Smooth cosine weighting
-        
+
     robustness_method : str, optional
         Method for downweighting outliers. Options:
-        
+
         - "bisquare" (default): Classic robust method
         - "huber": Less aggressive downweighting
         - "talwar": Hard rejection of outliers
-        
+
     confidence_intervals : float, optional
         Confidence level for confidence intervals (e.g., 0.95 for 95%).
         If provided, populates result.confidence_lower and result.confidence_upper.
@@ -135,11 +135,11 @@ smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
         If True, populates result.robustness_weights. Default: False.
     zero_weight_fallback : str, optional
         Behavior when all neighborhood weights are zero. Options:
-        
+
         - "use_local_mean" (default): Use mean of neighborhood
         - "return_original": Return original y value
         - "return_none": Return NaN (for explicit handling)
-        
+
     auto_converge : float, optional
         Tolerance for auto-convergence. When set, iterations stop when
         the maximum change between iterations is below this threshold.
@@ -157,12 +157,12 @@ smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
         Default: "kfold".
     cv_k : int, optional
         Number of folds for k-fold CV. Default: 5.
-    
+
     Returns
     -------
     LowessResult
         Result object with smoothed values and optional outputs.
-    
+
     Examples
     --------
     >>> import numpy as np
@@ -172,14 +172,14 @@ smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
     >>> result = fastLowess.smooth(x, y, fraction=0.3, confidence_intervals=0.95)
     >>> print(f"Smoothed {len(result.y)} points")
 
-smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None, 
-                 iterations=3, weight_function="tricube", 
+smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
+                 iterations=3, weight_function="tricube",
                  robustness_method="bisquare", parallel=True)
     Streaming LOWESS for large datasets.
-    
+
     Processes data in chunks to maintain constant memory usage.
     Ideal for datasets that don't fit in memory or for batch pipelines.
-    
+
     Parameters
     ----------
     x : array_like
@@ -196,18 +196,18 @@ smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
     iterations : int, optional
         Number of robustness iterations. Default: 3.
     weight_function : str, optional
-        Kernel function: "tricube", "epanechnikov", "gaussian", 
+        Kernel function: "tricube", "epanechnikov", "gaussian",
         "uniform", "biweight", "triangle". Default: "tricube".
     robustness_method : str, optional
         Robustness method: "bisquare", "huber", "talwar". Default: "bisquare".
     parallel : bool, optional
         Enable parallel execution. Default: True.
-    
+
     Returns
     -------
     LowessResult
         Result object with smoothed values.
-    
+
     Examples
     --------
     >>> # Process 1 million points efficiently
@@ -217,13 +217,13 @@ smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
 
 
 smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,
-              iterations=3, weight_function="tricube", 
+              iterations=3, weight_function="tricube",
               robustness_method="bisquare", parallel=False)
     Online LOWESS with sliding window.
-    
+
     Maintains a sliding window for incremental updates. Ideal for
     real-time data streams or sensor data processing.
-    
+
     Parameters
     ----------
     x : array_like
@@ -244,12 +244,12 @@ smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,
         Robustness method. Default: "bisquare".
     parallel : bool, optional
         Enable parallel execution. Default: False (sequential for low latency).
-    
+
     Returns
     -------
     LowessResult
         Result object with smoothed values.
-    
+
     Examples
     --------
     >>> # Simulate real-time sensor data
@@ -263,7 +263,7 @@ Classes
 
 LowessResult
     Result object containing smoothed values and optional outputs.
-    
+
     Attributes
     ----------
     x : numpy.ndarray
@@ -293,7 +293,7 @@ LowessResult
         Diagnostic statistics if return_diagnostics=True.
     cv_scores : numpy.ndarray or None
         Cross-validation scores if cross-validation was performed.
-    
+
     Examples
     --------
     >>> result = fastLowess.smooth(x, y, confidence_intervals=0.95)
@@ -304,7 +304,7 @@ LowessResult
 
 Diagnostics
     Diagnostic statistics for assessing fit quality.
-    
+
     Attributes
     ----------
     rmse : float
@@ -322,7 +322,7 @@ Diagnostics
         Corrected AIC for small samples (when applicable).
     effective_df : float or None
         Effective degrees of freedom.
-    
+
     Examples
     --------
     >>> result = fastLowess.smooth(x, y, return_diagnostics=True)

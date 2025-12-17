@@ -60,10 +60,7 @@ class TestSmooth:
         y = np.array([2.0, 4.1, 100.0, 8.2, 9.8])  # Outlier
 
         result = fastLowess.smooth(
-            x, y,
-            fraction=0.7,
-            iterations=3,
-            return_robustness_weights=True
+            x, y, fraction=0.7, iterations=3, return_robustness_weights=True
         )
 
         assert result.robustness_weights is not None
@@ -106,7 +103,14 @@ class TestSmooth:
         x = np.linspace(0, 10, 20)
         y = np.sin(x)
 
-        kernels = ["tricube", "epanechnikov", "gaussian", "uniform", "biweight", "triangle"]
+        kernels = [
+            "tricube",
+            "epanechnikov",
+            "gaussian",
+            "uniform",
+            "biweight",
+            "triangle",
+        ]
 
         for kernel in kernels:
             result = fastLowess.smooth(x, y, fraction=0.5, weight_function=kernel)
@@ -121,10 +125,7 @@ class TestSmooth:
 
         for method in methods:
             result = fastLowess.smooth(
-                x, y,
-                fraction=0.7,
-                iterations=3,
-                robustness_method=method
+                x, y, fraction=0.7, iterations=3, robustness_method=method
             )
             assert len(result.y) == len(x)
 
@@ -146,8 +147,6 @@ class TestSmooth:
             assert len(result.y) == len(x)
 
 
-
-
 class TestSmoothStreaming:
     """Tests for the smooth_streaming() function."""
 
@@ -162,7 +161,9 @@ class TestSmoothStreaming:
         assert isinstance(result, fastLowess.LowessResult)
         # Critical: verify all points are returned
         assert len(result.y) == len(x), f"Expected {len(x)} points, got {len(result.y)}"
-        assert len(result.x) == len(x), f"Expected {len(x)} x-values, got {len(result.x)}"
+        assert len(result.x) == len(x), (
+            f"Expected {len(x)} x-values, got {len(result.x)}"
+        )
 
     def test_streaming_basic(self):
         """Test basic streaming smoothing."""
@@ -210,10 +211,7 @@ class TestSmoothOnline:
         y = np.array([2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0])
 
         result = fastLowess.smooth_online(
-            x, y,
-            fraction=0.5,
-            window_capacity=10,
-            min_points=3
+            x, y, fraction=0.5, window_capacity=10, min_points=3
         )
 
         assert len(result.y) == len(x)
@@ -226,10 +224,7 @@ class TestSmoothOnline:
         y = 2 * x + np.random.normal(0, 1, 50)
 
         result = fastLowess.smooth_online(
-            x, y,
-            fraction=0.3,
-            window_capacity=20,
-            min_points=5
+            x, y, fraction=0.3, window_capacity=20, min_points=5
         )
 
         assert len(result.y) == len(x)
@@ -404,7 +399,7 @@ class TestCrossValidation:
         y = 2 * x + np.sin(x)
 
         result = fastLowess.smooth(x, y, cv_fractions=[0.2, 0.3, 0.5, 0.7])
-        
+
         assert result.fraction_used in [0.2, 0.3, 0.5, 0.7]
         assert result.cv_scores is not None
         assert len(result.cv_scores) == 4
@@ -413,15 +408,12 @@ class TestCrossValidation:
     def test_cv_kfold(self):
         """Test k-fold cross-validation."""
         x = np.linspace(0, 10, 30)
-        y = x ** 2
+        y = x**2
 
         result = fastLowess.smooth(
-            x, y, 
-            cv_fractions=[0.3, 0.5], 
-            cv_method="kfold", 
-            cv_k=5
+            x, y, cv_fractions=[0.3, 0.5], cv_method="kfold", cv_k=5
         )
-        
+
         assert result.fraction_used in [0.3, 0.5]
         assert result.cv_scores is not None
 
@@ -430,12 +422,8 @@ class TestCrossValidation:
         x = np.linspace(0, 10, 20)
         y = np.sin(x)
 
-        result = fastLowess.smooth(
-            x, y, 
-            cv_fractions=[0.4, 0.6], 
-            cv_method="loocv"
-        )
-        
+        result = fastLowess.smooth(x, y, cv_fractions=[0.4, 0.6], cv_method="loocv")
+
         assert result.fraction_used in [0.4, 0.6]
         assert result.cv_scores is not None
 
@@ -445,13 +433,14 @@ class TestCrossValidation:
         y = 2 * x + 0.5 * np.sin(x)
 
         result = fastLowess.smooth(
-            x, y,
+            x,
+            y,
             cv_fractions=[0.3, 0.5, 0.7],
             iterations=2,
             return_diagnostics=True,
-            return_residuals=True
+            return_residuals=True,
         )
-        
+
         assert result.fraction_used in [0.3, 0.5, 0.7]
         assert result.diagnostics is not None
         assert result.residuals is not None
@@ -462,7 +451,7 @@ class TestCrossValidation:
         y = x + np.random.normal(0, 0.1, 25)
 
         result = fastLowess.smooth(x, y, cv_fractions=[0.5])
-        
+
         assert result.fraction_used == 0.5
         assert result.cv_scores is not None
         assert len(result.cv_scores) == 1
