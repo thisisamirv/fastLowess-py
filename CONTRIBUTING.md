@@ -1,6 +1,6 @@
-# Contributing to fastLowess-py
+# Contributing to fastLowess (Python)
 
-Thank you for your interest in contributing to `fastLowess-py`! We welcome bug reports, feature suggestions, documentation improvements, and code contributions.
+Thank you for your interest in contributing to `fastLowess`! We welcome bug reports, feature suggestions, documentation improvements, and code contributions.
 
 ## Quick Links
 
