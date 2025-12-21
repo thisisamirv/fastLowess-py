@@ -18,23 +18,50 @@
 
 ## Robustness Advantages
 
-This implementation is **more robust than statsmodels** due to:
+This implementation is **more robust than statsmodels** due to two key design choices:
 
 ### MAD-Based Scale Estimation
 
-We use **Median Absolute Deviation (MAD)** for scale estimation, which is breakdown-point-optimal:
+For robustness weight calculations, this crate uses **Median Absolute Deviation (MAD)** for scale estimation:
 
-$$s = \text{median}(|r_i - \text{median}(r)|)$$
+```text
+s = median(|r_i - median(r)|)
+```
+
+In contrast, statsmodels uses median of absolute residuals:
+
+```text
+s = median(|r_i|)
+```
+
+**Why MAD is more robust:**
+
+- MAD is a **breakdown-point-optimal** estimator—it remains valid even when up to 50% of data are outliers.
+- The median-centering step removes asymmetric bias from residual distributions.
+- MAD provides consistent outlier detection regardless of whether residuals are centered around zero.
 
 ### Boundary Padding
 
-We apply **boundary policies** (Extend, Reflect, Zero) at dataset edges to maintain symmetric local neighborhoods, preventing the edge bias common in other implementations.
+This crate applies **boundary policies** (Extend, Reflect, Zero) at dataset edges:
+
+- **Extend**: Repeats edge values to maintain local neighborhood size.
+- **Reflect**: Mirrors data symmetrically around boundaries.
+- **Zero**: Pads with zeros (useful for signal processing).
+
+statsmodels does not apply boundary padding, which can lead to:
+
+- Biased estimates near boundaries due to asymmetric local neighborhoods.
+- Increased variance at the edges of the smoothed curve.
 
 ### Gaussian Consistency Factor
 
-For precision in intervals, residual scale is computed using:
+For interval estimation (confidence/prediction), residual scale is computed using:
 
-$$\hat{\sigma} = 1.4826 \times \text{MAD}$$
+```text
+sigma = 1.4826 * MAD
+```
+
+The factor 1.4826 = 1/Phi^-1(3/4) ensures consistency with the standard deviation under Gaussian assumptions.
 
 ## Performance Advantages
 
@@ -45,11 +72,11 @@ Benchmarked against Python's `statsmodels`. Achieves **12-3800x faster performan
 | Category         | Matched | Median Speedup | Mean Speedup |
 | :--------------- | :------ | :------------- | :----------- |
 | **Scalability**  | 5       | **577.4x**     | 1375.0x      |
-| **Pathological** | 4       | **381.6x**     | 373.4x       |
-| **Iterations**   | 6       | **438.1x**     | 426.0x       |
-| **Fraction**     | 6       | **336.8x**     | 364.9x       |
 | **Financial**    | 4       | **242.1x**     | 263.5x       |
+| **Iterations**   | 6       | **438.1x**     | 426.0x       |
+| **Pathological** | 4       | **381.6x**     | 373.4x       |
 | **Scientific**   | 4       | **165.1x**     | 207.5x       |
+| **Fraction**     | 6       | **336.8x**     | 364.9x       |
 | **Genomic**      | 4       | **23.1x**      | 22.7x        |
 | **Delta**        | 4       | **3.6x**       | 6.0x         |
 
@@ -80,67 +107,94 @@ pip install fastlowess
 import numpy as np
 import fastlowess
 
-x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
-y = np.array([2.0, 4.1, 5.9, 8.2, 9.8])
+x = np.linspace(0, 10, 100)
+y = np.sin(x) + np.random.normal(0, 0.2, 100)
 
 # Basic smoothing (parallel by default)
-result = fastlowess.smooth(x, y, fraction=0.5)
+result = fastlowess.smooth(x, y, fraction=0.3)
 
 print(f"Smoothed values: {result.y}")
 ```
 
-## Common Use Cases
-
-### 1. Robust Smoothing (Handle Outliers)
+## Smoothing Parameters
 
 ```python
-# Use robust iterations to downweight outliers
-result = fastlowess.smooth(
+import fastlowess
+
+fastlowess.smooth(
     x, y,
-    fraction=0.7,
-    iterations=5,  # Robust iterations
-    robustness_method="bisquare",  # "bisquare", "huber", or "talwar"
-    return_robustness_weights=True
-)
-
-# Identify outliers (weights < 0.1)
-outliers = np.where(result.robustness_weights < 0.1)[0]
-```
-
-### 2. Uncertainty Quantification
-
-```python
-result = fastlowess.smooth(
-    x, y,
+    # Smoothing span (0, 1]
     fraction=0.5,
-    confidence_intervals=0.95,
-    prediction_intervals=0.95
-)
 
-# Access confidence bands
-print(f"CI Lower: {result.confidence_lower}")
-print(f"CI Upper: {result.confidence_upper}")
+    # Robustness iterations for outlier resistance
+    iterations=3,
+
+    # Interpolation threshold for performance optimization
+    # None (default) auto-calculates based on data range
+    delta=0.01,
+
+    # Kernel function selection
+    # Options: "tricube", "gaussian", "epanechnikov", "uniform", etc.
+    weight_function="tricube",
+
+    # Robustness method selection
+    # Options: "bisquare", "huber", "talwar"
+    robustness_method="bisquare",
+
+    # Zero-weight fallback behavior
+    # Options: "use_local_mean", "return_original", "return_none"
+    zero_weight_fallback="use_local_mean",
+
+    # Boundary handling (for edge effects)
+    # Options: "extend", "reflect", "zero"
+    boundary_policy="extend",
+
+    # Uncertainty Quantification
+    confidence_intervals=0.95,
+    prediction_intervals=0.95,
+
+    # Output selection
+    return_diagnostics=True,
+    return_residuals=True,
+    return_robustness_weights=True,
+
+    # Cross-validation (for automatic parameter selection)
+    cv_fractions=[0.3, 0.5, 0.7],
+    cv_method="kfold",
+    cv_k=5,
+
+    # Multi-threading (via Rust/Rayon)
+    parallel=True
+)
 ```
 
-### 3. Automatic Parameter Selection (Cross-Validation)
+## Result Structure
+
+The `smooth()` function returns a `LowessResult` object with the following properties:
 
 ```python
-# Automatic selection of the best smoothing fraction
-result = fastlowess.smooth(
-    x, y,
-    cv_fractions=[0.2, 0.3, 0.5, 0.7],  # Test these candidates
-    cv_method="kfold",                  # "kfold" or "loocv"
-    cv_k=5,
-)
-
-print(f"Optimal fraction used: {result.fraction_used}")
+result.x                    # Sorted independent variable values (numpy array)
+result.y                    # Smoothed dependent variable values (numpy array)
+result.standard_errors      # Point-wise standard errors (if computed)
+result.confidence_lower     # Lower bound of confidence interval
+result.confidence_upper     # Upper bound of confidence interval
+result.prediction_lower     # Lower bound of prediction interval
+result.prediction_upper     # Upper bound of prediction interval
+result.residuals            # Model residuals (y - y_fit)
+result.robustness_weights   # Final weights used for outlier handling
+result.diagnostics          # Detailed fit diagnostics (RMSE, R^2, AIC, etc.)
+result.iterations_used      # Number of robustness iterations performed
+result.fraction_used        # Smoothing fraction used (best if via CV)
+result.cv_scores            # RMSE scores for each CV candidate
 ```
+
+The `diagnostics` object contains: `rmse`, `mae`, `r_squared`, `aic`, `aicc`, `effective_df`, `residual_sd`.
 
 ## Execution Modes
 
 ### Streaming Processing
 
-For datasets too large to fit in memory (n > 1M):
+For datasets too large to fit in memory (processes in chunks):
 
 ```python
 result = fastlowess.smooth_streaming(
@@ -161,7 +215,6 @@ result = fastlowess.smooth_online(
     x, y,
     fraction=0.2,
     window_capacity=100,
-    min_points=3,
     update_mode="incremental" # or "full"
 )
 ```
@@ -173,8 +226,8 @@ result = fastlowess.smooth_online(
 - **0.1-0.3**: Local, captures rapid changes (wiggly)
 - **0.4-0.6**: Balanced, general-purpose
 - **0.7-1.0**: Global, smooth trends only
-- **Default: 0.67** (Cleveland's choice)
-- **Use CV** (via `cv_fractions`) when uncertain
+- **Default: 0.67** (2/3, Cleveland's choice)
+- **Use CV** when uncertain
 
 ### Robustness Iterations
 
@@ -182,11 +235,20 @@ result = fastlowess.smooth_online(
 - **1-2**: Light contamination
 - **3**: Default, good balance (recommended)
 - **4-5**: Heavy outliers
+- **>5**: Diminishing returns
+
+### Kernel Function
+
+- **Tricube** (default): Best all-around, smooth, efficient
+- **Epanechnikov**: Theoretically optimal MSE
+- **Gaussian**: Very smooth, no compact support
+- **Uniform**: Fastest, least smooth (moving average)
 
 ### Delta Optimization
 
 - **None**: Small datasets (n < 1000)
 - **0.01 × range(x)**: Good starting point for dense data
+- **Manual tuning**: Adjust based on data density
 
 ## Documentation
 
@@ -213,8 +275,8 @@ Check [Validation](https://github.com/thisisamirv/fastlowess-py/tree/bench/valid
 
 ## Related Work
 
-- [lowess (Rust core)](https://github.com/thisisamirv/lowess)
-- [fastlowess (R wrapper)](https://github.com/thisisamirv/fastlowess-R)
+- [fastLowess (Rust core)](https://github.com/thisisamirv/fastLowess)
+- [fastLowess-R (R wrapper)](https://github.com/thisisamirv/fastlowess-R)
 
 ## Contributing
 
