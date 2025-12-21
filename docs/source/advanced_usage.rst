@@ -1,53 +1,17 @@
 Advanced Usage
 ==============
 
-This guide covers advanced features of `fastLowess`, including robust smoothing, uncertainty quantification, and automatic parameter selection.
+This section details the advanced features of ``fastlowess``, including robustness, adaptive optimization, and cross-validation.
 
-Robust Smoothing (Handling Outliers)
-------------------------------------
+Robust Smoothing
+----------------
 
-Real-world data often contains outliers that can distort the smoothed curve. `fastLowess` implements iterative re-weighted least squares (IRLS) to robustly ignore these outliers.
-
-.. image:: _static/images/robust_vs_standard_lowess.svg
-   :alt: Robust vs Standard LOWESS
-   :align: center
-   :width: 100%
-
-.. code-block:: python
-
-    import fastLowess
-    import numpy as np
-    
-    # 1. Generate data with periodic outliers
-    n = 1000
-    x = np.linspace(0, 100, n)
-    y = np.sin(x)
-    # Add outliers to every 100th point
-    y[::100] = x[::100] + 10.0
-
-    # 2. Apply robust smoothing
-    result = fastLowess.smooth(
-        x, y,
-        fraction=0.1,
-        iterations=5,                 # 5 iterations for strong robustness
-        robustness_method="bisquare", # "bisquare" (default), "huber", or "talwar"
-        return_robustness_weights=True
-    )
-
-    # 3. Identify downweighted points (outliers)
-    if result.robustness_weights is not None:
-        # Weights near 0 indicate outliers
-        outliers = np.where(result.robustness_weights < 0.1)[0]
-        print(f"Detected {len(outliers)} outliers")
-
-    # Output:
-    # Detected 10 outliers
-
+The package provides multiple methods for handling outliers. By default, it uses **Bisquare** weighting with 3 robustness iterations.
 
 Robustness Methods
-~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^
 
-`fastLowess` supports three methods for downweighting outliers:
+`fastlowess` supports three methods for downweighting outliers:
 
 +------------+-------------------------+---------------------------+
 | Method     | Behavior                | Use Case                  |
@@ -59,10 +23,89 @@ Robustness Methods
 | Talwar     | Hard threshold (0 or 1) | Extreme contamination     |
 +------------+-------------------------+---------------------------+
 
-Uncertainty Quantification
---------------------------
+.. code-block:: python
 
-You can compute **confidence intervals** (uncertainty in the smoothed mean) and **prediction intervals** (likely range for new observations).
+   from fastlowess import smooth
+
+   result = smooth(
+       x, y,
+       iterations=5,
+       robustness_method="talwar"
+   )
+
+Boundary Policy
+---------------
+
+Control how the smoother behaves at the edges of the dataset to avoid boundary bias.
+
+*   **"extend"** (default): Extends the boundary values (recommended for preserving trends).
+*   **"reflect"**: Reflects values around the boundary.
+*   **"zero"**: Pads with zeros.
+
+.. image:: _static/images/robust_vs_standard_lowess.svg
+   :alt: Robust vs Standard LOWESS
+   :align: center
+   :width: 100%
+
+.. code-block:: python
+
+   # Stop iterations if max change < 1e-4
+   result = smooth(x, y, iterations=10, auto_converge=1e-4)
+
+Cross-Validation
+----------------
+
+Automatically select the best ``fraction`` from a list of candidates.
+
+.. code-block:: python
+
+   fractions = [0.1, 0.2, 0.3, 0.5, 0.7]
+   result = smooth(
+       x, y,
+       cv_fractions=fractions,
+       cv_method="loocv"  # or "kfold"
+   )
+
+   print(f"Optimal fraction: {result.fraction_used}")
+
+Diagnostics
+-----------
+
+Enable ``return_diagnostics`` to get objective measures of fit quality.
+
+.. code-block:: python
+
+   result = smooth(x, y, return_diagnostics=True)
+   diag = result.diagnostics
+
+   print(f"R-Squared: {diag.r_squared:.4f}")
+   print(f"RMSE: {diag.rmse:.4f}")
+
+Diagnostic Reference
+^^^^^^^^^^^^^^^^^^^^
+
++-----------------+----------------------------------------+
+| Metric          | Description                            |
++=================+========================================+
+| **RMSE**        | Root Mean Squared Error                |
++-----------------+----------------------------------------+
+| **MAE**         | Mean Absolute Error                    |
++-----------------+----------------------------------------+
+| **R-squared**   | Coefficient of Determination           |
++-----------------+----------------------------------------+
+| **aic/aicc**    | Information Criteria (if applicable)   |
++-----------------+----------------------------------------+
+| **eff_df**      | Effective Degrees of Freedom           |
++-----------------+----------------------------------------+
+
+Zero-Weight Handling
+--------------------
+
+In sparse regions where a neighborhood contains no points (or weights sum to zero), you can control the fallback behavior:
+
+*   **"use_local_mean"** (default): Uses the mean of the raw neighborhood.
+*   **"return_original"**: Returns the original Y value for that point.
+*   **"return_none"**: Returns NaN.
 
 .. image:: _static/images/confidence_vs_prediction_intervals.svg
    :alt: Confidence vs Prediction Intervals
@@ -71,14 +114,14 @@ You can compute **confidence intervals** (uncertainty in the smoothed mean) and 
 
 .. code-block:: python
 
-    import fastLowess
+    import fastlowess
     import numpy as np
 
     x = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0])
     y = np.array([2.1, 3.8, 6.2, 7.9, 10.3, 11.8, 14.1, 15.7])
 
     # Compute both Confidence and Prediction Intervals
-    result = fastLowess.smooth(
+    result = fastlowess.smooth(
         x, y,
         fraction=0.5,
         confidence_intervals=0.95,      # 95% CI for the mean
@@ -112,7 +155,7 @@ You can choose different kernel functions via the `weight_function` parameter to
 
 .. code-block:: python
 
-    fastLowess.smooth(x, y, weight_function="gaussian")
+    fastlowess.smooth(x, y, weight_function="gaussian")
 
 +--------------+------------+-------------------+----------------------------+
 | Kernel       | Efficiency | Smoothness        | Use Case                   |
@@ -137,11 +180,11 @@ You can choose different kernel functions via the `weight_function` parameter to
 Cross-Validation (Automatic Parameter Selection)
 ------------------------------------------------
 
-Choosing the right `fraction` (bandwidth) can be difficult. `fastLowess` can automatically select the optimal fraction using Cross-Validation.
+Choosing the right `fraction` (bandwidth) can be difficult. `fastlowess` can automatically select the optimal fraction using Cross-Validation.
 
 .. code-block:: python
 
-    import fastLowess
+    import fastlowess
     import numpy as np
 
     # 1. Generate noisy data
@@ -150,7 +193,7 @@ Choosing the right `fraction` (bandwidth) can be difficult. `fastLowess` can aut
 
     # 2. Run Cross-Validation
     # Test different fractions (bandwidths) to find the best fit
-    result = fastLowess.smooth(
+    result = fastlowess.smooth(
         nx, ny,
         cv_fractions=[0.2, 0.3, 0.5, 0.7],  # Candidates
         cv_method="kfold",                  # "kfold" (default) or "loocv"
@@ -173,3 +216,32 @@ In rare cases (e.g., extremely sparse data or inappropriate bandwidth), a point 
 *   **"use_local_mean"** (default): Use the mean of the neighborhood.
 *   **"return_original"**: Return the original y-value (no smoothing).
 *   **"return_none"**: Return NaN (useful for filtering).
+
+Boundary Policy (Edge Handling)
+-------------------------------
+
+LOWESS traditionally uses asymmetric windows at boundaries, which can introduce bias. The ``boundary_policy`` parameter pads the data before smoothing to enable centered windows:
+
+*   **"extend"** (default): Pad with constant values (first/last y-value).
+*   **"reflect"**: Mirror the data at boundaries.
+*   **"zero"**: Pad with zeros.
+
+.. code-block:: python
+
+    # Use reflective padding for better edge handling
+    result = fastlowess.smooth(x, y, boundary_policy="reflect")
+
+Auto-Convergence
+----------------
+
+Automatically stop robustness iterations when the smoothed values converge.
+
+.. code-block:: python
+
+    # Stop when the maximum change between iterations is < 1e-6
+    result = fastlowess.smooth(
+        x, y, 
+        iterations=20, 
+        auto_converge=1e-6
+    )
+    print(f"Converged after {result.iterations_used} iterations")

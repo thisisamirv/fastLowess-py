@@ -1,57 +1,81 @@
 Quick Start
 ===========
 
-This guide will get you up and running with `fastLowess` in minutes.
+This guide covers basic usage of the ``fastlowess`` package for batch smoothing.
 
-Basic Usage
------------
+.. note::
+   Ensure you have installed the package first (see :doc:`installation`).
 
-The primary function is `fastLowess.smooth()`. It takes x and y arrays and returns a `LowessResult` object containing the smoothed values.
+Basic Smoothing
+---------------
+
+To smooth a dataset, provide the ``x`` and ``y`` arrays to the ``smooth()`` function. By default, it uses a smoothing fraction of 0.67 and 3 robustness iterations.
 
 .. code-block:: python
 
-    import numpy as np
-    import fastLowess
-    import matplotlib.pyplot as plt
+   import numpy as np
+   import fastlowess
 
-    # 1. Generate synthetic data with noise
-    x = np.linspace(0, 10, 100)
-    y = np.sin(x) + np.random.normal(0, 0.2, 100)
+   # Generate linear data with some noise
+   x = np.linspace(0, 10, 100)
+   y = 2 * x + np.random.normal(0, 1, 100)
 
-    # 2. Perform smoothing
-    # fraction=0.3 means 30% of data is used for each local regression
-    result = fastLowess.smooth(x, y, fraction=0.3)
+   # Simple smoothing
+   result = fastlowess.smooth(x, y, fraction=0.3)
 
-    # 3. Access the results
-    print(f"Number of points: {len(result.y)}")
-    print(f"First 5 smoothed values: {result.y[:5]}")
+   print(f"Smoothed values: {result.y[:5]}...")
 
-    # Output:
-    # Number of points: 100
-    # First 5 smoothed values: [0.3686 0.4011 0.4324 0.4628 0.4923]
+Understanding the Result
+------------------------
 
-    # (Optional) Plotting
-    # plt.scatter(x, y, alpha=0.3, label="Noisy Data")
-    # plt.plot(x, result.y, color='red', label="LOWESS Fit")
-    # plt.legend()
-    # plt.show()
+The ``smooth()`` function returns a ``LowessResult`` object containing:
 
-Core Parameters
----------------
+*   ``x``: The potentially sorted independent variable values.
+*   ``y``: The smoothed dependent variable values.
+*   ``fraction_used``: The smoothing fraction applied.
+*   ``iterations_used``: Number of robustness iterations performed.
+*   Optional fields (if requested): ``standard_errors``, ``confidence_lower``, ``residuals``, etc.
 
-**Fraction (Smoothing Span)**
+Customizing Parameters
+----------------------
 
-The `fraction` parameter controls the window size (bandwidth) as a proportion of the dataset.
+You can control the smoothing behavior using core parameters:
+
+*   **fraction**: Controls the span of the smoothing window (span). Values: (0.0, 1.0].
+*   **iterations**: Number of robustness iterations to downweight outliers.
 
 .. image:: _static/images/fraction_effect_comparison.svg
    :alt: Fraction Effect Comparison
    :align: center
    :width: 100%
+.. code-block:: python
 
-*   **Range**: `(0, 1]`
-*   **0.1 - 0.3**: Captures fine details (wiggly curve). Best for data with high-frequency variation.
-*   **0.4 - 0.6**: Balanced smoothing (default is 0.67). General purpose.
-*   **> 0.7**: Captures global trends, smoothing out most local variation.
+   # More smoothing, higher robustness
+   result = fastlowess.smooth(x, y, fraction=0.7, iterations=5)
+
+Uncertainty Quantification
+--------------------------
+
+Request confidence or prediction intervals by providing the desired confidence level (e.g., 0.95 for 95% intervals).
+
+.. code-block:: python
+
+   result = fastlowess.smooth(
+       x, y,
+       fraction=0.3,
+       confidence_intervals=0.95,
+       prediction_intervals=0.95
+   )
+
+   # Access results
+   lower = result.confidence_lower
+   upper = result.confidence_upper
+
+*   **Range**: ``(0, 1]``
+*   **0.1 - 0.3**: Captures fine details. Best for data with high-frequency variation.
+*   **0.3 - 0.5**: Moderate smoothing (recommended for most cases).
+*   **0.5 - 0.7**: Heavy smoothing, emphasizes long-term trends (default is 0.67).
+*   **> 0.8**: Extremely smooth, may over-smooth local features.
 
 **Iterations (Robustness)**
 
@@ -68,7 +92,7 @@ You can request fit statistics like R-squared ($R^2$), RMSE, and AIC:
 
 .. code-block:: python
 
-    result = fastLowess.smooth(x, y, fraction=0.3, return_diagnostics=True)
+    result = fastlowess.smooth(x, y, fraction=0.3, return_diagnostics=True)
 
     if result.diagnostics:
         print(f"R-squared: {result.diagnostics.r_squared:.4f}")

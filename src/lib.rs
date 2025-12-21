@@ -10,8 +10,8 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
 use ::fastLowess::prelude::{
-    Batch, CrossValidationStrategy, Lowess as LowessBuilder, LowessResult, Online,
-    RobustnessMethod, Streaming, WeightFunction, ZeroWeightFallback,
+    Batch, BoundaryPolicy, CrossValidationStrategy, Lowess as LowessBuilder, LowessResult, Online,
+    RobustnessMethod, Streaming, UpdateMode, WeightFunction, ZeroWeightFallback,
 };
 
 // ============================================================================
@@ -61,6 +61,31 @@ fn parse_zero_weight_fallback(name: &str) -> PyResult<ZeroWeightFallback> {
         "return_none" | "none" | "nan" => Ok(ZeroWeightFallback::ReturnNone),
         _ => Err(PyValueError::new_err(format!(
             "Unknown zero weight fallback: {}. Valid options: use_local_mean, return_original, return_none",
+            name
+        ))),
+    }
+}
+
+/// Parse boundary policy from string
+fn parse_boundary_policy(name: &str) -> PyResult<BoundaryPolicy> {
+    match name.to_lowercase().as_str() {
+        "extend" | "pad" => Ok(BoundaryPolicy::Extend),
+        "reflect" | "mirror" => Ok(BoundaryPolicy::Reflect),
+        "zero" | "none" => Ok(BoundaryPolicy::Zero),
+        _ => Err(PyValueError::new_err(format!(
+            "Unknown boundary policy: {}. Valid options: extend, reflect, zero",
+            name
+        ))),
+    }
+}
+
+/// Parse update mode from string
+fn parse_update_mode(name: &str) -> PyResult<UpdateMode> {
+    match name.to_lowercase().as_str() {
+        "full" | "resmooth" => Ok(UpdateMode::Full),
+        "incremental" | "single" => Ok(UpdateMode::Incremental),
+        _ => Err(PyValueError::new_err(format!(
+            "Unknown update mode: {}. Valid options: full, incremental",
             name
         ))),
     }
@@ -265,6 +290,8 @@ impl PyLowessResult {
 ///     Kernel function: "tricube", "epanechnikov", "gaussian", "uniform", "biweight", "triangle".
 /// robustness_method : str, optional
 ///     Robustness method: "bisquare", "huber", "talwar".
+/// boundary_policy : str, optional
+///     Handling of edge effects: "extend", "reflect", "zero" (default: "extend").
 /// confidence_intervals : float, optional
 ///     Confidence level for confidence intervals (e.g., 0.95).
 /// prediction_intervals : float, optional
@@ -279,8 +306,6 @@ impl PyLowessResult {
 ///     Fallback when all weights are zero: "use_local_mean", "return_original", "return_none".
 /// auto_converge : float, optional
 ///     Tolerance for auto-convergence (disabled by default).
-/// max_iterations : int, optional
-///     Maximum robustness iterations (default: 20).
 /// cv_fractions : list of float, optional
 ///     Fractions to test for cross-validation (disabled by default).
 ///     When provided, enables cross-validation to select optimal fraction.
@@ -301,6 +326,7 @@ impl PyLowessResult {
     delta=None,
     weight_function="tricube",
     robustness_method="bisquare",
+    boundary_policy="extend",
     confidence_intervals=None,
     prediction_intervals=None,
     return_diagnostics=false,
@@ -308,7 +334,6 @@ impl PyLowessResult {
     return_robustness_weights=false,
     zero_weight_fallback="use_local_mean",
     auto_converge=None,
-    max_iterations=None,
     cv_fractions=None,
     cv_method="kfold",
     cv_k=5
@@ -322,6 +347,7 @@ fn smooth<'py>(
     delta: Option<f64>,
     weight_function: &str,
     robustness_method: &str,
+    boundary_policy: &str,
     confidence_intervals: Option<f64>,
     prediction_intervals: Option<f64>,
     return_diagnostics: bool,
@@ -329,7 +355,6 @@ fn smooth<'py>(
     return_robustness_weights: bool,
     zero_weight_fallback: &str,
     auto_converge: Option<f64>,
-    max_iterations: Option<usize>,
     cv_fractions: Option<Vec<f64>>,
     cv_method: &str,
     cv_k: usize,
@@ -340,13 +365,15 @@ fn smooth<'py>(
     let wf = parse_weight_function(weight_function)?;
     let rm = parse_robustness_method(robustness_method)?;
     let zwf = parse_zero_weight_fallback(zero_weight_fallback)?;
+    let bp = parse_boundary_policy(boundary_policy)?;
 
-    let mut builder = LowessBuilder::<f64>::new()
-        .fraction(fraction)
-        .iterations(iterations)
-        .weight_function(wf)
-        .robustness_method(rm)
-        .zero_weight_fallback(zwf);
+    let mut builder = LowessBuilder::<f64>::new();
+    builder = builder.fraction(fraction);
+    builder = builder.iterations(iterations);
+    builder = builder.weight_function(wf);
+    builder = builder.robustness_method(rm);
+    builder = builder.zero_weight_fallback(zwf);
+    builder = builder.boundary_policy(bp);
 
     if let Some(d) = delta {
         builder = builder.delta(d);
@@ -374,10 +401,6 @@ fn smooth<'py>(
 
     if let Some(tol) = auto_converge {
         builder = builder.auto_converge(tol);
-    }
-
-    if let Some(mi) = max_iterations {
-        builder = builder.max_iterations(mi);
     }
 
     // Cross-validation if fractions are provided
@@ -424,10 +447,20 @@ fn smooth<'py>(
 ///     Overlap between chunks (default: 10% of chunk_size).
 /// iterations : int, optional
 ///     Number of robustness iterations (default: 3).
+/// delta : float, optional
+///     Interpolation optimization threshold.
 /// weight_function : str, optional
 ///     Kernel function: "tricube", "epanechnikov", "gaussian", "uniform", "biweight", "triangle".
 /// robustness_method : str, optional
 ///     Robustness method: "bisquare", "huber", "talwar".
+/// boundary_policy : str, optional
+///     Handling of edge effects: "extend", "reflect", "zero" (default: "extend").
+/// auto_converge : float, optional
+///     Tolerance for auto-convergence (disabled by default).
+/// return_diagnostics : bool, optional
+///     Whether to compute cumulative diagnostics across chunks.
+/// return_robustness_weights : bool, optional
+///     Whether to include robustness weights.
 /// parallel : bool, optional
 ///     Enable parallel execution (default: True).
 ///
@@ -437,7 +470,21 @@ fn smooth<'py>(
 ///     Result object with smoothed values.
 #[allow(clippy::too_many_arguments)]
 #[pyfunction]
-#[pyo3(signature = (x, y, fraction=0.3, chunk_size=5000, overlap=None, iterations=3, weight_function="tricube", robustness_method="bisquare", parallel=true))]
+#[pyo3(signature = (
+    x, y,
+    fraction=0.3,
+    chunk_size=5000,
+    overlap=None,
+    iterations=3,
+    delta=None,
+    weight_function="tricube",
+    robustness_method="bisquare",
+    boundary_policy="extend",
+    auto_converge=None,
+    return_diagnostics=false,
+    return_robustness_weights=false,
+    parallel=true
+))]
 fn smooth_streaming<'py>(
     x: PyReadonlyArray1<'py, f64>,
     y: PyReadonlyArray1<'py, f64>,
@@ -445,8 +492,13 @@ fn smooth_streaming<'py>(
     chunk_size: usize,
     overlap: Option<usize>,
     iterations: usize,
+    delta: Option<f64>,
     weight_function: &str,
     robustness_method: &str,
+    boundary_policy: &str,
+    auto_converge: Option<f64>,
+    return_diagnostics: bool,
+    return_robustness_weights: bool,
     parallel: bool,
 ) -> PyResult<PyLowessResult> {
     let x_slice = x.as_slice().map_err(to_py_error)?;
@@ -460,18 +512,34 @@ fn smooth_streaming<'py>(
 
     let wf = parse_weight_function(weight_function)?;
     let rm = parse_robustness_method(robustness_method)?;
+    let bp = parse_boundary_policy(boundary_policy)?;
 
-    let mut processor = LowessBuilder::<f64>::new()
-        .fraction(fraction)
-        .iterations(iterations)
-        .weight_function(wf)
-        .robustness_method(rm)
-        .adapter(Streaming)
-        .chunk_size(chunk_size)
-        .overlap(overlap_size)
-        .parallel(parallel)
-        .build()
-        .map_err(to_py_error)?;
+    let mut builder = LowessBuilder::<f64>::new();
+    builder = builder.fraction(fraction);
+    builder = builder.iterations(iterations);
+    builder = builder.weight_function(wf);
+    builder = builder.robustness_method(rm);
+    builder = builder.boundary_policy(bp);
+
+    let mut builder = builder.adapter(Streaming);
+    builder = builder.chunk_size(chunk_size);
+    builder = builder.overlap(overlap_size);
+    builder = builder.parallel(parallel);
+
+    if let Some(d) = delta {
+        builder = builder.delta(d);
+    }
+    if let Some(tol) = auto_converge {
+        builder = builder.auto_converge(tol);
+    }
+    if return_diagnostics {
+        builder = builder.return_diagnostics(true);
+    }
+    if return_robustness_weights {
+        builder = builder.return_robustness_weights(true);
+    }
+
+    let mut processor = builder.build().map_err(to_py_error)?;
 
     // Process the data as a single chunk
     let chunk_result = processor
@@ -484,21 +552,58 @@ fn smooth_streaming<'py>(
     // Combine results from process_chunk and finalize
     let mut combined_x = chunk_result.x;
     let mut combined_y = chunk_result.y;
+    let mut combined_se = chunk_result.standard_errors;
+    let mut combined_cl = chunk_result.confidence_lower;
+    let mut combined_cu = chunk_result.confidence_upper;
+    let mut combined_pl = chunk_result.prediction_lower;
+    let mut combined_pu = chunk_result.prediction_upper;
+    let mut combined_res = chunk_result.residuals;
+    let mut combined_rw = chunk_result.robustness_weights;
+
     combined_x.extend(final_result.x);
     combined_y.extend(final_result.y);
+
+    if let (Some(mut s), Some(f)) = (combined_se.take(), final_result.standard_errors) {
+        s.extend(f);
+        combined_se = Some(s);
+    }
+    if let (Some(mut s), Some(f)) = (combined_cl.take(), final_result.confidence_lower) {
+        s.extend(f);
+        combined_cl = Some(s);
+    }
+    if let (Some(mut s), Some(f)) = (combined_cu.take(), final_result.confidence_upper) {
+        s.extend(f);
+        combined_cu = Some(s);
+    }
+    if let (Some(mut s), Some(f)) = (combined_pl.take(), final_result.prediction_lower) {
+        s.extend(f);
+        combined_pl = Some(s);
+    }
+    if let (Some(mut s), Some(f)) = (combined_pu.take(), final_result.prediction_upper) {
+        s.extend(f);
+        combined_pu = Some(s);
+    }
+    if let (Some(mut s), Some(f)) = (combined_res.take(), final_result.residuals) {
+        s.extend(f);
+        combined_res = Some(s);
+    }
+    if let (Some(mut s), Some(f)) = (combined_rw.take(), final_result.robustness_weights) {
+        s.extend(f);
+        combined_rw = Some(s);
+    }
 
     // Create combined result
     let result = LowessResult {
         x: combined_x,
         y: combined_y,
-        standard_errors: None,
-        confidence_lower: None,
-        confidence_upper: None,
-        prediction_lower: None,
-        prediction_upper: None,
-        residuals: None,
-        robustness_weights: None,
-        diagnostics: None,
+        standard_errors: combined_se,
+        confidence_lower: combined_cl,
+        confidence_upper: combined_cu,
+        prediction_lower: combined_pl,
+        prediction_upper: combined_pu,
+        residuals: combined_res,
+        robustness_weights: combined_rw,
+        diagnostics: final_result.diagnostics, // diagnostics are cumulative in final
         iterations_used: chunk_result.iterations_used,
         fraction_used: chunk_result.fraction_used,
         cv_scores: None,
@@ -525,10 +630,20 @@ fn smooth_streaming<'py>(
 ///     Minimum points before smoothing starts (default: 3).
 /// iterations : int, optional
 ///     Number of robustness iterations (default: 3).
+/// delta : float, optional
+///     Interpolation optimization threshold.
 /// weight_function : str, optional
 ///     Kernel function: "tricube", "epanechnikov", "gaussian", "uniform", "biweight", "triangle".
 /// robustness_method : str, optional
 ///     Robustness method: "bisquare", "huber", "talwar".
+/// boundary_policy : str, optional
+///     Handling of edge effects: "extend", "reflect", "zero" (default: "extend").
+/// update_mode : str, optional
+///     Update strategy: "full" or "incremental" (default: "full").
+/// auto_converge : float, optional
+///     Tolerance for auto-convergence (disabled by default).
+/// return_robustness_weights : bool, optional
+///     Whether to include robustness weights.
 /// parallel : bool, optional
 ///     Enable parallel execution (default: False for online).
 ///
@@ -538,7 +653,21 @@ fn smooth_streaming<'py>(
 ///     Result object with smoothed values.
 #[allow(clippy::too_many_arguments)]
 #[pyfunction]
-#[pyo3(signature = (x, y, fraction=0.2, window_capacity=100, min_points=3, iterations=3, weight_function="tricube", robustness_method="bisquare", parallel=false))]
+#[pyo3(signature = (
+    x, y,
+    fraction=0.2,
+    window_capacity=100,
+    min_points=3,
+    iterations=3,
+    delta=None,
+    weight_function="tricube",
+    robustness_method="bisquare",
+    boundary_policy="extend",
+    update_mode="full",
+    auto_converge=None,
+    return_robustness_weights=false,
+    parallel=false
+))]
 fn smooth_online<'py>(
     x: PyReadonlyArray1<'py, f64>,
     y: PyReadonlyArray1<'py, f64>,
@@ -546,8 +675,13 @@ fn smooth_online<'py>(
     window_capacity: usize,
     min_points: usize,
     iterations: usize,
+    delta: Option<f64>,
     weight_function: &str,
     robustness_method: &str,
+    boundary_policy: &str,
+    update_mode: &str,
+    auto_converge: Option<f64>,
+    return_robustness_weights: bool,
     parallel: bool,
 ) -> PyResult<PyLowessResult> {
     let x_slice = x.as_slice().map_err(to_py_error)?;
@@ -555,18 +689,33 @@ fn smooth_online<'py>(
 
     let wf = parse_weight_function(weight_function)?;
     let rm = parse_robustness_method(robustness_method)?;
+    let bp = parse_boundary_policy(boundary_policy)?;
+    let um = parse_update_mode(update_mode)?;
 
-    let mut processor = LowessBuilder::<f64>::new()
-        .fraction(fraction)
-        .iterations(iterations)
-        .weight_function(wf)
-        .robustness_method(rm)
-        .adapter(Online)
-        .window_capacity(window_capacity)
-        .min_points(min_points)
-        .parallel(parallel)
-        .build()
-        .map_err(to_py_error)?;
+    let mut builder = LowessBuilder::<f64>::new();
+    builder = builder.fraction(fraction);
+    builder = builder.iterations(iterations);
+    builder = builder.weight_function(wf);
+    builder = builder.robustness_method(rm);
+    builder = builder.boundary_policy(bp);
+
+    let mut builder = builder.adapter(Online);
+    builder = builder.window_capacity(window_capacity);
+    builder = builder.min_points(min_points);
+    builder = builder.update_mode(um);
+    builder = builder.parallel(parallel);
+
+    if let Some(d) = delta {
+        builder = builder.delta(d);
+    }
+    if let Some(tol) = auto_converge {
+        builder = builder.auto_converge(tol);
+    }
+    if return_robustness_weights {
+        builder = builder.return_robustness_weights(true);
+    }
+
+    let mut processor = builder.build().map_err(to_py_error)?;
 
     let outputs = processor
         .add_points(x_slice, y_slice)
@@ -603,9 +752,9 @@ fn smooth_online<'py>(
 // Module Registration
 // ============================================================================
 
-/// fastLowess: High-performance LOWESS smoothing for Python.
+/// fastlowess: High-performance LOWESS smoothing for Python.
 #[pymodule]
-fn fastLowess(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn fastlowess(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyLowessResult>()?;
     m.add_class::<PyDiagnostics>()?;
     m.add_function(wrap_pyfunction!(smooth, m)?)?;

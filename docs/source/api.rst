@@ -1,7 +1,7 @@
 API Reference
 =============
 
-.. automodule:: fastLowess
+.. automodule:: fastlowess
    :members:
    :undoc-members:
    :show-inheritance:

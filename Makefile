@@ -6,7 +6,7 @@ check: fmt clippy build test doc
 check-all: check lint-py
 	@echo "All checks (Rust + Python) completed successfully!"
 
-# --- Formatting ---
+# Formatting
 fmt: fmt-rust fmt-py
 	@echo "Formatting check complete!"
 
@@ -16,7 +16,7 @@ fmt-rust:
 
 fmt-py:
 	@echo "Checking Python code formatting with ruff..."
-	@ruff format --check fastLowess/ tests/ || true
+	@ruff format --check fastlowess/ tests/ || true
 
 fmt-fix: fmt-fix-rust fmt-fix-py
 	@echo "Formatting complete!"
@@ -27,9 +27,9 @@ fmt-fix-rust:
 
 fmt-fix-py:
 	@echo "Formatting Python code with ruff..."
-	@ruff format fastLowess/ tests/
+	@ruff format fastlowess/ tests/
 
-# --- Linter ---
+# Linter
 clippy: clippy-default clippy-serial
 
 clippy-default:
@@ -43,15 +43,15 @@ clippy-serial:
 
 lint-py:
 	@echo "Linting Python code with ruff..."
-	@ruff check fastLowess/ tests/
+	@ruff check fastlowess/ tests/
 	@echo "Python lint complete!"
 
 lint-py-fix:
 	@echo "Fixing Python lint issues with ruff..."
-	@ruff check --fix fastLowess/ tests/
+	@ruff check --fix fastlowess/ tests/
 	@echo "Python lint fix complete!"
 
-# --- Build ---
+# Build
 build: build-default build-serial
 
 build-default:
@@ -63,7 +63,7 @@ build-serial:
 	@cargo build --no-default-features
 	@echo "Build complete!"
 
-# --- Maturin (Python package) ---
+# Maturin (Python package)
 develop:
 	@echo "Building and installing Python package (development mode)..."
 	@maturin develop
@@ -84,7 +84,7 @@ wheel-release:
 	@maturin build --release
 	@echo "Wheel build (release) complete!"
 
-# --- Test ---
+# Test
 test: test-python
 
 test-rust:
@@ -105,7 +105,7 @@ test-python-fast:
 test-all: test-rust test-python
 	@echo "All tests complete!"
 
-# --- Documentation ---
+# Documentation
 doc: doc-default doc-serial
 	@echo "Documentation build complete!"
 
@@ -117,7 +117,14 @@ doc-serial:
 	@echo "Building documentation (serial / no parallel)..."
 	@RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --no-default-features
 
-# --- Clean ---
+# Python (Sphinx) Documentation
+doc-py:
+	@echo "Building Sphinx documentation..."
+	@pip install -r docs/requirements.txt
+	@cd docs && make html
+	@echo "Sphinx documentation build complete! Output is in docs/build/html/index.html"
+
+# Clean
 clean: clean-rust clean-python
 	@echo "Clean complete!"
 
@@ -130,12 +137,12 @@ clean-python:
 	@rm -rf target/wheels
 	@rm -rf .pytest_cache
 	@rm -rf __pycache__
-	@rm -rf fastLowess/__pycache__
+	@rm -rf fastlowess/__pycache__
 	@rm -rf tests/__pycache__
 	@rm -rf *.egg-info
 	@rm -rf .ruff_cache
 
-# --- Help ---
+# Help
 help:
 	@echo "Available targets:"
 	@echo "  check          - Run all Rust checks (fmt, clippy, build, test, doc)"
@@ -162,9 +169,8 @@ help:
 	@echo "  test-rust      - Run Rust tests"
 	@echo "  test-python    - Run Python tests (verbose)"
 	@echo "  test-all       - Run all tests"
-	@echo ""
 	@echo "Other:"
 	@echo "  doc            - Build Rust documentation"
+	@echo "  doc-py         - Build Python (Sphinx) documentation"
 	@echo "  clean          - Clean all build artifacts"
 	@echo "  help           - Show this help message"
-
