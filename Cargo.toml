@@ -1,6 +1,6 @@
 [package]
 name = "fastLowess-py"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.85.0"
 
@@ -26,10 +26,11 @@ include = [
     "README.md",
     "LICENSE",
     "CHANGELOG.md",
-] # Build
+]
 
+# Build
 [dependencies]
-fastLowess = { version = "0.1.0", features = ["dev"] }
+fastLowess = { version = "0.2", features = ["dev"] }
 pyo3 = { version = "0.27", features = ["extension-module"] }
 numpy = "0.27"
 

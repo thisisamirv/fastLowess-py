@@ -4,14 +4,14 @@ build-backend = "maturin"
 
 [project]
 name = "fastlowess"
-version = "0.1.1"
+version = "0.2.0"
 description = "High-level, fast LOWESS smoothing built on top of the fastLowess Rust crate."
 authors = [{ name = "Amir Valizadeh", email = "thisisamirv@gmail.com" }]
 license = { text = "AGPL-3.0-or-later OR Commercial" }
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Programming Language :: Rust",

@@ -127,12 +127,13 @@ def example_4_cross_validation():
 
     fractions = [0.2, 0.3, 0.5, 0.7]
     
-    optimal_fraction, result = fastLowess.cross_validate(
+    result = fastLowess.smooth(
         x, y,
-        fractions=fractions,
+        cv_fractions=fractions,
         cv_method="kfold",
         cv_k=5,
     )
+    optimal_fraction = result.fraction_used
 
     print(f"Selected fraction: {optimal_fraction}")
     if result.cv_scores is not None:

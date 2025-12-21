@@ -60,11 +60,12 @@ Quick Start
 Functions
 ---------
 
-smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
-       robustness_method="bisquare", confidence_intervals=None,
-       prediction_intervals=None, return_diagnostics=False,
-       return_residuals=False, return_robustness_weights=False,
-       zero_weight_fallback="use_local_mean")
+smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function="tricube",
+       robustness_method="bisquare", boundary_policy="extend",
+       confidence_intervals=None, prediction_intervals=None,
+       return_diagnostics=False, return_residuals=False,
+       return_robustness_weights=False, zero_weight_fallback="use_local_mean",
+       auto_converge=None, cv_fractions=None, cv_method="kfold", cv_k=5)
     LOWESS smoothing with the batch adapter.
 
     This is the primary interface for LOWESS smoothing. Processes the entire
@@ -116,6 +117,13 @@ smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
         - "huber": Less aggressive downweighting
         - "talwar": Hard rejection of outliers
 
+    boundary_policy : str, optional
+        Handling of edge effects (default: "extend"). Options:
+
+        - "extend": Extend boundary values (retains trend)
+        - "reflect": Reflect values around boundary
+        - "zero": Pad with zeros
+
     confidence_intervals : float, optional
         Confidence level for confidence intervals (e.g., 0.95 for 95%).
         If provided, populates result.confidence_lower and result.confidence_upper.
@@ -144,8 +152,6 @@ smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
         Tolerance for auto-convergence. When set, iterations stop when
         the maximum change between iterations is below this threshold.
         Default: None (disabled).
-    max_iterations : int, optional
-        Maximum robustness iterations. Default: 20.
     cv_fractions : list of float, optional
         Fractions to test for cross-validation. When provided, enables
         cross-validation to select optimal fraction. The result's
@@ -173,8 +179,10 @@ smooth(x, y, fraction=0.5, iterations=3, delta=None, weight_function="tricube",
     >>> print(f"Smoothed {len(result.y)} points")
 
 smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
-                 iterations=3, weight_function="tricube",
-                 robustness_method="bisquare", parallel=True)
+                 iterations=3, delta=None, weight_function="tricube",
+                 robustness_method="bisquare", boundary_policy="extend",
+                 auto_converge=None, return_diagnostics=False,
+                 return_robustness_weights=False, parallel=True)
     Streaming LOWESS for large datasets.
 
     Processes data in chunks to maintain constant memory usage.
@@ -195,11 +203,21 @@ smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
         Default: 10% of chunk_size.
     iterations : int, optional
         Number of robustness iterations. Default: 3.
+    delta : float, optional
+        Optimization threshold for point skipping. Default: None.
     weight_function : str, optional
         Kernel function: "tricube", "epanechnikov", "gaussian",
         "uniform", "biweight", "triangle". Default: "tricube".
     robustness_method : str, optional
         Robustness method: "bisquare", "huber", "talwar". Default: "bisquare".
+    boundary_policy : str, optional
+        Boundary handling: "extend", "reflect", "zero". Default: "extend".
+    auto_converge : float, optional
+        Adaptive convergence tolerance. Default: None.
+    return_diagnostics : bool, optional
+        Compute cumulative diagnostics across chunks. Default: False.
+    return_robustness_weights : bool, optional
+        Include final robustness weights. Default: False.
     parallel : bool, optional
         Enable parallel execution. Default: True.
 
@@ -217,8 +235,10 @@ smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
 
 
 smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,
-              iterations=3, weight_function="tricube",
-              robustness_method="bisquare", parallel=False)
+              iterations=3, delta=None, weight_function="tricube",
+              robustness_method="bisquare", boundary_policy="extend",
+              update_mode="full", auto_converge=None,
+              return_robustness_weights=False, parallel=False)
     Online LOWESS with sliding window.
 
     Maintains a sliding window for incremental updates. Ideal for
@@ -238,12 +258,22 @@ smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,
         Minimum points before smoothing starts. Default: 3.
     iterations : int, optional
         Number of robustness iterations. Default: 3.
+    delta : float, optional
+        Optimization threshold for point skipping. Default: None.
     weight_function : str, optional
         Kernel function. Default: "tricube".
     robustness_method : str, optional
         Robustness method. Default: "bisquare".
+    boundary_policy : str, optional
+        Boundary handling: "extend", "reflect", "zero". Default: "extend".
+    update_mode : str, optional
+        Update strategy: "full" or "incremental". Default: "full".
+    auto_converge : float, optional
+        Adaptive convergence tolerance. Default: None.
+    return_robustness_weights : bool, optional
+        Include final robustness weights. Default: False.
     parallel : bool, optional
-        Enable parallel execution. Default: False (sequential for low latency).
+        Enable parallel execution. Default: False.
 
     Returns
     -------
@@ -393,4 +423,4 @@ __all__ = [
     "Diagnostics",
 ]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

@@ -1,23 +1,80 @@
-# fastLowess (Python binding for fastLowess Rust crate)
+# fastLowess
 
 [![PyPI](https://img.shields.io/pypi/v/fastLowess.svg?style=flat-square)](https://pypi.org/project/fastLowess/)
 [![License](https://img.shields.io/badge/License-AGPL--3.0%20OR%20Commercial-blue.svg)](LICENSE)
 [![Python Versions](https://img.shields.io/pypi/pyversions/fastLowess.svg?style=flat-square)](https://pypi.org/project/fastLowess/)
 [![Documentation Status](https://readthedocs.org/projects/fastlowess-py/badge/?version=latest)](https://fastlowess-py.readthedocs.io/en/latest/?badge=latest)
 
-**High-performance LOWESS (Locally Weighted Scatterplot Smoothing) for Python** — 5-287× faster than statsmodels with robust statistics, confidence intervals, and parallel execution. Built on the [fastLowess](https://github.com/thisisamirv/fastLowess) Rust crate.
+**High-performance parallel LOWESS (Locally Weighted Scatterplot Smoothing) for Python** — A high-level wrapper around the [`fastLowess`](https://github.com/thisisamirv/fastLowess) Rust crate that offers **4-3800x faster performance** than standard implementations while providing robust statistics, uncertainty quantification, and memory-efficient streaming.
 
-## Why This Package?
+## Features
 
-- ⚡ **Blazingly Fast**: 5-287× faster than statsmodels, sub-millisecond smoothing for 1000 points
-- 🎯 **Production-Ready**: Comprehensive error handling, numerical stability, extensive testing
-- 📊 **Feature-Rich**: Confidence/prediction intervals, multiple kernels, cross-validation
-- 🚀 **Scalable**: Parallel execution, streaming mode, delta optimization
-- 🔬 **Scientific**: Validated against R and Python implementations
+- **Parallel by Default**: Multi-core regression fits via Rust's Rayon, achieving multiple orders of magnitude speedups on large datasets.
+- **Robust Statistics**: MAD-based scale estimation and IRLS with Bisquare, Huber, or Talwar weighting.
+- **Uncertainty Quantification**: Point-wise standard errors, confidence intervals, and prediction intervals.
+- **Optimized Performance**: Delta optimization for skipping dense regions and streaming/online modes.
+- **Parameter Selection**: Built-in cross-validation for automatic smoothing fraction selection.
+- **Production-Ready**: Comprehensive error handling, numerical stability, and high-performance numerical core.
+
+## Robustness Advantages
+
+This implementation is **more robust than statsmodels** due to:
+
+### MAD-Based Scale Estimation
+
+We use **Median Absolute Deviation (MAD)** for scale estimation, which is breakdown-point-optimal:
+
+$$s = \text{median}(|r_i - \text{median}(r)|)$$
+
+### Boundary Padding
+
+We apply **boundary policies** (Extend, Reflect, Zero) at dataset edges to maintain symmetric local neighborhoods, preventing the edge bias common in other implementations.
+
+### Gaussian Consistency Factor
+
+For precision in intervals, residual scale is computed using:
+
+$$\hat{\sigma} = 1.4826 \times \text{MAD}$$
+
+## Performance Advantages
+
+Benchmarked against Python's `statsmodels`. Achieves **50-3800x faster performance** across different tested scenarios. The parallel implementation ensures that even at extreme scales (100k points), processing remains sub-20ms.
+
+### Summary
+
+| Category         | Matched | Median Speedup | Mean Speedup |
+| :--------------- | :------ | :------------- | :----------- |
+| **Scalability**  | 5       | **765x**       | 1433x        |
+| **Pathological** | 4       | **448x**       | 416x         |
+| **Iterations**   | 6       | **436x**       | 440x         |
+| **Fraction**     | 6       | **424x**       | 413x         |
+| **Financial**    | 4       | **336x**       | 385x         |
+| **Scientific**   | 4       | **327x**       | 366x         |
+| **Genomic**      | 4       | **20x**        | 25x          |
+| **Delta**        | 4       | **4x**         | 5.5x         |
+
+### Top 10 Performance Wins
+
+| Benchmark          | statsmodels | fastLowess | Speedup   |
+| :----------------- | :---------- | :--------- | :-------- |
+| scale_100000       | 43.727s     | 11.4ms     | **3824x** |
+| scale_50000        | 11.160s     | 5.95ms     | **1876x** |
+| scale_10000        | 663.1ms     | 0.87ms     | **765x**  |
+| financial_10000    | 497.1ms     | 0.66ms     | **748x**  |
+| scientific_10000   | 777.2ms     | 1.07ms     | **729x**  |
+| fraction_0.05      | 197.2ms     | 0.37ms     | **534x**  |
+| scale_5000         | 229.9ms     | 0.44ms     | **523x**  |
+| fraction_0.1       | 227.9ms     | 0.45ms     | **512x**  |
+| financial_5000     | 170.9ms     | 0.34ms     | **497x**  |
+| scientific_5000    | 268.5ms     | 0.55ms     | **489x**  |
+
+## Installation
+
+```bash
+pip install fastLowess
+```
 
 ## Quick Start
-
-For full documentation including advanced usage, API reference, and examples, visit [fastlowess-py.readthedocs.io](https://fastlowess-py.readthedocs.io/).
 
 ```python
 import numpy as np
@@ -26,55 +83,28 @@ import fastLowess
 x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
 y = np.array([2.0, 4.1, 5.9, 8.2, 9.8])
 
-# Basic smoothing
+# Basic smoothing (parallel by default)
 result = fastLowess.smooth(x, y, fraction=0.5)
 
-print(f"Smoothed: {result.y}")
-print(f"Fraction used: {result.fraction_used}")
+print(f"Smoothed values: {result.y}")
 ```
-
-## Installation
-
-```bash
-pip install fastLowess
-```
-
-## Features at a Glance
-
-| Feature                  | Description                             | Use Case                      |
-| ------------------------ | --------------------------------------- | ----------------------------- |
-| **Robust Smoothing**     | IRLS with Bisquare/Huber/Talwar weights | Outlier-contaminated data     |
-| **Confidence Intervals** | Point-wise standard errors & bounds     | Uncertainty quantification    |
-| **Cross-Validation**     | Auto-select optimal fraction            | Unknown smoothing parameter   |
-| **Multiple Kernels**     | Tricube, Epanechnikov, Gaussian, etc.   | Different smoothness profiles |
-| **Parallel Execution**   | Multi-threaded via Rust/Rayon           | Large datasets (n > 1000)     |
-| **Streaming Mode**       | Constant memory usage                   | Very large datasets           |
-| **Delta Optimization**   | Skip dense regions                      | 10× speedup on dense data     |
 
 ## Common Use Cases
 
 ### 1. Robust Smoothing (Handle Outliers)
 
 ```python
-import numpy as np
-import fastLowess
-
-x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
-y = np.array([2.0, 4.1, 100.0, 8.2, 9.8])  # Outlier at index 2
-
 # Use robust iterations to downweight outliers
 result = fastLowess.smooth(
     x, y,
     fraction=0.7,
     iterations=5,  # Robust iterations
+    robustness_method="bisquare",  # "bisquare", "huber", or "talwar"
     return_robustness_weights=True
 )
 
-# Check which points were downweighted
-if result.robustness_weights is not None:
-    for i, w in enumerate(result.robustness_weights):
-        if w < 0.1:
-            print(f"Point {i} is likely an outlier")
+# Identify outliers (weights < 0.1)
+outliers = np.where(result.robustness_weights < 0.1)[0]
 ```
 
 ### 2. Uncertainty Quantification
@@ -88,270 +118,103 @@ result = fastLowess.smooth(
 )
 
 # Access confidence bands
-for i in range(len(x)):
-    print(f"x={x[i]:.1f}: y={result.y[i]:.2f} "
-          f"CI=[{result.confidence_lower[i]:.2f}, {result.confidence_upper[i]:.2f}]")
+print(f"CI Lower: {result.confidence_lower}")
+print(f"CI Upper: {result.confidence_upper}")
 ```
 
 ### 3. Automatic Parameter Selection (Cross-Validation)
 
 ```python
-# Cross-validation is integrated into smooth() via cv_fractions
+# Automatic selection of the best smoothing fraction
 result = fastLowess.smooth(
     x, y,
-    cv_fractions=[0.2, 0.3, 0.5, 0.7],  # Fractions to test
-    cv_method="kfold",                   # "kfold" or "loocv"
-    cv_k=5                               # Number of folds
+    cv_fractions=[0.2, 0.3, 0.5, 0.7],  # Test these candidates
+    cv_method="kfold",                  # "kfold" or "loocv"
+    cv_k=5,
 )
 
-print(f"Optimal fraction: {result.fraction_used}")
-print(f"CV RMSE scores: {result.cv_scores}")
+print(f"Optimal fraction used: {result.fraction_used}")
 ```
 
-### 4. Large Dataset Optimization
+## Execution Modes
+
+### Streaming Processing
+
+For datasets too large to fit in memory (n > 1M):
 
 ```python
-# Streaming mode for very large datasets
-# Keeps memory usage constant by processing in chunks
 result = fastLowess.smooth_streaming(
     x, y,
     fraction=0.3,
     chunk_size=5000,
-    overlap=500
+    overlap=500,
+    parallel=True
 )
 ```
 
-### 5. Production Monitoring (Diagnostics)
+### Online Processing
+
+For real-time data streams or sliding windows:
 
 ```python
-result = fastLowess.smooth(
+result = fastLowess.smooth_online(
     x, y,
-    fraction=0.5,
-    iterations=3,
-    return_diagnostics=True
+    fraction=0.2,
+    window_capacity=100,
+    min_points=3,
+    update_mode="incremental" # or "full"
 )
-
-if result.diagnostics:
-    diag = result.diagnostics
-    print(f"RMSE: {diag.rmse:.4f}")
-    print(f"MAE: {diag.mae:.4f}")
-    print(f"R²: {diag.r_squared:.4f}")
 ```
 
 ## Parameter Selection Guide
 
 ### Fraction (Smoothing Span)
 
-The `fraction` parameter controls the window size.
-
 - **0.1-0.3**: Local, captures rapid changes (wiggly)
 - **0.4-0.6**: Balanced, general-purpose
 - **0.7-1.0**: Global, smooth trends only
-- **Default: 0.67** (2/3, Cleveland's choice)
-- **Use CV** when uncertain (via `cv_fractions`)
+- **Default: 0.67** (Cleveland's choice)
+- **Use CV** (via `cv_fractions`) when uncertain
 
 ### Robustness Iterations
-
-The `iterations` parameter controls resistance to outliers.
 
 - **0**: Clean data, speed critical
 - **1-2**: Light contamination
 - **3**: Default, good balance (recommended)
 - **4-5**: Heavy outliers
-- **>5**: Diminishing returns
-
-### Kernel Function
-
-The `weight_function` parameter controls the kernel.
-
-- **"tricube"** (default): Best all-around, smooth, efficient
-- **"epanechnikov"**: Theoretically optimal MSE
-- **"gaussian"**: Very smooth, no compact support
-- **"uniform"**: Fastest, least smooth (moving average)
-- **"biweight"**: Similar to tricube
-- **"triangle"**: Linear decay
-- **"cosine"**: Smooth cosine weighting
 
 ### Delta Optimization
 
-The `delta` parameter controls interpolation. Points within `delta` distance of the last fit are interpolated rather than re-fitted.
-
-- **None** (default): Small datasets, or auto-calculated
+- **None**: Small datasets (n < 1000)
 - **0.01 × range(x)**: Good starting point for dense data
-- **Manual tuning**: Adjust based on data density
 
-## Error Handling
+## Documentation
 
-Errors from the underlying Rust implementation are raised as standard Python exceptions, primarily `ValueError`.
+For full documentation, API reference, and advanced features, visit [fastlowess-py.readthedocs.io](https://fastlowess-py.readthedocs.io/).
 
-```python
-try:
-    fastLowess.smooth(x, y, fraction=1.5)
-except ValueError as e:
-    print(f"Error: {e}")  # "fraction must be <= 1.0"
+## Examples
+
+Check the `examples` directory for advanced usage:
+
+```bash
+python examples/batch_smoothing.py
+python examples/online_smoothing.py
+python examples/streaming_smoothing.py
 ```
 
-## API Reference
+## Validation
 
-### `fastLowess.smooth`
+Validated against:
 
-The primary interface for LOWESS smoothing. Processes the entire dataset in memory with optional parallel execution.
+- **Python (statsmodels)**: Passed on 44 distinct test scenarios.
+- **Original Paper**: Reproduces Cleveland (1979) results.
 
-```python
-def smooth(
-    x, y,
-    fraction=0.67,                    # Smoothing fraction (0, 1]
-    iterations=3,                     # Robustness iterations
-    delta=None,                       # Interpolation threshold
-    weight_function="tricube",        # Kernel function
-    robustness_method="bisquare",     # Outlier method
-    confidence_intervals=None,        # CI level (e.g., 0.95)
-    prediction_intervals=None,        # PI level (e.g., 0.95)
-    return_diagnostics=False,         # Compute RMSE, R², etc.
-    return_residuals=False,           # Include residuals
-    return_robustness_weights=False,  # Include weights
-    zero_weight_fallback="use_local_mean",
-    auto_converge=None,               # Auto-convergence tolerance
-    max_iterations=None,              # Max iterations (default: 20)
-    cv_fractions=None,                # Fractions for CV
-    cv_method="kfold",                # "kfold" or "loocv"
-    cv_k=5                            # Folds for k-fold CV
-) -> LowessResult
-```
+Check [Validation](https://github.com/thisisamirv/fastLowess-py/tree/bench/validation) for more information. Small variations in results are expected due to differences in scale estimation and padding.
 
-### `fastLowess.smooth_streaming`
+## Related Work
 
-Streaming LOWESS for large datasets. Processes data in chunks to maintain constant memory usage.
-
-```python
-def smooth_streaming(
-    x, y,
-    fraction=0.3,                     # Smoothing fraction
-    chunk_size=5000,                  # Points per chunk
-    overlap=None,                     # Overlap (default: 10%)
-    iterations=3,                     # Robustness iterations
-    weight_function="tricube",        # Kernel function
-    robustness_method="bisquare",     # Outlier method
-    parallel=True                     # Enable parallelism
-) -> LowessResult
-```
-
-### `fastLowess.smooth_online`
-
-Online LOWESS with sliding window for real-time data streams.
-
-```python
-def smooth_online(
-    x, y,
-    fraction=0.2,                     # Fraction within window
-    window_capacity=100,              # Max points in window
-    min_points=3,                     # Min points before smoothing
-    iterations=3,                     # Robustness iterations
-    weight_function="tricube",        # Kernel function
-    robustness_method="bisquare",     # Outlier method
-    parallel=False                    # Enable parallelism
-) -> LowessResult
-```
-
-### `LowessResult` Structure
-
-The `LowessResult` object returned by all functions contains:
-
-| Field                | Type        | Description                         |
-| -------------------- | ----------- | ----------------------------------- |
-| `x`                  | array       | Sorted x values                     |
-| `y`                  | array       | Smoothed y values                   |
-| `fraction_used`      | float       | Fraction actually used              |
-| `iterations_used`    | int/None    | Robustness iterations performed     |
-| `standard_errors`    | array/None  | Standard errors (if CI/PI enabled)  |
-| `confidence_lower`   | array/None  | CI lower bound                      |
-| `confidence_upper`   | array/None  | CI upper bound                      |
-| `prediction_lower`   | array/None  | PI lower bound                      |
-| `prediction_upper`   | array/None  | PI upper bound                      |
-| `residuals`          | array/None  | Raw residuals (y - y_smooth)        |
-| `robustness_weights` | array/None  | Final outlier weights [0, 1]        |
-| `diagnostics`        | object/None | Fit statistics (RMSE, R², etc.)     |
-| `cv_scores`          | array/None  | CV scores for tested fractions      |
-
-### `Diagnostics` Structure
-
-| Field          | Type       | Description                      |
-| -------------- | ---------- | -------------------------------- |
-| `rmse`         | float      | Root Mean Squared Error          |
-| `mae`          | float      | Mean Absolute Error              |
-| `r_squared`    | float      | Coefficient of determination     |
-| `residual_sd`  | float      | Residual standard deviation      |
-| `aic`          | float/None | Akaike Information Criterion     |
-| `aicc`         | float/None | Corrected AIC                    |
-| `effective_df` | float/None | Effective degrees of freedom     |
-
-## Advanced Features
-
-### Streaming Processing
-
-For datasets too large to fit in memory:
-
-```python
-import fastLowess
-
-# Process data in chunks to keep memory usage constant
-result = fastLowess.smooth_streaming(
-    x, y,
-    fraction=0.3,
-    chunk_size=5000,
-    overlap=500
-)
-```
-
-Use cases:
-
-- Very large datasets (millions of points)
-- Memory-constrained environments
-- Batch processing pipelines
-
-### Online/Incremental Updates
-
-For real-time smoothing with a sliding window:
-
-```python
-import fastLowess
-
-# Initialize online smoother with a sliding window
-result = fastLowess.smooth_online(
-    x, y,
-    fraction=0.2,
-    window_capacity=100,  # Keep last 100 points
-    min_points=3          # Minimum points before smoothing starts
-)
-```
-
-Use cases:
-
-- Real-time sensor data
-- Live monitoring dashboards
-- Incremental data streams
-
-### Validation
-
-This implementation has been extensively validated against:
-
-1. **R's stats::lowess**: Numerical agreement to machine precision
-2. **Python's statsmodels**: Validated on multiple test scenarios
-3. **Cleveland's original paper**: Reproduces published examples
-
-## Performance Benchmarks
-
-Comparison against Python's `statsmodels` (pure Python/NumPy vs Rust extension):
-
-| Dataset Size  | statsmodels | fastLowess | Speedup  |
-| ------------- | ----------- | ---------- | -------- |
-| 100 points    | 1.79 ms     | 0.13 ms    | **14×**  |
-| 500 points    | 9.86 ms     | 0.26 ms    | **38×**  |
-| 1,000 points  | 22.80 ms    | 0.39 ms    | **59×**  |
-| 5,000 points  | 229.76 ms   | 2.04 ms    | **112×** |
-| 10,000 points | 742.99 ms   | 2.59 ms    | **287×** |
-
-_Benchmarks conducted on Intel Core Ultra 7 268V. Performance may vary by system._
+- [lowess (Rust core)](https://github.com/thisisamirv/lowess)
+- [fastLowess (R wrapper)](https://github.com/thisisamirv/fastlowess-R)
 
 ## Contributing
 
@@ -359,34 +222,10 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ## License
 
-See the [LICENSE](LICENSE) file for details.
+Dual-licensed under **AGPL-3.0** (Open Source) or **Commercial License**.
+Contact `<thisisamirv@gmail.com>` for commercial inquiries.
 
 ## References
 
-**Original papers:**
-
-- Cleveland, W.S. (1979). "Robust Locally Weighted Regression and Smoothing Scatterplots". _Journal of the American Statistical Association_, 74(368): 829-836. [DOI:10.2307/2286407](https://doi.org/10.2307/2286407)
-- Cleveland, W.S. (1981). "LOWESS: A Program for Smoothing Scatterplots by Robust Locally Weighted Regression". _The American Statistician_, 35(1): 54.
-
-**Related implementations:**
-
-- [R stats::lowess](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lowess.html)
-- [Python statsmodels](https://www.statsmodels.org/stable/generated/statsmodels.nonparametric.smoothers_lowess.lowess.html)
-
-## Citation
-
-```bibtex
-@software{fastLowess_2025,
-  author = {Valizadeh, Amir},
-  title = {fastLowess: High-performance LOWESS for Python},
-  year = {2025},
-  url = {https://github.com/thisisamirv/fastLowess-py},
-  version = {0.1.0}
-}
-```
-
-## Author
-
-**Amir Valizadeh**  
-📧 <thisisamirv@gmail.com>
-🔗 [GitHub](https://github.com/thisisamirv/fastLowess-py)
+- Cleveland, W.S. (1979). "Robust Locally Weighted Regression and Smoothing Scatterplots". *JASA*.
+- Cleveland, W.S. (1981). "LOWESS: A Program for Smoothing Scatterplots". *The American Statistician*.

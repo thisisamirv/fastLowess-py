@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # --- Setup Rust ---
+      # Setup Rust
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@master
         with:
@@ -34,7 +34,7 @@ jobs:
         with:
           key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      # --- Setup Python ---
+      # Setup Python
       - name: Install Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -45,7 +45,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install maturin pytest numpy
 
-      # --- Build & Test ---
+      # Build & Test
       - name: Build and Install Python Extension
         run: pip install .
 
@@ -61,13 +61,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # --- Setup Rust ---
+      # Setup Rust
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
 
-      # --- Setup Python ---
+      # Setup Python
       - name: Install Python
         uses: actions/setup-python@v5
         with:
@@ -76,7 +76,7 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
 
-      # --- Rust Checks ---
+      # Rust Checks
       - name: Rust Format
         run: cargo fmt --all -- --check
 
@@ -91,7 +91,7 @@ jobs:
         env:
           RUSTDOCFLAGS: -D warnings
 
-      # --- Python Checks ---
+      # Python Checks
       - name: Install Python tools
         run: pip install ruff
 
