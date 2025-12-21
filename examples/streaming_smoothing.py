@@ -1,173 +1,79 @@
 #!/usr/bin/env python3
 """
-fastLowess Streaming Smoothing Examples
+fastlowess Streaming Smoothing Example
 
 This example demonstrates streaming LOWESS smoothing for large datasets:
 - Basic chunked processing
-- Different chunk sizes and overlap strategies
-- Processing very large datasets
-- Parallel vs sequential execution
-
-The streaming adapter (smooth_streaming function) is designed for:
-- Large datasets (>100K points) that don't fit in memory
-- Batch processing pipelines
-- File-based data processing
-- ETL (Extract, Transform, Load) workflows
+- Handling datasets that don't fit in memory
+- Parallel execution for extreme speed
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
+import fastlowess
+from fastlowess import smooth_streaming, smooth
 import time
-import fastLowess
-
 
 def main():
-    print("=" * 80)
-    print("fastLowess Streaming Smoothing Examples")
-    print("=" * 80)
-    print()
+    print("=== fastlowess Streaming Mode Example ===")
+    
+    # 1. Generate Very Large Dataset
+    # 500,000 points
+    n_points = 500_000
+    print(f"Generating large dataset: {n_points} points...")
+    x = np.linspace(0, 100, n_points)
+    y = np.cos(x * 0.1) + np.random.normal(0, 0.5, n_points)
+    
+    # 2. Regular Batch Smoothing (for comparison)
+    start = time.time()
+    print("Running Batch LOWESS (Parallel)...")
+    res_batch = smooth(x, y, fraction=0.01) 
+    batch_time = time.time() - start
+    print(f"Batch took: {batch_time:.4f} seconds")
 
-    example_1_basic_streaming()
-    example_2_chunk_size_comparison()
-    example_3_large_dataset()
-    example_4_parallel_comparison()
-
-
-def example_1_basic_streaming():
-    """Example 1: Basic Streaming Processing
-    Demonstrates the fundamental streaming workflow
-    """
-    print("Example 1: Basic Streaming Processing")
-    print("-" * 80)
-
-    # Generate test data: y = 2x + 1 with noise
-    n = 100
-    x = np.arange(n, dtype=float)
-    y = 2.0 * x + 1.0 + np.sin(x * 0.3) * 2.0
-
-    # Process with streaming adapter
-    result = fastLowess.smooth_streaming(
-        x, y,
-        fraction=0.5,
-        chunk_size=30,
-        overlap=10,
-        iterations=2,
-        weight_function="tricube",
-        robustness_method="bisquare",
+    # 3. Streaming Mode
+    # Divide the data into chunks of 10,000 for low memory usage
+    start = time.time()
+    print("Running Streaming LOWESS (Chunked)...")
+    res_stream = smooth_streaming(
+        x, y, 
+        fraction=0.01, 
+        chunk_size=10000, 
+        overlap=1000,
+        parallel=True
     )
+    stream_time = time.time() - start
+    print(f"Streaming took: {stream_time:.4f} seconds")
 
-    print(f"Dataset: {n} points")
-    print(f"Chunk size: 30, Overlap: 10")
-    print(f"Output points: {len(result.y)}")
-    print(f"All points processed: {len(result.y) == n}")
-    print(f"First 5 smoothed values: {result.y[:5]}")
-    print()
+    # 4. Verify Accuracy
+    mse = np.mean((res_batch.y - res_stream.y)**2)
+    print(f"Mean Squared Difference (Batch vs Stream): {mse:.2e}")
 
-
-def example_2_chunk_size_comparison():
-    """Example 2: Chunk Size Comparison
-    Shows how different chunk sizes affect processing
-    """
-    print("Example 2: Chunk Size Comparison")
-    print("-" * 80)
-
-    # Generate test data
-    n = 500
-    x = np.arange(n, dtype=float)
-    y = 2.0 * x + 1.0
-
-    chunk_configs = [
-        (50, 10, "Small chunks"),
-        (100, 20, "Medium chunks"),
-        (200, 40, "Large chunks"),
-    ]
-
-    for chunk_size, overlap, description in chunk_configs:
-        start = time.perf_counter()
-        result = fastLowess.smooth_streaming(
-            x, y,
-            fraction=0.5,
-            chunk_size=chunk_size,
-            overlap=overlap,
-            iterations=2,
-        )
-        duration = time.perf_counter() - start
-
-        print(f"{description} (size: {chunk_size}, overlap: {overlap})")
-        print(f"  Output points: {len(result.y)}")
-        print(f"  Time: {duration:.4f}s")
-    print()
-
-
-def example_3_large_dataset():
-    """Example 3: Large Dataset Processing
-    Demonstrates processing a very large dataset
-    """
-    print("Example 3: Large Dataset Processing")
-    print("-" * 80)
-
-    n = 50_000  # 50K points
-    print(f"Processing {n} data points in streaming mode...")
-
-    x = np.arange(n, dtype=float)
-    y = 2.0 * x + 1.0 + np.sin(x * 0.01) * 10.0
-
-    start = time.perf_counter()
-    result = fastLowess.smooth_streaming(
-        x, y,
-        fraction=0.3,
-        chunk_size=5000,
-        overlap=500,
-        iterations=2,
-        parallel=True,  # Enable parallel execution
-    )
-    duration = time.perf_counter() - start
-
-    print(f"Processed {len(result.y)} points in {duration:.4f}s")
-    print(f"Memory efficiency: Constant (chunk size = 5000 points)")
-    print()
-
-
-def example_4_parallel_comparison():
-    """Example 4: Parallel vs Sequential Comparison
-    Compares execution time with and without parallelism
-    """
-    print("Example 4: Parallel vs Sequential Comparison")
-    print("-" * 80)
-
-    n = 10_000
-    x = np.arange(n, dtype=float)
-    y = np.sin(x * 0.1) + np.cos(x * 0.01)
-
-    # Parallel execution
-    start = time.perf_counter()
-    result_parallel = fastLowess.smooth_streaming(
-        x, y,
-        fraction=0.5,
-        chunk_size=1000,
-        overlap=100,
-        iterations=3,
-        parallel=True,
-    )
-    parallel_time = time.perf_counter() - start
-
-    # Sequential execution
-    start = time.perf_counter()
-    result_sequential = fastLowess.smooth_streaming(
-        x, y,
-        fraction=0.5,
-        chunk_size=1000,
-        overlap=100,
-        iterations=3,
-        parallel=False,
-    )
-    sequential_time = time.perf_counter() - start
-
-    print(f"Parallel:   {parallel_time:.4f}s ({len(result_parallel.y)} points)")
-    print(f"Sequential: {sequential_time:.4f}s ({len(result_sequential.y)} points)")
-    if sequential_time > 0:
-        print(f"Speedup: {sequential_time/parallel_time:.2f}x")
-    print()
-
+    # Plotting Results
+    zoom_range = (40, 60)
+    zoom_mask = (x >= zoom_range[0]) & (x <= zoom_range[1])
+    
+    plt.figure(figsize=(12, 8))
+    
+    # Raw Data (downsampled for performance)
+    display_mask = np.random.choice([False, True], size=n_points, p=[0.99, 0.01])
+    plt.scatter(x[display_mask & zoom_mask], y[display_mask & zoom_mask], alpha=0.3, color='gray', s=10, label='Raw Data (sampled)')
+    
+    # Smooth Curves
+    plt.plot(x[zoom_mask], res_batch.y[zoom_mask], 'r-', linewidth=3, label='Batch Result')
+    plt.plot(x[zoom_mask], res_stream.y[zoom_mask], 'b--', linewidth=2, label='Streaming Result')
+    
+    plt.title(f"fastlowess: Streaming Smoothing on {n_points} points")
+    plt.xlabel("X Axis")
+    plt.ylabel("Y Axis")
+    plt.legend()
+    plt.grid(True, alpha=0.2)
+    
+    plt.xlim(zoom_range)
+    plt.ylim(-2.5, 2.5)
+    
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
     main()

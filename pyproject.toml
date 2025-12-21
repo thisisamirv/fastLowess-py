@@ -32,9 +32,9 @@ keywords = ["lowess", "smoothing", "statistics", "regression", "numpy"]
 dependencies = ["numpy>=1.20.0"]
 
 [tool.maturin]
-module-name = "fastLowess"
+module-name = "fastlowess.fastlowess"
 include = [
-    "fastLowess/**",
+    "fastlowess/**",
     "src/**",
     "Cargo.toml",
     "pyproject.toml",

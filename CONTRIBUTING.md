@@ -1,4 +1,4 @@
-# Contributing to fastLowess-py
+# Contributing to fastlowess
 
 We welcome contributions via bug reports, feature requests, documentation improvements, and code changes.
 
@@ -36,7 +36,7 @@ make check      # Run all checks (formatters, linters, tests)
 1. **Focus**: Keep PRs small and focused on a single change.
 2. **Tests**: Add or update tests for any logic changes (usually in `tests/`).
 3. **Linting**: Ensure `make check` passes. We follow [Conventional Commits](https://www.conventionalcommits.org/).
-4. **Documentation**: Update docstrings in `fastLowess/__init__.py` and internal docs in `src/lib.rs`.
+4. **Documentation**: Update docstrings in `fastlowess/__init__.py` and internal docs in `src/lib.rs`.
 
 ### Commitment Guidelines
 

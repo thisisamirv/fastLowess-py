@@ -1,11 +1,11 @@
-# fastLowess
+# fastlowess
 
-[![PyPI](https://img.shields.io/pypi/v/fastLowess.svg?style=flat-square)](https://pypi.org/project/fastLowess/)
+[![PyPI](https://img.shields.io/pypi/v/fastlowess.svg?style=flat-square)](https://pypi.org/project/fastlowess/)
 [![License](https://img.shields.io/badge/License-AGPL--3.0%20OR%20Commercial-blue.svg)](LICENSE)
-[![Python Versions](https://img.shields.io/pypi/pyversions/fastLowess.svg?style=flat-square)](https://pypi.org/project/fastLowess/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/fastlowess.svg?style=flat-square)](https://pypi.org/project/fastlowess/)
 [![Documentation Status](https://readthedocs.org/projects/fastlowess-py/badge/?version=latest)](https://fastlowess-py.readthedocs.io/en/latest/?badge=latest)
 
-**High-performance parallel LOWESS (Locally Weighted Scatterplot Smoothing) for Python** — A high-level wrapper around the [`fastLowess`](https://github.com/thisisamirv/fastLowess) Rust crate that offers **4-3800x faster performance** than standard implementations while providing robust statistics, uncertainty quantification, and memory-efficient streaming.
+**High-performance parallel LOWESS (Locally Weighted Scatterplot Smoothing) for Python** — A high-level wrapper around the [`fastLowess`](https://github.com/thisisamirv/fastLowess) Rust crate that offers **12-3800x faster performance** than standard implementations while providing robust statistics, uncertainty quantification, and memory-efficient streaming.
 
 ## Features
 
@@ -38,53 +38,53 @@ $$\hat{\sigma} = 1.4826 \times \text{MAD}$$
 
 ## Performance Advantages
 
-Benchmarked against Python's `statsmodels`. Achieves **50-3800x faster performance** across different tested scenarios. The parallel implementation ensures that even at extreme scales (100k points), processing remains sub-20ms.
+Benchmarked against Python's `statsmodels`. Achieves **12-3800x faster performance** across different tested scenarios. The parallel implementation ensures that even at extreme scales (100k points), processing remains sub-20ms.
 
 ### Summary
 
 | Category         | Matched | Median Speedup | Mean Speedup |
 | :--------------- | :------ | :------------- | :----------- |
-| **Scalability**  | 5       | **765x**       | 1433x        |
-| **Pathological** | 4       | **448x**       | 416x         |
-| **Iterations**   | 6       | **436x**       | 440x         |
-| **Fraction**     | 6       | **424x**       | 413x         |
-| **Financial**    | 4       | **336x**       | 385x         |
-| **Scientific**   | 4       | **327x**       | 366x         |
-| **Genomic**      | 4       | **20x**        | 25x          |
-| **Delta**        | 4       | **4x**         | 5.5x         |
+| **Scalability**  | 5       | **577.4x**     | 1375.0x      |
+| **Pathological** | 4       | **381.6x**     | 373.4x       |
+| **Iterations**   | 6       | **438.1x**     | 426.0x       |
+| **Fraction**     | 6       | **336.8x**     | 364.9x       |
+| **Financial**    | 4       | **242.1x**     | 263.5x       |
+| **Scientific**   | 4       | **165.1x**     | 207.5x       |
+| **Genomic**      | 4       | **23.1x**      | 22.7x        |
+| **Delta**        | 4       | **3.6x**       | 6.0x         |
 
 ### Top 10 Performance Wins
 
-| Benchmark          | statsmodels | fastLowess | Speedup   |
-| :----------------- | :---------- | :--------- | :-------- |
-| scale_100000       | 43.727s     | 11.4ms     | **3824x** |
-| scale_50000        | 11.160s     | 5.95ms     | **1876x** |
-| scale_10000        | 663.1ms     | 0.87ms     | **765x**  |
-| financial_10000    | 497.1ms     | 0.66ms     | **748x**  |
-| scientific_10000   | 777.2ms     | 1.07ms     | **729x**  |
-| fraction_0.05      | 197.2ms     | 0.37ms     | **534x**  |
-| scale_5000         | 229.9ms     | 0.44ms     | **523x**  |
-| fraction_0.1       | 227.9ms     | 0.45ms     | **512x**  |
-| financial_5000     | 170.9ms     | 0.34ms     | **497x**  |
-| scientific_5000    | 268.5ms     | 0.55ms     | **489x**  |
+| Benchmark          | statsmodels | fastlowess | Speedup     |
+| :----------------- | :---------- | :--------- | :---------- |
+| scale_100000       | 43727.2ms   | 11.5ms     | **3808.9x** |
+| scale_50000        | 11159.9ms   | 5.9ms      | **1901.4x** |
+| scale_10000        | 663.1ms     | 1.1ms      | **577.4x**  |
+| fraction_0.05      | 197.2ms     | 0.4ms      | **556.5x**  |
+| financial_10000    | 497.1ms     | 1.0ms      | **518.8x**  |
+| iterations_0       | 74.2ms      | 0.2ms      | **492.9x**  |
+| clustered          | 267.8ms     | 0.6ms      | **472.9x**  |
+| iterations_1       | 148.5ms     | 0.3ms      | **471.5x**  |
+| scale_5000         | 229.9ms     | 0.5ms      | **469.0x**  |
+| scientific_10000   | 777.2ms     | 1.7ms      | **464.7x**  |
 
 ## Installation
 
 ```bash
-pip install fastLowess
+pip install fastlowess
 ```
 
 ## Quick Start
 
 ```python
 import numpy as np
-import fastLowess
+import fastlowess
 
 x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
 y = np.array([2.0, 4.1, 5.9, 8.2, 9.8])
 
 # Basic smoothing (parallel by default)
-result = fastLowess.smooth(x, y, fraction=0.5)
+result = fastlowess.smooth(x, y, fraction=0.5)
 
 print(f"Smoothed values: {result.y}")
 ```
@@ -95,7 +95,7 @@ print(f"Smoothed values: {result.y}")
 
 ```python
 # Use robust iterations to downweight outliers
-result = fastLowess.smooth(
+result = fastlowess.smooth(
     x, y,
     fraction=0.7,
     iterations=5,  # Robust iterations
@@ -110,7 +110,7 @@ outliers = np.where(result.robustness_weights < 0.1)[0]
 ### 2. Uncertainty Quantification
 
 ```python
-result = fastLowess.smooth(
+result = fastlowess.smooth(
     x, y,
     fraction=0.5,
     confidence_intervals=0.95,
@@ -126,7 +126,7 @@ print(f"CI Upper: {result.confidence_upper}")
 
 ```python
 # Automatic selection of the best smoothing fraction
-result = fastLowess.smooth(
+result = fastlowess.smooth(
     x, y,
     cv_fractions=[0.2, 0.3, 0.5, 0.7],  # Test these candidates
     cv_method="kfold",                  # "kfold" or "loocv"
@@ -143,7 +143,7 @@ print(f"Optimal fraction used: {result.fraction_used}")
 For datasets too large to fit in memory (n > 1M):
 
 ```python
-result = fastLowess.smooth_streaming(
+result = fastlowess.smooth_streaming(
     x, y,
     fraction=0.3,
     chunk_size=5000,
@@ -157,7 +157,7 @@ result = fastLowess.smooth_streaming(
 For real-time data streams or sliding windows:
 
 ```python
-result = fastLowess.smooth_online(
+result = fastlowess.smooth_online(
     x, y,
     fraction=0.2,
     window_capacity=100,
@@ -209,12 +209,12 @@ Validated against:
 - **Python (statsmodels)**: Passed on 44 distinct test scenarios.
 - **Original Paper**: Reproduces Cleveland (1979) results.
 
-Check [Validation](https://github.com/thisisamirv/fastLowess-py/tree/bench/validation) for more information. Small variations in results are expected due to differences in scale estimation and padding.
+Check [Validation](https://github.com/thisisamirv/fastlowess-py/tree/bench/validation) for more information. Small variations in results are expected due to differences in scale estimation and padding.
 
 ## Related Work
 
 - [lowess (Rust core)](https://github.com/thisisamirv/lowess)
-- [fastLowess (R wrapper)](https://github.com/thisisamirv/fastlowess-R)
+- [fastlowess (R wrapper)](https://github.com/thisisamirv/fastlowess-R)
 
 ## Contributing
 

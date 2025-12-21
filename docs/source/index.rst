@@ -1,9 +1,9 @@
-fastLowess: High-performance LOWESS for Python
+fastlowess: High-performance LOWESS for Python
 ============================================
 
 **High-performance parallel LOWESS (Locally Weighted Scatterplot Smoothing) for Python**
 
-A production-ready implementation built on top of a highly optimized Rust core. It offers **4-3800x speed improvements** over standard implementations while providing robust statistics, uncertainty quantification, and memory-efficient streaming.
+A production-ready implementation built on top of a highly optimized Rust core. It offers **12-3800x speed improvements** over standard implementations while providing robust statistics, uncertainty quantification, and memory-efficient streaming.
 
 What is LOWESS?
 ---------------
@@ -62,53 +62,53 @@ For precision in intervals, residual scale is computed using:
 Performance Advantages
 ----------------------
 
-Benchmarked against Python's ``statsmodels``. Achieves **50-3800x faster performance** across different tested scenarios. The parallel implementation ensures that even at extreme scales (100k points), processing remains sub-20ms.
+Benchmarked against Python's ``statsmodels``. Achieves **12-3800x faster performance** across different tested scenarios. The parallel implementation ensures that even at extreme scales (100k points), processing remains sub-20ms.
 
 +------------------+---------+----------------+--------------+
 | Category         | Matched | Median Speedup | Mean Speedup |
 +==================+=========+================+==============+
-| **Scalability**  | 5       | **765x**       | 1433x        |
+| **Scalability**  | 5       | **577.4x**     | 1375.0x      |
 +------------------+---------+----------------+--------------+
-| **Pathological** | 4       | **448x**       | 416x         |
+| **Pathological** | 4       | **381.6x**     | 373.4x       |
 +------------------+---------+----------------+--------------+
-| **Iterations**   | 6       | **436x**       | 440x         |
+| **Iterations**   | 6       | **438.1x**     | 426.0x       |
 +------------------+---------+----------------+--------------+
-| **Fraction**     | 6       | **424x**       | 413x         |
+| **Fraction**     | 6       | **336.8x**     | 364.9x       |
 +------------------+---------+----------------+--------------+
-| **Financial**    | 4       | **336x**       | 385x         |
+| **Financial**    | 4       | **242.1x**     | 263.5x       |
 +------------------+---------+----------------+--------------+
-| **Scientific**   | 4       | **327x**       | 366x         |
+| **Scientific**   | 4       | **165.1x**     | 207.5x       |
 +------------------+---------+----------------+--------------+
-| **Genomic**      | 4       | **20x**        | 25x          |
+| **Genomic**      | 4       | **23.1x**      | 22.7x        |
 +------------------+---------+----------------+--------------+
-| **Delta**        | 4       | **4x**         | 5.5x         |
+| **Delta**        | 4       | **3.6x**       | 6.0x         |
 +------------------+---------+----------------+--------------+
 
 Top 10 Performance Wins
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 +-------------------+-------------+-------------+------------+
-| Benchmark         | statsmodels | fastLowess  | Speedup    |
+| Benchmark         | statsmodels | fastlowess  | Speedup    |
 +===================+=============+=============+============+
-| scale_100000      | 43.727s     | 11.4ms      | **3824x**  |
+| scale_100000      | 43727.2ms   | 11.5ms      | **3808.9x**|
 +-------------------+-------------+-------------+------------+
-| scale_50000       | 11.160s     | 5.95ms      | **1876x**  |
+| scale_50000       | 11159.9ms   | 5.9ms       | **1901.4x**|
 +-------------------+-------------+-------------+------------+
-| scale_10000       | 663.1ms     | 0.87ms      | **765x**   |
+| scale_10000       | 663.1ms     | 1.1ms       | **577.4x** |
 +-------------------+-------------+-------------+------------+
-| financial_10000   | 497.1ms     | 0.66ms      | **748x**   |
+| fraction_0.05     | 197.2ms     | 0.4ms       | **556.5x** |
 +-------------------+-------------+-------------+------------+
-| scientific_10000  | 777.2ms     | 1.07ms      | **729x**   |
+| financial_10000   | 497.1ms     | 1.0ms       | **518.8x** |
 +-------------------+-------------+-------------+------------+
-| fraction_0.05     | 197.2ms     | 0.37ms      | **534x**   |
+| iterations_0      | 74.2ms      | 0.2ms       | **492.9x** |
 +-------------------+-------------+-------------+------------+
-| scale_5000        | 229.9ms     | 0.44ms      | **523x**   |
+| clustered         | 267.8ms     | 0.6ms       | **472.9x** |
 +-------------------+-------------+-------------+------------+
-| fraction_0.1      | 227.9ms     | 0.45ms      | **512x**   |
+| iterations_1      | 148.5ms     | 0.3ms       | **471.5x** |
 +-------------------+-------------+-------------+------------+
-| financial_5000    | 170.9ms     | 0.34ms      | **497x**   |
+| scale_5000        | 229.9ms     | 0.5ms       | **469.0x** |
 +-------------------+-------------+-------------+------------+
-| scientific_5000   | 268.5ms     | 0.55ms      | **489x**   |
+| scientific_10000  | 777.2ms     | 1.7ms       | **464.7x** |
 +-------------------+-------------+-------------+------------+
 
 .. toctree::

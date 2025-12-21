@@ -16,7 +16,7 @@ fmt-rust:
 
 fmt-py:
 	@echo "Checking Python code formatting with ruff..."
-	@ruff format --check fastLowess/ tests/ || true
+	@ruff format --check fastlowess/ tests/ || true
 
 fmt-fix: fmt-fix-rust fmt-fix-py
 	@echo "Formatting complete!"
@@ -27,7 +27,7 @@ fmt-fix-rust:
 
 fmt-fix-py:
 	@echo "Formatting Python code with ruff..."
-	@ruff format fastLowess/ tests/
+	@ruff format fastlowess/ tests/
 
 # Linter
 clippy: clippy-default clippy-serial
@@ -43,12 +43,12 @@ clippy-serial:
 
 lint-py:
 	@echo "Linting Python code with ruff..."
-	@ruff check fastLowess/ tests/
+	@ruff check fastlowess/ tests/
 	@echo "Python lint complete!"
 
 lint-py-fix:
 	@echo "Fixing Python lint issues with ruff..."
-	@ruff check --fix fastLowess/ tests/
+	@ruff check --fix fastlowess/ tests/
 	@echo "Python lint fix complete!"
 
 # Build
@@ -137,7 +137,7 @@ clean-python:
 	@rm -rf target/wheels
 	@rm -rf .pytest_cache
 	@rm -rf __pycache__
-	@rm -rf fastLowess/__pycache__
+	@rm -rf fastlowess/__pycache__
 	@rm -rf tests/__pycache__
 	@rm -rf *.egg-info
 	@rm -rf .ruff_cache

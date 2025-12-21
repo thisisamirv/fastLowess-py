@@ -16,6 +16,7 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated the documentation to reflect the latest changes.
+- Changed the module name from `fastLowess` to `fastlowess`.
 
 ## [0.1.1]
 

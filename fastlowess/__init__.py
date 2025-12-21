@@ -1,4 +1,4 @@
-"""fastLowess: High-Performance LOWESS Smoothing for Python
+"""fastlowess: High-performance LOWESS Smoothing for Python.
 
 A high-performance LOWESS (Locally Weighted Scatterplot Smoothing) implementation
 with parallel execution via Rayon and NumPy integration. Built on top of the
@@ -34,19 +34,19 @@ Quick Start
 **Basic Smoothing:**
 
 >>> import numpy as np
->>> import fastLowess
+>>> import fastlowess
 >>>
 >>> x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
 >>> y = np.array([2.0, 4.1, 5.9, 8.2, 9.8])
 >>>
 >>> # Simple smoothing
->>> result = fastLowess.smooth(x, y, fraction=0.5)
+>>> result = fastlowess.smooth(x, y, fraction=0.5)
 >>> print(result.y)
 [2.   4.1  5.9  8.2  9.8]
 
 **Full-Featured LOWESS:**
 
->>> result = fastLowess.smooth(
+>>> result = fastlowess.smooth(
 ...     x, y,
 ...     fraction=0.5,
 ...     iterations=3,
@@ -172,10 +172,10 @@ smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function="tricube",
     Examples
     --------
     >>> import numpy as np
-    >>> import fastLowess
+    >>> import fastlowess
     >>> x = np.linspace(0, 10, 100)
     >>> y = 2 * x + np.random.normal(0, 1, 100)
-    >>> result = fastLowess.smooth(x, y, fraction=0.3, confidence_intervals=0.95)
+    >>> result = fastlowess.smooth(x, y, fraction=0.3, confidence_intervals=0.95)
     >>> print(f"Smoothed {len(result.y)} points")
 
 smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
@@ -231,7 +231,7 @@ smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
     >>> # Process 1 million points efficiently
     >>> x = np.arange(1_000_000, dtype=float)
     >>> y = np.sin(x * 0.001) + np.random.normal(0, 0.1, 1_000_000)
-    >>> result = fastLowess.smooth_streaming(x, y, chunk_size=10000)
+    >>> result = fastlowess.smooth_streaming(x, y, chunk_size=10000)
 
 
 smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,
@@ -285,7 +285,7 @@ smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,
     >>> # Simulate real-time sensor data
     >>> x = np.arange(1000, dtype=float)
     >>> y = 20.0 + 5.0 * np.sin(x * 0.1) + np.random.normal(0, 1, 1000)
-    >>> result = fastLowess.smooth_online(x, y, window_capacity=50)
+    >>> result = fastlowess.smooth_online(x, y, window_capacity=50)
 
 
 Classes
@@ -326,7 +326,7 @@ LowessResult
 
     Examples
     --------
-    >>> result = fastLowess.smooth(x, y, confidence_intervals=0.95)
+    >>> result = fastlowess.smooth(x, y, confidence_intervals=0.95)
     >>> print(f"Smoothed values: {result.y}")
     >>> print(f"Confidence interval: [{result.confidence_lower}, {result.confidence_upper}]")
     >>> print(f"Fraction used: {result.fraction_used}")
@@ -355,7 +355,7 @@ Diagnostics
 
     Examples
     --------
-    >>> result = fastLowess.smooth(x, y, return_diagnostics=True)
+    >>> result = fastlowess.smooth(x, y, return_diagnostics=True)
     >>> diag = result.diagnostics
     >>> print(f"RMSE: {diag.rmse:.4f}")
     >>> print(f"MAE: {diag.mae:.4f}")
@@ -407,7 +407,7 @@ parallel LOWESS smoothing with NumPy integration.
 """
 
 # Import from native extension
-from .fastLowess import (
+from .fastlowess import (
     smooth,
     smooth_streaming,
     smooth_online,

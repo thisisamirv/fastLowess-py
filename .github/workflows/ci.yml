@@ -96,7 +96,7 @@ jobs:
         run: pip install ruff
 
       - name: Python Format Check (ruff)
-        run: ruff format --check fastLowess/ tests/
+        run: ruff format --check fastlowess/ tests/
 
       - name: Python Lint (ruff)
-        run: ruff check fastLowess/ tests/
+        run: ruff check fastlowess/ tests/

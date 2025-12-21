@@ -21,7 +21,7 @@ categories = ["science", "algorithms"]
 include = [
     "src/**/*",
     "docs/**/*.svg",
-    "fastLowess/**/*",
+    "fastlowess/**/*",
     "Cargo.toml",
     "README.md",
     "LICENSE",
@@ -35,7 +35,7 @@ pyo3 = { version = "0.27", features = ["extension-module"] }
 numpy = "0.27"
 
 [lib]
-name = "fastLowess"
+name = "fastlowess"
 crate-type = ["cdylib"]
 
 [features]

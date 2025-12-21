@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-fastLowess Batch Smoothing Examples
+fastlowess Batch Smoothing Example
 
 This example demonstrates batch LOWESS smoothing features:
 - Basic smoothing with different parameters
@@ -8,138 +8,135 @@ This example demonstrates batch LOWESS smoothing features:
 - Confidence and prediction intervals
 - Diagnostics and cross-validation
 
-The batch adapter (lowess function) is the primary interface for
+The batch adapter (smooth function) is the primary interface for
 processing complete datasets that fit in memory.
 """
 
 import numpy as np
-import time
-import fastLowess
+import matplotlib.pyplot as plt
+import fastlowess
+from fastlowess import smooth
 
+def generate_sample_data(n_points=1000):
+    """
+    Generate complex sample data with a trend, seasonality, and outliers.
+    """
+    np.random.seed(42)
+    x = np.linspace(0, 50, n_points)
+    
+    # Trend + Seasonality
+    y_true = 0.5 * x + 5 * np.sin(x * 0.5)
+    
+    # Gaussian noise
+    y = y_true + np.random.normal(0, 1.5, n_points)
+    
+    # Add significant outliers
+    outlier_indices = np.random.choice(n_points, size=20, replace=False)
+    y[outlier_indices] += np.random.uniform(10, 20, 20) * np.random.choice([-1, 1], 20)
+    
+    return x, y, y_true
 
 def main():
-    print("=" * 80)
-    print("fastLowess Batch Smoothing Examples")
-    print("=" * 80)
-    print()
-
-    example_1_basic_smoothing()
-    example_2_with_intervals()
-    example_3_robust_smoothing()
-    example_4_cross_validation()
-
-
-def example_1_basic_smoothing():
-    """Example 1: Basic Smoothing
-    Demonstrates the fundamental smoothing workflow
-    """
-    print("Example 1: Basic Smoothing")
-    print("-" * 80)
-
-    # Generate synthetic dataset
-    n = 10_000
-    x = np.arange(n, dtype=float)
-    y = np.sin(x * 0.1) + np.cos(x * 0.01)
-
-    start = time.perf_counter()
-    result = fastLowess.smooth(
-        x, y,
-        fraction=0.5,       # Use 50% of data for each local fit
-        iterations=3,       # 3 robustness iterations
-    )
-    duration = time.perf_counter() - start
-
-    print(f"Processed {n} points in {duration:.4f}s")
-    print(f"First 5 smoothed values: {result.y[:5]}")
-    print()
-
-
-def example_2_with_intervals():
-    """Example 2: Confidence and Prediction Intervals
-    Demonstrates computing uncertainty intervals
-    """
-    print("Example 2: Confidence and Prediction Intervals")
-    print("-" * 80)
-
-    x = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0])
-    y = np.array([2.1, 3.8, 6.2, 7.9, 10.3, 11.8, 14.1, 15.7])
-
-    result = fastLowess.smooth(
-        x, y,
-        fraction=0.5,
-        confidence_intervals=0.95,      # 95% confidence intervals
-        prediction_intervals=0.95,      # 95% prediction intervals
-    )
-
-    print(f"{'X':>8} {'Y_smooth':>12} {'CI_Lower':>12} {'CI_Upper':>12}")
-    print("-" * 50)
-    for i in range(len(x)):
-        ci_lower = result.confidence_lower[i] if result.confidence_lower is not None else 0
-        ci_upper = result.confidence_upper[i] if result.confidence_upper is not None else 0
-        print(f"{x[i]:8.2f} {result.y[i]:12.4f} {ci_lower:12.4f} {ci_upper:12.4f}")
-    print()
-
-
-def example_3_robust_smoothing():
-    """Example 3: Robust Smoothing with Outliers
-    Demonstrates outlier handling with robustness iterations
-    """
-    print("Example 3: Robust Smoothing with Outliers")
-    print("-" * 80)
-
-    # Data with outliers
-    n = 1000
-    x = np.arange(n, dtype=float) * 0.1
-    y = np.sin(x.copy())
-    # Add periodic outliers
-    y[::100] = x[::100] + 10.0
-
-    methods = ["bisquare", "huber", "talwar"]
-
-    for method in methods:
-        result = fastLowess.smooth(
-            x, y,
-            fraction=0.1,
-            iterations=3,
-            robustness_method=method,
-            return_robustness_weights=True,
-        )
-        
-        if result.robustness_weights is not None:
-            outliers = np.sum(np.array(result.robustness_weights) < 0.1)
-            print(f"{method.capitalize()}: Identified {outliers} potential outliers (weight < 0.1)")
-        else:
-            print(f"{method.capitalize()}: Completed (weights not available)")
-    print()
-
-
-def example_4_cross_validation():
-    """Example 4: Cross-Validation for Fraction Selection
-    Demonstrates automatic parameter selection
-    """
-    print("Example 4: Cross-Validation for Fraction Selection")
-    print("-" * 80)
-
-    # Generate test data
-    np.random.seed(42)
-    x = np.arange(100, dtype=float)
-    y = 2 * x + 1 + np.random.randn(100) * 5
-
-    fractions = [0.2, 0.3, 0.5, 0.7]
+    print("=== fastlowess Batch Smoothing Example ===")
     
-    result = fastLowess.smooth(
-        x, y,
-        cv_fractions=fractions,
-        cv_method="kfold",
-        cv_k=5,
+    # 1. Generate Data
+    x, y, y_true = generate_sample_data(1000)
+    print(f"Generated {len(x)} data points with outliers.")
+
+    # 2. Basic Smoothing (Default parameters)
+    print("Running basic smoothing...")
+    res_basic = smooth(x, y, fraction=0.2)
+    
+    # 3. Robust Smoothing (IRLS)
+    print("Running robust smoothing (3 iterations)...")
+    res_robust = smooth(
+        x, y, 
+        fraction=0.2, 
+        iterations=3, 
+        robustness_method="bisquare",
+        return_robustness_weights=True
     )
-    optimal_fraction = result.fraction_used
+    
+    # 4. Uncertainty Quantification
+    print("Computing confidence and prediction intervals...")
+    res_intervals = smooth(
+        x, y, 
+        fraction=0.2, 
+        confidence_intervals=0.95, 
+        prediction_intervals=0.95,
+        return_diagnostics=True
+    )
+    
+    # 5. Cross-Validation for optimal fraction
+    print("Running cross-validation to find optimal fraction...")
+    cv_fractions = [0.05, 0.1, 0.2, 0.4]
+    res_cv = smooth(x, y, cv_fractions=cv_fractions, cv_method="kfold", cv_k=5)
+    print(f"Optimal fraction found: {res_cv.fraction_used}")
 
-    print(f"Selected fraction: {optimal_fraction}")
-    if result.cv_scores is not None:
-        print(f"CV scores: {result.cv_scores}")
-    print()
+    # Plotting Results
+    plt.figure(figsize=(12, 8))
+    
+    # Original Data
+    plt.scatter(x, y, alpha=0.3, color='gray', s=10, label='Noisy Data (w/ Outliers)')
+    plt.plot(x, y_true, 'k--', alpha=0.8, label='True Signal')
+    
+    # Basic Smoothing
+    plt.plot(x, res_basic.y, 'r-', linewidth=2, label=f'Basic LOWESS (f={res_basic.fraction_used})')
+    
+    # Robust Smoothing
+    plt.plot(x, res_robust.y, 'g-', linewidth=2.5, label='Robust LOWESS (3 iters)')
+    
+    # Confidence Intervals
+    plt.fill_between(
+        x, 
+        res_intervals.confidence_lower, 
+        res_intervals.confidence_upper, 
+        color='blue', 
+        alpha=0.2, 
+        label='95% Confidence Interval'
+    )
+    
+    # Diagnostics Printout
+    diag = res_intervals.diagnostics
+    print("\nFit Statistics (Intervals Model):")
+    print(f" - R²:   {diag.r_squared:.4f}")
+    print(f" - RMSE: {diag.rmse:.4f}")
+    print(f" - MAE:  {diag.mae:.4f}")
 
+    plt.title("fastlowess: Robust Batch Smoothing with Intervals")
+    plt.xlabel("X Axis")
+    plt.ylabel("Y Axis")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    
+    # Subplot for robustness weights
+    plt.figure(figsize=(12, 3))
+    plt.scatter(x, res_robust.robustness_weights, c=res_robust.robustness_weights, cmap='viridis', s=10)
+    plt.title("Robustness Weights (Low weight = Outlier suspected)")
+    plt.colorbar(label='Weight')
+    plt.grid(True, alpha=0.3)
+    plt.ylim(-0.1, 1.1)
+    
+    # 6. Boundary Policy Comparison
+    print("\nDemonstrating boundary policy effects on linear data...")
+    xl = np.linspace(0, 10, 50)
+    yl = 2 * xl + 1
+    
+    # Compare policies
+    r_ext = smooth(xl, yl, fraction=0.6, boundary_policy="extend")
+    r_ref = smooth(xl, yl, fraction=0.6, boundary_policy="reflect")
+    r_zr = smooth(xl, yl, fraction=0.6, boundary_policy="zero")
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(xl, yl, 'k--', label='True Linear Trend')
+    plt.plot(xl, r_ext.y, 'r-', label='Extend (Default) - constant padding')
+    plt.plot(xl, r_ref.y, 'g-', label='Reflect - mirrored padding')
+    plt.plot(xl, r_zr.y, 'b-', label='Zero - zero padding')
+    
+    plt.title("Effect of Boundary Policies on Linear Data (q=0.6)")
+    plt.legend()
+    plt.grid(True, alpha=0.2)
+    plt.show()
 
 if __name__ == "__main__":
     main()

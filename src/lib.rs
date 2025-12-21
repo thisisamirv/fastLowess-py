@@ -752,9 +752,9 @@ fn smooth_online<'py>(
 // Module Registration
 // ============================================================================
 
-/// fastLowess: High-performance LOWESS smoothing for Python.
+/// fastlowess: High-performance LOWESS smoothing for Python.
 #[pymodule]
-fn fastLowess(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn fastlowess(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyLowessResult>()?;
     m.add_class::<PyDiagnostics>()?;
     m.add_function(wrap_pyfunction!(smooth, m)?)?;
