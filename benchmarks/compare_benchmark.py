@@ -42,55 +42,55 @@ def build_map(entries):
         out[name] = e
     return out
 
-def compare_category(fastLowess_entries, stats_entries):
-    fastLowess_map = build_map(fastLowess_entries)
+def compare_category(fastlowess_entries, stats_entries):
+    fastlowess_map = build_map(fastlowess_entries)
     stats_map = build_map(stats_entries)
-    common = sorted(set(fastLowess_map.keys()) & set(stats_map.keys()))
+    common = sorted(set(fastlowess_map.keys()) & set(stats_map.keys()))
     rows = []
     speedups = []
     for name in common:
-        r_entry = fastLowess_map[name]
+        fl_entry = fastlowess_map[name]
         s_entry = stats_map[name]
-        r_val, r_size = pick_time_value(r_entry)
+        fl_val, fl_size = pick_time_value(fl_entry)
         s_val, s_size = pick_time_value(s_entry)
 
         row = {
             "name": name,
-            "fastLowess_value_ms": r_val,
+            "fastlowess_value_ms": fl_val,
             "stats_value_ms": s_val,
-            "fastLowess_size": r_size,
+            "fastlowess_size": fl_size,
             "stats_size": s_size,
             "notes": []
         }
 
-        if r_val is None or s_val is None:
+        if fl_val is None or s_val is None:
             row["notes"].append("missing_metric")
             rows.append(row)
             continue
 
         # core comparisons
-        if r_val == 0 or s_val == 0:
+        if fl_val == 0 or s_val == 0:
             speedup = None
         else:
-            speedup = s_val / r_val  # >1 => fastLowess faster by this factor
-        row["speedup_stats_over_fastLowess"] = speedup
+            speedup = s_val / fl_val  # >1 => Statsmodels faster by this factor
+        row["speedup_stats_over_fastlowess"] = speedup
         if speedup is not None:
             row["log2_speedup"] = math.log2(speedup) if speedup > 0 else None
-            row["percent_change_stats_vs_fastLowess"] = ((s_val - r_val) / r_val) * 100.0
+            row["percent_change_stats_vs_fastlowess"] = ((s_val - fl_val) / fl_val) * 100.0
             speedups.append(speedup)
 
         # absolute diffs
-        row["absolute_diff_ms"] = None if r_val is None or s_val is None else (s_val - r_val)
-        row["abs_percent_vs_fastLowess"] = None if r_val == 0 else abs(row["absolute_diff_ms"]) / r_val * 100.0
+        row["absolute_diff_ms"] = None if fl_val is None or s_val is None else (s_val - fl_val)
+        row["abs_percent_vs_fastlowess"] = None if fl_val == 0 else abs(row["absolute_diff_ms"]) / fl_val * 100.0
 
         # per-point normalization if size available and >0
-        size = r_size or s_size
+        size = fl_size or s_size
         if size:
             try:
                 size_i = int(size)
-                row["fastLowess_ms_per_point"] = r_val / size_i
+                row["fastlowess_ms_per_point"] = fl_val / size_i
                 row["stats_ms_per_point"] = s_val / size_i
-                row["speedup_per_point"] = None if row["fastLowess_ms_per_point"] == 0 else row["stats_ms_per_point"] / row["fastLowess_ms_per_point"]
+                row["speedup_per_point"] = None if row["fastlowess_ms_per_point"] == 0 else row["stats_ms_per_point"] / row["fastlowess_ms_per_point"]
             except Exception:
                 row["notes"].append("bad_size")
 
@@ -116,37 +116,37 @@ def main():
     out_dir = workspace / "output"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    fastLowess_path = out_dir / "fastLowess_benchmark.json"
+    fastlowess_path = out_dir / "fastLowess_benchmark.json"
     stats_path = out_dir / "statsmodels_benchmark.json"
 
-    if not fastLowess_path.exists() or not stats_path.exists():
+    if not fastlowess_path.exists() or not stats_path.exists():
         missing = []
-        if not fastLowess_path.exists():
-            missing.append(str(fastLowess_path))
+        if not fastlowess_path.exists():
+            missing.append(str(fastlowess_path))
         if not stats_path.exists():
             missing.append(str(stats_path))
         print("Missing files:", ", ".join(missing))
         return
 
-    fastLowess = load_json(fastLowess_path)
+    fastlowess = load_json(fastlowess_path)
     stats = load_json(stats_path)
 
-    all_keys = sorted(set(fastLowess.keys()) | set(stats.keys()))
+    all_keys = sorted(set(fastlowess.keys()) | set(stats.keys()))
     comparison = {}
     overall_speedups = []
 
     # detailed rows for CSV
     csv_rows = []
     csv_fieldnames = [
-        "category","name","fastLowess_value_ms","stats_value_ms","speedup_stats_over_fastLowess",
-        "log2_speedup","percent_change_stats_vs_fastLowess","absolute_diff_ms","abs_percent_vs_fastLowess",
-        "fastLowess_size","stats_size","fastLowess_ms_per_point","stats_ms_per_point","speedup_per_point","notes"
+        "category","name","fastlowess_value_ms","stats_value_ms","speedup_stats_over_fastlowess",
+        "log2_speedup","percent_change_stats_vs_fastlowess","absolute_diff_ms","abs_percent_vs_fastlowess",
+        "fastlowess_size","stats_size","fastlowess_ms_per_point","stats_ms_per_point","speedup_per_point","notes"
     ]
 
     for key in all_keys:
-        r_entries = fastLowess.get(key, [])
+        fl_entries = fastlowess.get(key, [])
         s_entries = stats.get(key, [])
-        rows, summary = compare_category(r_entries, s_entries)
+        rows, summary = compare_category(fl_entries, s_entries)
         comparison[key] = {"rows": rows, "summary": summary}
         if summary["median_speedup"] is not None:
             overall_speedups.append(summary["median_speedup"])
@@ -154,40 +154,40 @@ def main():
             csv_rows.append({
                 "category": key,
                 "name": row.get("name"),
-                "fastLowess_value_ms": row.get("fastLowess_value_ms"),
+                "fastlowess_value_ms": row.get("fastlowess_value_ms"),
                 "stats_value_ms": row.get("stats_value_ms"),
-                "speedup_stats_over_fastLowess": row.get("speedup_stats_over_fastLowess"),
+                "speedup_stats_over_fastlowess": row.get("speedup_stats_over_fastlowess"),
                 "log2_speedup": row.get("log2_speedup"),
-                "percent_change_stats_vs_fastLowess": row.get("percent_change_stats_vs_fastLowess"),
+                "percent_change_stats_vs_fastlowess": row.get("percent_change_stats_vs_fastlowess"),
                 "absolute_diff_ms": row.get("absolute_diff_ms"),
-                "abs_percent_vs_fastLowess": row.get("abs_percent_vs_fastLowess"),
-                "fastLowess_size": row.get("fastLowess_size"),
+                "abs_percent_vs_fastlowess": row.get("abs_percent_vs_fastlowess"),
+                "fastlowess_size": row.get("fastlowess_size"),
                 "stats_size": row.get("stats_size"),
-                "fastLowess_ms_per_point": row.get("fastLowess_ms_per_point"),
+                "fastlowess_ms_per_point": row.get("fastlowess_ms_per_point"),
                 "stats_ms_per_point": row.get("stats_ms_per_point"),
                 "speedup_per_point": row.get("speedup_per_point"),
                 "notes": ";".join(row.get("notes", []))
             })
 
-    print("\nBenchmark comparison (statsmodels_ms / fastLowess_ms):")
+    print("\nBenchmark comparison (statsmodels_ms / fastlowess_ms):")
     for key, data in comparison.items():
         s = data["summary"]
         print(f"- {key}: compared={s['compared']}, median_speedup={s['median_speedup']}, mean_speedup={s['mean_speedup']}")
 
     # Top wins and regressions across all categories
-    all_rows = [r for cat in comparison.values() for r in cat["rows"] if r.get("speedup_stats_over_fastLowess") is not None]
+    all_rows = [r for cat in comparison.values() for r in cat["rows"] if r.get("speedup_stats_over_fastlowess") is not None]
     if all_rows:
-        sorted_by_speed = sorted(all_rows, key=lambda r: r["speedup_stats_over_fastLowess"] or 0, reverse=True)
-        sorted_by_regression = sorted(all_rows, key=lambda r: r["speedup_stats_over_fastLowess"] or 0)
+        sorted_by_speed = sorted(all_rows, key=lambda r: r["speedup_stats_over_fastlowess"] or 0, reverse=True)
+        sorted_by_regression = sorted(all_rows, key=lambda r: r["speedup_stats_over_fastlowess"] or 0)
 
-        print("\nTop 10 fastLowess wins (largest stats_ms / fastLowess_ms):")
+        print("\nTop 10 FastLowess wins (largest stats_ms / fastlowess_ms):")
         for r in sorted_by_speed[:10]:
-            print(f"  {r['name']}: stats={r['stats_value_ms']:.4f}ms, fastLowess={r['fastLowess_value_ms']:.4f}ms, speedup={r['speedup_stats_over_fastLowess']:.2f}x")
+            print(f"  {r['name']}: stats={r['stats_value_ms']:.4f}ms, fastlowess={r['fastlowess_value_ms']:.4f}ms, speedup={r['speedup_stats_over_fastlowess']:.2f}x")
 
-        print("\nTop 10 regressions (statsmodels faster than fastLowess):")
+        print("\nTop 10 regressions (statsmodels faster than FastLowess):")
         for r in sorted_by_regression[:10]:
-            if r["speedup_stats_over_fastLowess"] < 1.0:
-                print(f"  {r['name']}: stats={r['stats_value_ms']:.4f}ms, fastLowess={r['fastLowess_value_ms']:.4f}ms, speedup={r['speedup_stats_over_fastLowess']:.2f}x")
+            if r["speedup_stats_over_fastlowess"] < 1.0:
+                print(f"  {r['name']}: stats={r['stats_value_ms']:.4f}ms, fastlowess={r['fastlowess_value_ms']:.4f}ms, speedup={r['speedup_stats_over_fastlowess']:.2f}x")
 
     # Print detailed per-category rows to console
     print("\nDetailed per-category results:")
@@ -197,19 +197,19 @@ def main():
             continue
         print(f"\nCategory: {cat} (compared={data['summary']['compared']})")
         # header
-        print(f"{'name':60} {'fastLowess_ms':>10} {'stats_ms':>10} {'speedup':>8} {'%chg':>8} {'notes'}")
+        print(f"{'name':60} {'fastlowess_ms':>10} {'stats_ms':>10} {'speedup':>8} {'%chg':>8} {'notes'}")
         for r in rows:
             name = (r.get("name") or "")[:60].ljust(60)
-            fastLowess_v = r.get("fastLowess_value_ms")
+            fastlowess_v = r.get("fastlowess_value_ms")
             stats_v = r.get("stats_value_ms")
-            sp = r.get("speedup_stats_over_fastLowess")
-            pct = r.get("percent_change_stats_vs_fastLowess")
+            sp = r.get("speedup_stats_over_fastlowess")
+            pct = r.get("percent_change_stats_vs_fastlowess")
             notes = ";".join(r.get("notes", []))
-            fastLowess_s = f"{fastLowess_v:.4f}" if isinstance(fastLowess_v, (int, float)) else "N/A"
+            fastlowess_s = f"{fastlowess_v:.4f}" if isinstance(fastlowess_v, (int, float)) else "N/A"
             stats_s = f"{stats_v:.4f}" if isinstance(stats_v, (int, float)) else "N/A"
             sp_s = f"{sp:.2f}x" if isinstance(sp, (int, float)) else "N/A"
             pct_s = f"{pct:.1f}%" if isinstance(pct, (int, float)) else "N/A"
-            print(f"{name} {fastLowess_s:>10} {stats_s:>10} {sp_s:>8} {pct_s:>8} {notes}")
+            print(f"{name} {fastlowess_s:>10} {stats_s:>10} {sp_s:>8} {pct_s:>8} {notes}")
 
 if __name__ == "__main__":
     main()

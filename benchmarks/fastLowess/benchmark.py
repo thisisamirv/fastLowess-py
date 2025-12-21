@@ -1,35 +1,30 @@
 #!/usr/bin/env python3
 """
-Python fastLowess benchmark runner with JSON output for comparison with statsmodels.
+Industry-level LOWESS benchmarks with JSON output for fastLowess.
 
-This is a standalone benchmark program that outputs results in JSON format
-compatible with the Rust benchmark.
+Benchmarks are aligned with the statsmodels benchmarks to enable direct comparison.
+Results are written to benchmarks/output/fastLowess_benchmark.json.
+
+Run with: python3 benchmark.py
 """
 
 import json
-import math
 import time
-from dataclasses import dataclass, asdict
-from pathlib import Path
-from typing import List, Dict, Any
-
 import numpy as np
 import fastLowess
+from pathlib import Path
+from typing import Tuple, List, Dict
+from dataclasses import dataclass, asdict
 
 
 # ============================================================================
-# Constants
+# Benchmark Result Storage
 # ============================================================================
 
-WARMUP_ITERATIONS = 3
-
-
-# ============================================================================
-# Data Structures
-# ============================================================================
 
 @dataclass
 class BenchmarkResult:
+    """Store benchmark timing results."""
     name: str
     size: int
     iterations: int
@@ -39,411 +34,389 @@ class BenchmarkResult:
     min_time_ms: float = 0.0
     max_time_ms: float = 0.0
 
-    def compute_stats(self, times: List[float]):
-        if not times:
-            return
 
-        # Convert to milliseconds
-        times_ms = [t * 1000.0 for t in times]
-
-        self.mean_time_ms = np.mean(times_ms)
-        self.std_time_ms = np.std(times_ms)
-        self.median_time_ms = np.median(times_ms)
-        self.min_time_ms = np.min(times_ms)
-        self.max_time_ms = np.max(times_ms)
+def run_benchmark(name: str, size: int, func, iterations: int = 10, warmup: int = 2) -> BenchmarkResult:
+    """Run a benchmark with warmup and timing."""
+    result = BenchmarkResult(name=name, size=size, iterations=iterations)
+    
+    # Warmup runs
+    for _ in range(warmup):
+        func()
+    
+    # Timed runs
+    times = []
+    for _ in range(iterations):
+        start = time.perf_counter()
+        func()
+        elapsed = time.perf_counter() - start
+        times.append(elapsed * 1000)  # Convert to ms
+    
+    result.mean_time_ms = np.mean(times)
+    result.std_time_ms = np.std(times)
+    result.median_time_ms = np.median(times)
+    result.min_time_ms = np.min(times)
+    result.max_time_ms = np.max(times)
+    
+    return result
 
 
 # ============================================================================
-# Data Generation
+# Data Generation (Aligned with statsmodels)
 # ============================================================================
 
-def generate_data(size: int):
-    x = np.array([i * 10.0 / size for i in range(size)])
-    y = np.array([
-        math.sin(xi) + math.sin(math.sin((i * 7.3) * 0.5)) * 0.2
-        for i, xi in enumerate(x)
-    ])
+
+def generate_sine_data(size: int, seed: int = 42) -> Tuple[np.ndarray, np.ndarray]:
+    """Generate smooth sinusoidal data with Gaussian noise."""
+    rng = np.random.default_rng(seed)
+    x = np.linspace(0, 10, size)
+    y = np.sin(x) + rng.normal(0, 0.2, size)
     return x, y
 
 
-def generate_data_with_outliers(size: int):
-    x = np.array([i * 10.0 / size for i in range(size)])
-    y = np.array([math.sin(xi) for xi in x])
-
-    # Add outliers (5% of points)
-    n_outliers = max(size // 20, 1)
-    for i in range(n_outliers):
-        idx = (i * size) // n_outliers
-        y[idx] += 3.0 if i % 2 == 0 else -3.0
-
+def generate_outlier_data(size: int, seed: int = 42) -> Tuple[np.ndarray, np.ndarray]:
+    """Generate data with 5% outliers."""
+    rng = np.random.default_rng(seed)
+    x = np.linspace(0, 10, size)
+    y = np.sin(x) + rng.normal(0, 0.2, size)
+    
+    # Add 5% outliers
+    n_outliers = size // 20
+    for _ in range(n_outliers):
+        idx = rng.integers(0, size)
+        y[idx] += rng.uniform(-5, 5)
     return x, y
 
 
+def generate_financial_data(size: int, seed: int = 42) -> Tuple[np.ndarray, np.ndarray]:
+    """Generate financial time series (geometric Brownian motion)."""
+    rng = np.random.default_rng(seed)
+    x = np.arange(size, dtype=float)
+    
+    # Simulate stock prices with realistic volatility
+    y = [100.0]  # Starting price
+    for _ in range(1, size):
+        ret = rng.normal(0.0005, 0.02)
+        y.append(y[-1] * (1 + ret))
+    return x, np.array(y)
+
+
+def generate_scientific_data(size: int, seed: int = 42) -> Tuple[np.ndarray, np.ndarray]:
+    """Generate scientific measurement data (exponential decay with oscillations)."""
+    rng = np.random.default_rng(seed)
+    x = np.linspace(0, 10, size)
+    signal = np.exp(-x * 0.3) * np.cos(x * 2 * np.pi)
+    noise = rng.normal(0, 0.05, size)
+    return x, signal + noise
+
+
+def generate_genomic_data(size: int, seed: int = 42) -> Tuple[np.ndarray, np.ndarray]:
+    """Generate genomic methylation data (beta values 0-1)."""
+    rng = np.random.default_rng(seed)
+    x = np.arange(size) * 1000.0  # CpG positions
+    base = 0.5 + np.sin(x / 50000.0) * 0.3
+    noise = rng.normal(0, 0.1, size)
+    y = np.clip(base + noise, 0.0, 1.0)
+    return x, y
+
+
+def generate_clustered_data(size: int, seed: int = 42) -> Tuple[np.ndarray, np.ndarray]:
+    """Generate clustered x-values (groups with tiny spacing)."""
+    rng = np.random.default_rng(seed)
+    x = np.array([(i // 100) + (i % 100) * 1e-6 for i in range(size)])
+    y = np.sin(x) + rng.normal(0, 0.1, size)
+    return x, y
+
+
+def generate_high_noise_data(size: int, seed: int = 42) -> Tuple[np.ndarray, np.ndarray]:
+    """Generate high-noise data (SNR < 1)."""
+    rng = np.random.default_rng(seed)
+    x = np.linspace(0, 10, size)
+    signal = np.sin(x) * 0.5
+    noise = rng.normal(0, 2.0, size)  # High noise
+    return x, signal + noise
+
+
 # ============================================================================
-# Benchmark Functions
+# Benchmark Categories (Aligned with statsmodels)
 # ============================================================================
 
-def benchmark_basic_smoothing(sizes: List[int], iterations: int) -> List[BenchmarkResult]:
+
+def benchmark_scalability(iterations: int = 10) -> List[BenchmarkResult]:
+    """Benchmark performance scaling with dataset size."""
+    print("\n" + "=" * 80)
+    print("SCALABILITY")
+    print("=" * 80)
+    
     results = []
-
+    sizes = [1000, 5000, 10000, 50000, 100000]
+    
     for size in sizes:
-        print(f"Benchmarking basic smoothing with size={size}...")
-        result = BenchmarkResult(f"basic_smoothing_{size}", size, iterations)
-
-        x, y = generate_data(size)
-        times = []
-
-        # Warmup
-        for _ in range(WARMUP_ITERATIONS):
-            _ = fastLowess.smooth(x, y, fraction=0.3, iterations=3)
-
-        # Benchmark
-        for _ in range(iterations):
-            start = time.perf_counter()
-            _ = fastLowess.smooth(x, y, fraction=0.3, iterations=3)
-            times.append(time.perf_counter() - start)
-
-        result.compute_stats(times)
-        print(f"  Mean: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+        x, y = generate_sine_data(size, seed=42)
+        
+        def run():
+            fastLowess.smooth(x, y, fraction=0.1, iterations=3)
+        
+        result = run_benchmark(f"scale_{size}", size, run, iterations)
         results.append(result)
-
+        print(f"  scale_{size}: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
     return results
 
 
-def benchmark_fraction_variations(size: int, iterations: int) -> List[BenchmarkResult]:
+def benchmark_fraction(iterations: int = 10) -> List[BenchmarkResult]:
+    """Benchmark different smoothing fractions."""
+    print("\n" + "=" * 80)
+    print("FRACTION")
+    print("=" * 80)
+    
     results = []
-    fractions = [0.1, 0.2, 0.3, 0.5, 0.67, 0.8]
-
-    x, y = generate_data(size)
-
+    size = 5000
+    fractions = [0.05, 0.1, 0.2, 0.3, 0.5, 0.67]
+    x, y = generate_sine_data(size, seed=42)
+    
     for frac in fractions:
-        print(f"Benchmarking fraction={frac}...")
-        result = BenchmarkResult(f"fraction_{frac}", size, iterations)
-        times = []
-
-        # Warmup
-        for _ in range(WARMUP_ITERATIONS):
-            _ = fastLowess.smooth(x, y, fraction=frac, iterations=3)
-
-        # Benchmark
-        for _ in range(iterations):
-            start = time.perf_counter()
-            _ = fastLowess.smooth(x, y, fraction=frac, iterations=3)
-            times.append(time.perf_counter() - start)
-
-        result.compute_stats(times)
-        print(f"  Mean: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+        def run(f=frac):
+            fastLowess.smooth(x, y, fraction=f, iterations=3)
+        
+        result = run_benchmark(f"fraction_{frac}", size, run, iterations)
         results.append(result)
-
+        print(f"  fraction_{frac}: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
     return results
 
 
-def benchmark_robustness_iterations(size: int, iterations: int) -> List[BenchmarkResult]:
+def benchmark_iterations(iterations: int = 10) -> List[BenchmarkResult]:
+    """Benchmark different robustness iterations."""
+    print("\n" + "=" * 80)
+    print("ITERATIONS")
+    print("=" * 80)
+    
     results = []
-    niter_values = [0, 1, 2, 3, 5, 10]
-
-    x, y = generate_data_with_outliers(size)
-
-    for niter in niter_values:
-        print(f"Benchmarking robustness iterations={niter}...")
-        result = BenchmarkResult(f"iterations_{niter}", size, iterations)
-        times = []
-
-        # Warmup
-        for _ in range(WARMUP_ITERATIONS):
-            _ = fastLowess.smooth(x, y, fraction=0.3, iterations=niter)
-
-        # Benchmark
-        for _ in range(iterations):
-            start = time.perf_counter()
-            _ = fastLowess.smooth(x, y, fraction=0.3, iterations=niter)
-            times.append(time.perf_counter() - start)
-
-        result.compute_stats(times)
-        print(f"  Mean: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    size = 5000
+    iter_values = [0, 1, 2, 3, 5, 10]
+    x, y = generate_outlier_data(size, seed=42)
+    
+    for it in iter_values:
+        def run(n=it):
+            fastLowess.smooth(x, y, fraction=0.2, iterations=n)
+        
+        result = run_benchmark(f"iterations_{it}", size, run, iterations)
         results.append(result)
-
+        print(f"  iterations_{it}: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
     return results
 
 
-def benchmark_delta_parameter(size: int, iterations: int) -> List[BenchmarkResult]:
+def benchmark_delta(iterations: int = 10) -> List[BenchmarkResult]:
+    """Benchmark delta parameter effects."""
+    print("\n" + "=" * 80)
+    print("DELTA")
+    print("=" * 80)
+    
     results = []
-
-    x = np.array([i * 0.1 for i in range(size)])
-    y = np.array([math.sin(xi) for xi in x])
-
+    size = 10000
+    x, y = generate_sine_data(size, seed=42)
+    
     delta_configs = [
         ("delta_none", 0.0),
-        ("delta_auto", None),  # Use None (auto)
-        ("delta_small", 1.0),
+        ("delta_small", 0.5),
+        ("delta_medium", 2.0),
         ("delta_large", 10.0),
     ]
-
-    for name, delta_val in delta_configs:
-        print(f"Benchmarking {name} (delta={delta_val})...")
-        result = BenchmarkResult(name, size, iterations)
-        times = []
-
-        # Warmup
-        for _ in range(WARMUP_ITERATIONS):
-            if delta_val is None:
-                _ = fastLowess.smooth(x, y, fraction=0.3, iterations=2)
-            else:
-                _ = fastLowess.smooth(x, y, fraction=0.3, iterations=2, delta=delta_val)
-
-        # Benchmark
-        for _ in range(iterations):
-            start = time.perf_counter()
-            if delta_val is None:
-                _ = fastLowess.smooth(x, y, fraction=0.3, iterations=2)
-            else:
-                _ = fastLowess.smooth(x, y, fraction=0.3, iterations=2, delta=delta_val)
-            times.append(time.perf_counter() - start)
-
-        result.compute_stats(times)
-        print(f"  Mean: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
+    for name, delta in delta_configs:
+        def run(d=delta):
+            fastLowess.smooth(x, y, fraction=0.2, iterations=2, delta=d)
+        
+        result = run_benchmark(name, size, run, iterations)
         results.append(result)
-
+        print(f"  {name}: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
     return results
 
 
-def benchmark_pathological_cases(size: int, iterations: int) -> List[BenchmarkResult]:
+def benchmark_financial(iterations: int = 10) -> List[BenchmarkResult]:
+    """Benchmark with financial time series data."""
+    print("\n" + "=" * 80)
+    print("FINANCIAL")
+    print("=" * 80)
+    
     results = []
+    sizes = [500, 1000, 5000, 10000]
+    
+    for size in sizes:
+        x, y = generate_financial_data(size, seed=42)
+        
+        def run():
+            fastLowess.smooth(x, y, fraction=0.1, iterations=2)
+        
+        result = run_benchmark(f"financial_{size}", size, run, iterations)
+        results.append(result)
+        print(f"  financial_{size}: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
+    return results
 
-    # Clustered x values
-    print("Benchmarking clustered_x...")
-    x_clustered = np.array([
-        (i // 100) + (i % 100) * 1e-6
-        for i in range(size)
-    ])
-    y_clustered = np.array([math.sin(xi) for xi in x_clustered])
 
-    result = BenchmarkResult("clustered_x", size, iterations)
-    times = []
+def benchmark_scientific(iterations: int = 10) -> List[BenchmarkResult]:
+    """Benchmark with scientific measurement data."""
+    print("\n" + "=" * 80)
+    print("SCIENTIFIC")
+    print("=" * 80)
+    
+    results = []
+    sizes = [500, 1000, 5000, 10000]
+    
+    for size in sizes:
+        x, y = generate_scientific_data(size, seed=42)
+        
+        def run():
+            fastLowess.smooth(x, y, fraction=0.15, iterations=3)
+        
+        result = run_benchmark(f"scientific_{size}", size, run, iterations)
+        results.append(result)
+        print(f"  scientific_{size}: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
+    return results
 
-    # Warmup
-    for _ in range(WARMUP_ITERATIONS):
-        _ = fastLowess.smooth(x_clustered, y_clustered, fraction=0.5, iterations=2)
 
-    for _ in range(iterations):
-        start = time.perf_counter()
-        _ = fastLowess.smooth(x_clustered, y_clustered, fraction=0.5, iterations=2)
-        times.append(time.perf_counter() - start)
+def benchmark_genomic(iterations: int = 10) -> List[BenchmarkResult]:
+    """Benchmark with genomic methylation data."""
+    print("\n" + "=" * 80)
+    print("GENOMIC")
+    print("=" * 80)
+    
+    results = []
+    sizes = [1000, 5000, 10000, 50000]
+    
+    for size in sizes:
+        x, y = generate_genomic_data(size, seed=42)
+        
+        def run():
+            fastLowess.smooth(x, y, fraction=0.1, iterations=3, delta=100.0)
+        
+        result = run_benchmark(f"genomic_{size}", size, run, iterations)
+        results.append(result)
+        print(f"  genomic_{size}: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
+    return results
 
-    result.compute_stats(times)
-    print(f"  Mean: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+
+def benchmark_pathological(iterations: int = 10) -> List[BenchmarkResult]:
+    """Benchmark with pathological/edge case data."""
+    print("\n" + "=" * 80)
+    print("PATHOLOGICAL")
+    print("=" * 80)
+    
+    results = []
+    size = 5000
+    
+    # Clustered
+    x_clustered, y_clustered = generate_clustered_data(size, seed=42)
+    result = run_benchmark(
+        "clustered", size,
+        lambda: fastLowess.smooth(x_clustered, y_clustered, fraction=0.3, iterations=2),
+        iterations
+    )
     results.append(result)
-
-    # Extreme outliers
-    print("Benchmarking extreme_outliers...")
-    x_normal = np.array([i * 10.0 / size for i in range(size)])
-    y_outliers = np.array([math.sin(xi) for xi in x_normal])
-    for i in range(0, size, 50):
-        y_outliers[i] += 100.0 if i % 100 == 0 else -100.0
-
-    result = BenchmarkResult("extreme_outliers", size, iterations)
-    times = []
-
-    # Warmup
-    for _ in range(WARMUP_ITERATIONS):
-        _ = fastLowess.smooth(x_normal, y_outliers, fraction=0.3, iterations=5)
-
-    for _ in range(iterations):
-        start = time.perf_counter()
-        _ = fastLowess.smooth(x_normal, y_outliers, fraction=0.3, iterations=5)
-        times.append(time.perf_counter() - start)
-
-    result.compute_stats(times)
-    print(f"  Mean: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
-    results.append(result)
-
-    # Constant y values
-    print("Benchmarking constant_y...")
-    y_constant = np.full(size, 5.0)
-
-    result = BenchmarkResult("constant_y", size, iterations)
-    times = []
-
-    # Warmup
-    for _ in range(WARMUP_ITERATIONS):
-        _ = fastLowess.smooth(x_normal, y_constant, fraction=0.3, iterations=2)
-
-    for _ in range(iterations):
-        start = time.perf_counter()
-        _ = fastLowess.smooth(x_normal, y_constant, fraction=0.3, iterations=2)
-        times.append(time.perf_counter() - start)
-
-    result.compute_stats(times)
-    print(f"  Mean: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
-    results.append(result)
-
+    print(f"  clustered: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
     # High noise
-    print("Benchmarking high_noise...")
-    y_noisy = np.array([
-        math.sin(xi / 10.0) * 0.1 + math.sin(math.sin((i * 7.3) * 0.5)) * 2.0
-        for i, xi in enumerate(x_normal)
-    ])
-
-    result = BenchmarkResult("high_noise", size, iterations)
-    times = []
-
-    # Warmup
-    for _ in range(WARMUP_ITERATIONS):
-        _ = fastLowess.smooth(x_normal, y_noisy, fraction=0.6, iterations=3)
-
-    for _ in range(iterations):
-        start = time.perf_counter()
-        _ = fastLowess.smooth(x_normal, y_noisy, fraction=0.6, iterations=3)
-        times.append(time.perf_counter() - start)
-
-    result.compute_stats(times)
-    print(f"  Mean: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    x_noisy, y_noisy = generate_high_noise_data(size, seed=42)
+    result = run_benchmark(
+        "high_noise", size,
+        lambda: fastLowess.smooth(x_noisy, y_noisy, fraction=0.5, iterations=5),
+        iterations
+    )
     results.append(result)
-
+    print(f"  high_noise: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
+    # Extreme outliers
+    x_outlier, y_outlier = generate_outlier_data(size, seed=42)
+    result = run_benchmark(
+        "extreme_outliers", size,
+        lambda: fastLowess.smooth(x_outlier, y_outlier, fraction=0.2, iterations=10),
+        iterations
+    )
+    results.append(result)
+    print(f"  extreme_outliers: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
+    # Constant y
+    x_const = np.arange(size, dtype=float)
+    y_const = np.full(size, 5.0)
+    result = run_benchmark(
+        "constant_y", size,
+        lambda: fastLowess.smooth(x_const, y_const, fraction=0.2, iterations=2),
+        iterations
+    )
+    results.append(result)
+    print(f"  constant_y: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
     return results
 
 
-def benchmark_realistic_scenarios(iterations: int) -> List[BenchmarkResult]:
+def benchmark_weight_functions(iterations: int = 10) -> List[BenchmarkResult]:
+    """Benchmark with different weight functions."""
+    print("\n" + "=" * 80)
+    print("WEIGHT FUNCTIONS")
+    print("=" * 80)
+    
     results = []
-    size = 1000
-
-    # Financial time series
-    print("Benchmarking financial_timeseries...")
-    x = np.array([float(i) for i in range(size)])
-    y = np.array([
-        xi * 0.01 + math.sin(xi / 50.0) * 0.5 + math.sin(math.sin((i * 7.3) * 0.5)) * 0.3
-        for i, xi in enumerate(x)
-    ])
-
-    result = BenchmarkResult("financial_timeseries", size, iterations)
-    times = []
-
-    # Warmup
-    for _ in range(WARMUP_ITERATIONS):
-        _ = fastLowess.smooth(x, y, fraction=0.1, iterations=2)
-
-    for _ in range(iterations):
-        start = time.perf_counter()
-        _ = fastLowess.smooth(x, y, fraction=0.1, iterations=2)
-        times.append(time.perf_counter() - start)
-
-    result.compute_stats(times)
-    print(f"  Mean: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
-    results.append(result)
-
-    # Scientific data
-    print("Benchmarking scientific_data...")
-    x_sci = np.array([i * 0.01 for i in range(size)])
-    y_sci = np.array([
-        math.exp(xi * 2.0 * math.pi) * math.cos(xi * 10.0) + math.sin(math.sin((i * 13.7) * 0.3)) * 0.1
-        for i, xi in enumerate(x_sci)
-    ])
-
-    result = BenchmarkResult("scientific_data", size, iterations)
-    times = []
-
-    # Warmup
-    for _ in range(WARMUP_ITERATIONS):
-        _ = fastLowess.smooth(x_sci, y_sci, fraction=0.2, iterations=3)
-
-    for _ in range(iterations):
-        start = time.perf_counter()
-        _ = fastLowess.smooth(x_sci, y_sci, fraction=0.2, iterations=3)
-        times.append(time.perf_counter() - start)
-
-    result.compute_stats(times)
-    print(f"  Mean: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
-    results.append(result)
-
-    # Genomic methylation
-    print("Benchmarking genomic_methylation...")
-    x_genomic = np.array([float(i * 1000) for i in range(size)])
-    y_genomic = np.array([
-        max(0.0, min(1.0, 0.5 + math.sin(xi / 5000.0) * 0.2 + math.sin(math.sin((i * 17.3) * 0.3)) * 0.15))
-        for i, xi in enumerate(x_genomic)
-    ])
-
-    result = BenchmarkResult("genomic_methylation", size, iterations)
-    times = []
-
-    # Warmup
-    for _ in range(WARMUP_ITERATIONS):
-        _ = fastLowess.smooth(x_genomic, y_genomic, fraction=0.2, iterations=3, delta=100.0)
-
-    for _ in range(iterations):
-        start = time.perf_counter()
-        _ = fastLowess.smooth(x_genomic, y_genomic, fraction=0.2, iterations=3, delta=100.0)
-        times.append(time.perf_counter() - start)
-
-    result.compute_stats(times)
-    print(f"  Mean: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
-    results.append(result)
-
+    size = 5000
+    x, y = generate_sine_data(size, seed=42)
+    
+    weight_fns = ["tricube", "gaussian", "epanechnikov", "biweight", "cosine"]
+    
+    for wf in weight_fns:
+        def run(w=wf):
+            fastLowess.smooth(x, y, fraction=0.2, iterations=3, weight_function=w)
+        
+        result = run_benchmark(wf, size, run, iterations)
+        results.append(result)
+        print(f"  {wf}: {result.mean_time_ms:.2f} ms ± {result.std_time_ms:.2f} ms")
+    
     return results
 
 
 # ============================================================================
-# Main
+# Main Entry Point
 # ============================================================================
+
 
 def main():
+    """Run all benchmarks and save results."""
     print("=" * 80)
-    print("PYTHON FASTLOWESS BENCHMARK SUITE")
-    print("=" * 80 + "\n")
-
-    all_results: Dict[str, List[Dict[str, Any]]] = {}
-
-    # Core benchmarks
-    print("\n" + "=" * 80)
-    print("CORE BENCHMARKS")
-    print("=" * 80 + "\n")
-
-    all_results["basic_smoothing"] = [
-        asdict(r) for r in benchmark_basic_smoothing([100, 500, 1000, 5000, 10000], 10)
-    ]
-
-    all_results["fraction_variations"] = [
-        asdict(r) for r in benchmark_fraction_variations(1000, 10)
-    ]
-
-    all_results["robustness_iterations"] = [
-        asdict(r) for r in benchmark_robustness_iterations(1000, 10)
-    ]
-
-    all_results["delta_parameter"] = [
-        asdict(r) for r in benchmark_delta_parameter(5000, 10)
-    ]
-
-    # Stress tests
-    print("\n" + "=" * 80)
-    print("STRESS TESTS")
-    print("=" * 80 + "\n")
-
-    all_results["pathological_cases"] = [
-        asdict(r) for r in benchmark_pathological_cases(1000, 10)
-    ]
-
-    # Application scenarios
-    print("\n" + "=" * 80)
-    print("APPLICATION SCENARIOS")
-    print("=" * 80 + "\n")
-
-    all_results["realistic_scenarios"] = [
-        asdict(r) for r in benchmark_realistic_scenarios(10)
-    ]
-
-    # Save results
-    json_str = json.dumps(all_results, indent=2)
-
-    # Determine output directory (parent's output dir: ../output)
-    script_dir = Path(__file__).parent
-    out_dir = script_dir.parent / "output"
+    print("FASTLOWESS BENCHMARK SUITE (Aligned with statsmodels)")
+    print("=" * 80)
+    
+    iterations = 10
+    all_results: Dict[str, List[BenchmarkResult]] = {}
+    
+    # Run all benchmark categories
+    all_results["scalability"] = benchmark_scalability(iterations)
+    all_results["fraction"] = benchmark_fraction(iterations)
+    all_results["iterations"] = benchmark_iterations(iterations)
+    all_results["delta"] = benchmark_delta(iterations)
+    all_results["financial"] = benchmark_financial(iterations)
+    all_results["scientific"] = benchmark_scientific(iterations)
+    all_results["genomic"] = benchmark_genomic(iterations)
+    all_results["pathological"] = benchmark_pathological(iterations)
+    all_results["weight_functions"] = benchmark_weight_functions(iterations)
+    
+    # Convert to JSON-serializable format
+    output = {}
+    for category, results in all_results.items():
+        output[category] = [asdict(r) for r in results]
+    
+    # Save to output directory
+    script_dir = Path(__file__).resolve().parent
+    benchmarks_dir = script_dir.parent
+    out_dir = benchmarks_dir / "output"
     out_dir.mkdir(parents=True, exist_ok=True)
-
+    
     out_path = out_dir / "fastLowess_benchmark.json"
     with open(out_path, "w") as f:
-        f.write(json_str)
-
+        json.dump(output, f, indent=2)
+    
     print("\n" + "=" * 80)
     print(f"Results saved to {out_path}")
     print("=" * 80)
