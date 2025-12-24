@@ -4,6 +4,7 @@
 [![License](https://img.shields.io/badge/License-AGPL--3.0%20OR%20Commercial-blue.svg)](LICENSE)
 [![Python Versions](https://img.shields.io/pypi/pyversions/fastlowess.svg?style=flat-square)](https://pypi.org/project/fastlowess/)
 [![Documentation Status](https://readthedocs.org/projects/fastlowess-py/badge/?version=latest)](https://fastlowess-py.readthedocs.io/en/latest/?badge=latest)
+[![Conda](https://anaconda.org/conda-forge/fastlowess/badges/version.svg?style=flat-square)](https://anaconda.org/conda-forge/fastlowess)
 
 **High-performance parallel LOWESS (Locally Weighted Scatterplot Smoothing) for Python** — A high-level wrapper around the [`fastLowess`](https://github.com/thisisamirv/fastLowess) Rust crate that offers **12-3800x faster performance** than standard implementations while providing robust statistics, uncertainty quantification, and memory-efficient streaming.
 
