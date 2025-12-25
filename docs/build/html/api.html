@@ -6,20 +6,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; fastLowess 0.1.0 documentation</title>
+  <title>API Reference &mdash; fastlowess 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Benchmarks" href="benchmarks.html" /> 
+    <link rel="prev" title="Execution Modes" href="execution_modes.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +31,7 @@
           
           
           <a href="index.html" class="icon icon-home">
-            fastLowess
+            fastlowess
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -47,7 +47,6 @@
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="execution_modes.html">Execution Modes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="benchmarks.html">Benchmarks</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
@@ -59,35 +58,35 @@
 <li class="toctree-l2"><a class="reference internal" href="#choosing-the-right-function">Choosing the Right Function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#parameter-guidelines">Parameter Guidelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-information">Version Information</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fastLowess.Diagnostics"><code class="docutils literal notranslate"><span class="pre">Diagnostics</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.Diagnostics.aic"><code class="docutils literal notranslate"><span class="pre">Diagnostics.aic</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.Diagnostics.aicc"><code class="docutils literal notranslate"><span class="pre">Diagnostics.aicc</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.Diagnostics.effective_df"><code class="docutils literal notranslate"><span class="pre">Diagnostics.effective_df</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.Diagnostics.mae"><code class="docutils literal notranslate"><span class="pre">Diagnostics.mae</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.Diagnostics.r_squared"><code class="docutils literal notranslate"><span class="pre">Diagnostics.r_squared</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.Diagnostics.residual_sd"><code class="docutils literal notranslate"><span class="pre">Diagnostics.residual_sd</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.Diagnostics.rmse"><code class="docutils literal notranslate"><span class="pre">Diagnostics.rmse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fastlowess.Diagnostics"><code class="docutils literal notranslate"><span class="pre">Diagnostics</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.Diagnostics.aic"><code class="docutils literal notranslate"><span class="pre">Diagnostics.aic</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.Diagnostics.aicc"><code class="docutils literal notranslate"><span class="pre">Diagnostics.aicc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.Diagnostics.effective_df"><code class="docutils literal notranslate"><span class="pre">Diagnostics.effective_df</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.Diagnostics.mae"><code class="docutils literal notranslate"><span class="pre">Diagnostics.mae</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.Diagnostics.r_squared"><code class="docutils literal notranslate"><span class="pre">Diagnostics.r_squared</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.Diagnostics.residual_sd"><code class="docutils literal notranslate"><span class="pre">Diagnostics.residual_sd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.Diagnostics.rmse"><code class="docutils literal notranslate"><span class="pre">Diagnostics.rmse</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#fastLowess.LowessResult"><code class="docutils literal notranslate"><span class="pre">LowessResult</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.confidence_lower"><code class="docutils literal notranslate"><span class="pre">LowessResult.confidence_lower</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.confidence_upper"><code class="docutils literal notranslate"><span class="pre">LowessResult.confidence_upper</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.cv_scores"><code class="docutils literal notranslate"><span class="pre">LowessResult.cv_scores</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.diagnostics"><code class="docutils literal notranslate"><span class="pre">LowessResult.diagnostics</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.fraction_used"><code class="docutils literal notranslate"><span class="pre">LowessResult.fraction_used</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.iterations_used"><code class="docutils literal notranslate"><span class="pre">LowessResult.iterations_used</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.prediction_lower"><code class="docutils literal notranslate"><span class="pre">LowessResult.prediction_lower</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.prediction_upper"><code class="docutils literal notranslate"><span class="pre">LowessResult.prediction_upper</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.residuals"><code class="docutils literal notranslate"><span class="pre">LowessResult.residuals</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.robustness_weights"><code class="docutils literal notranslate"><span class="pre">LowessResult.robustness_weights</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.standard_errors"><code class="docutils literal notranslate"><span class="pre">LowessResult.standard_errors</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.x"><code class="docutils literal notranslate"><span class="pre">LowessResult.x</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fastLowess.LowessResult.y"><code class="docutils literal notranslate"><span class="pre">LowessResult.y</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fastlowess.LowessResult"><code class="docutils literal notranslate"><span class="pre">LowessResult</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.confidence_lower"><code class="docutils literal notranslate"><span class="pre">LowessResult.confidence_lower</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.confidence_upper"><code class="docutils literal notranslate"><span class="pre">LowessResult.confidence_upper</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.cv_scores"><code class="docutils literal notranslate"><span class="pre">LowessResult.cv_scores</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.diagnostics"><code class="docutils literal notranslate"><span class="pre">LowessResult.diagnostics</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.fraction_used"><code class="docutils literal notranslate"><span class="pre">LowessResult.fraction_used</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.iterations_used"><code class="docutils literal notranslate"><span class="pre">LowessResult.iterations_used</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.prediction_lower"><code class="docutils literal notranslate"><span class="pre">LowessResult.prediction_lower</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.prediction_upper"><code class="docutils literal notranslate"><span class="pre">LowessResult.prediction_upper</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.residuals"><code class="docutils literal notranslate"><span class="pre">LowessResult.residuals</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.robustness_weights"><code class="docutils literal notranslate"><span class="pre">LowessResult.robustness_weights</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.standard_errors"><code class="docutils literal notranslate"><span class="pre">LowessResult.standard_errors</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.x"><code class="docutils literal notranslate"><span class="pre">LowessResult.x</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastlowess.LowessResult.y"><code class="docutils literal notranslate"><span class="pre">LowessResult.y</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#fastLowess.smooth"><code class="docutils literal notranslate"><span class="pre">smooth()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fastLowess.smooth_online"><code class="docutils literal notranslate"><span class="pre">smooth_online()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fastLowess.smooth_streaming"><code class="docutils literal notranslate"><span class="pre">smooth_streaming()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fastlowess.smooth"><code class="docutils literal notranslate"><span class="pre">smooth()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fastlowess.smooth_online"><code class="docutils literal notranslate"><span class="pre">smooth_online()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fastlowess.smooth_streaming"><code class="docutils literal notranslate"><span class="pre">smooth_streaming()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -98,7 +97,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">fastLowess</a>
+          <a href="index.html">fastlowess</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -116,9 +115,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-fastLowess">
-<span id="api-reference"></span><h1>API Reference<a class="headerlink" href="#module-fastLowess" title="Link to this heading"></a></h1>
-<p>fastLowess: High-Performance LOWESS Smoothing for Python</p>
+  <section id="module-fastlowess">
+<span id="api-reference"></span><h1>API Reference<a class="headerlink" href="#module-fastlowess" title="Link to this heading"></a></h1>
+<p>fastlowess: High-performance LOWESS Smoothing for Python.</p>
 <p>A high-performance LOWESS (Locally Weighted Scatterplot Smoothing) implementation
 with parallel execution via Rayon and NumPy integration. Built on top of the
 fastLowess Rust crate.</p>
@@ -151,19 +150,19 @@ without assuming a global functional form.</p>
 <h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
 <p><strong>Basic Smoothing:</strong></p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fastLowess</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fastlowess</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">,</span> <span class="mf">5.9</span><span class="p">,</span> <span class="mf">8.2</span><span class="p">,</span> <span class="mf">9.8</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Simple smoothing</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
 <span class="go">[2.   4.1  5.9  8.2  9.8]</span>
 </pre></div>
 </div>
 <p><strong>Full-Featured LOWESS:</strong></p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">fraction</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">iterations</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
@@ -286,10 +285,10 @@ Default: “kfold”.</p>
 </dd>
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fastLowess</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fastlowess</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">confidence_intervals</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">confidence_intervals</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Smoothed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2"> points&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -342,7 +341,7 @@ Default: 10% of chunk_size.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Process 1 million points efficiently</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1_000_000</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">0.001</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1_000_000</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth_streaming</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth_streaming</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd>
@@ -392,7 +391,7 @@ real-time data streams or sensor data processing.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Simulate real-time sensor data</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mf">20.0</span> <span class="o">+</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth_online</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">window_capacity</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth_online</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">window_capacity</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd>
@@ -431,7 +430,7 @@ Values near 0 indicate likely outliers; values near 1 are well-fitted.</p>
 <dt>cv_scores<span class="classifier">numpy.ndarray or None</span></dt><dd><p>Cross-validation scores if cross-validation was performed.</p>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">confidence_intervals</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">confidence_intervals</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Smoothed values: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Confidence interval: [</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">confidence_lower</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">confidence_upper</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fraction used: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">fraction_used</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -456,7 +455,7 @@ Range: [0, 1], with 1 indicating perfect fit.</p>
 <dt>effective_df<span class="classifier">float or None</span></dt><dd><p>Effective degrees of freedom.</p>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">return_diagnostics</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">return_diagnostics</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">diag</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">diagnostics</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RMSE: </span><span class="si">{</span><span class="n">diag</span><span class="o">.</span><span class="n">rmse</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MAE: </span><span class="si">{</span><span class="n">diag</span><span class="o">.</span><span class="n">mae</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -516,142 +515,142 @@ Includes cross-validation via cv_fractions parameter</p></td>
 parallel LOWESS smoothing with NumPy integration.</p>
 </section>
 <dl class="py class">
-<dt class="sig sig-object py" id="fastLowess.Diagnostics">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastLowess.</span></span><span class="sig-name descname"><span class="pre">Diagnostics</span></span><a class="headerlink" href="#fastLowess.Diagnostics" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.Diagnostics">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastlowess.</span></span><span class="sig-name descname"><span class="pre">Diagnostics</span></span><a class="headerlink" href="#fastlowess.Diagnostics" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Diagnostic statistics for LOWESS fit quality.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.Diagnostics.aic">
-<span class="sig-name descname"><span class="pre">aic</span></span><a class="headerlink" href="#fastLowess.Diagnostics.aic" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.Diagnostics.aic">
+<span class="sig-name descname"><span class="pre">aic</span></span><a class="headerlink" href="#fastlowess.Diagnostics.aic" title="Link to this definition"></a></dt>
 <dd><p>Akaike Information Criterion</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.Diagnostics.aicc">
-<span class="sig-name descname"><span class="pre">aicc</span></span><a class="headerlink" href="#fastLowess.Diagnostics.aicc" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.Diagnostics.aicc">
+<span class="sig-name descname"><span class="pre">aicc</span></span><a class="headerlink" href="#fastlowess.Diagnostics.aicc" title="Link to this definition"></a></dt>
 <dd><p>Corrected AIC</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.Diagnostics.effective_df">
-<span class="sig-name descname"><span class="pre">effective_df</span></span><a class="headerlink" href="#fastLowess.Diagnostics.effective_df" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.Diagnostics.effective_df">
+<span class="sig-name descname"><span class="pre">effective_df</span></span><a class="headerlink" href="#fastlowess.Diagnostics.effective_df" title="Link to this definition"></a></dt>
 <dd><p>Effective degrees of freedom</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.Diagnostics.mae">
-<span class="sig-name descname"><span class="pre">mae</span></span><a class="headerlink" href="#fastLowess.Diagnostics.mae" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.Diagnostics.mae">
+<span class="sig-name descname"><span class="pre">mae</span></span><a class="headerlink" href="#fastlowess.Diagnostics.mae" title="Link to this definition"></a></dt>
 <dd><p>Mean Absolute Error</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.Diagnostics.r_squared">
-<span class="sig-name descname"><span class="pre">r_squared</span></span><a class="headerlink" href="#fastLowess.Diagnostics.r_squared" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.Diagnostics.r_squared">
+<span class="sig-name descname"><span class="pre">r_squared</span></span><a class="headerlink" href="#fastlowess.Diagnostics.r_squared" title="Link to this definition"></a></dt>
 <dd><p>R-squared (coefficient of determination)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.Diagnostics.residual_sd">
-<span class="sig-name descname"><span class="pre">residual_sd</span></span><a class="headerlink" href="#fastLowess.Diagnostics.residual_sd" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.Diagnostics.residual_sd">
+<span class="sig-name descname"><span class="pre">residual_sd</span></span><a class="headerlink" href="#fastlowess.Diagnostics.residual_sd" title="Link to this definition"></a></dt>
 <dd><p>Residual standard deviation</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.Diagnostics.rmse">
-<span class="sig-name descname"><span class="pre">rmse</span></span><a class="headerlink" href="#fastLowess.Diagnostics.rmse" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.Diagnostics.rmse">
+<span class="sig-name descname"><span class="pre">rmse</span></span><a class="headerlink" href="#fastlowess.Diagnostics.rmse" title="Link to this definition"></a></dt>
 <dd><p>Root Mean Squared Error</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="fastLowess.LowessResult">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastLowess.</span></span><span class="sig-name descname"><span class="pre">LowessResult</span></span><a class="headerlink" href="#fastLowess.LowessResult" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastlowess.</span></span><span class="sig-name descname"><span class="pre">LowessResult</span></span><a class="headerlink" href="#fastlowess.LowessResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Result from LOWESS smoothing.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.confidence_lower">
-<span class="sig-name descname"><span class="pre">confidence_lower</span></span><a class="headerlink" href="#fastLowess.LowessResult.confidence_lower" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.confidence_lower">
+<span class="sig-name descname"><span class="pre">confidence_lower</span></span><a class="headerlink" href="#fastlowess.LowessResult.confidence_lower" title="Link to this definition"></a></dt>
 <dd><p>Lower confidence interval bounds</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.confidence_upper">
-<span class="sig-name descname"><span class="pre">confidence_upper</span></span><a class="headerlink" href="#fastLowess.LowessResult.confidence_upper" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.confidence_upper">
+<span class="sig-name descname"><span class="pre">confidence_upper</span></span><a class="headerlink" href="#fastlowess.LowessResult.confidence_upper" title="Link to this definition"></a></dt>
 <dd><p>Upper confidence interval bounds</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.cv_scores">
-<span class="sig-name descname"><span class="pre">cv_scores</span></span><a class="headerlink" href="#fastLowess.LowessResult.cv_scores" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.cv_scores">
+<span class="sig-name descname"><span class="pre">cv_scores</span></span><a class="headerlink" href="#fastlowess.LowessResult.cv_scores" title="Link to this definition"></a></dt>
 <dd><p>CV scores for tested fractions</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.diagnostics">
-<span class="sig-name descname"><span class="pre">diagnostics</span></span><a class="headerlink" href="#fastLowess.LowessResult.diagnostics" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.diagnostics">
+<span class="sig-name descname"><span class="pre">diagnostics</span></span><a class="headerlink" href="#fastlowess.LowessResult.diagnostics" title="Link to this definition"></a></dt>
 <dd><p>Diagnostic metrics</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.fraction_used">
-<span class="sig-name descname"><span class="pre">fraction_used</span></span><a class="headerlink" href="#fastLowess.LowessResult.fraction_used" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.fraction_used">
+<span class="sig-name descname"><span class="pre">fraction_used</span></span><a class="headerlink" href="#fastlowess.LowessResult.fraction_used" title="Link to this definition"></a></dt>
 <dd><p>Fraction used for smoothing</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.iterations_used">
-<span class="sig-name descname"><span class="pre">iterations_used</span></span><a class="headerlink" href="#fastLowess.LowessResult.iterations_used" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.iterations_used">
+<span class="sig-name descname"><span class="pre">iterations_used</span></span><a class="headerlink" href="#fastlowess.LowessResult.iterations_used" title="Link to this definition"></a></dt>
 <dd><p>Number of iterations performed</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.prediction_lower">
-<span class="sig-name descname"><span class="pre">prediction_lower</span></span><a class="headerlink" href="#fastLowess.LowessResult.prediction_lower" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.prediction_lower">
+<span class="sig-name descname"><span class="pre">prediction_lower</span></span><a class="headerlink" href="#fastlowess.LowessResult.prediction_lower" title="Link to this definition"></a></dt>
 <dd><p>Lower prediction interval bounds</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.prediction_upper">
-<span class="sig-name descname"><span class="pre">prediction_upper</span></span><a class="headerlink" href="#fastLowess.LowessResult.prediction_upper" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.prediction_upper">
+<span class="sig-name descname"><span class="pre">prediction_upper</span></span><a class="headerlink" href="#fastlowess.LowessResult.prediction_upper" title="Link to this definition"></a></dt>
 <dd><p>Upper prediction interval bounds</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.residuals">
-<span class="sig-name descname"><span class="pre">residuals</span></span><a class="headerlink" href="#fastLowess.LowessResult.residuals" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.residuals">
+<span class="sig-name descname"><span class="pre">residuals</span></span><a class="headerlink" href="#fastlowess.LowessResult.residuals" title="Link to this definition"></a></dt>
 <dd><p>Residuals (original y - smoothed y)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.robustness_weights">
-<span class="sig-name descname"><span class="pre">robustness_weights</span></span><a class="headerlink" href="#fastLowess.LowessResult.robustness_weights" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.robustness_weights">
+<span class="sig-name descname"><span class="pre">robustness_weights</span></span><a class="headerlink" href="#fastlowess.LowessResult.robustness_weights" title="Link to this definition"></a></dt>
 <dd><p>Robustness weights from final iteration</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.standard_errors">
-<span class="sig-name descname"><span class="pre">standard_errors</span></span><a class="headerlink" href="#fastLowess.LowessResult.standard_errors" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.standard_errors">
+<span class="sig-name descname"><span class="pre">standard_errors</span></span><a class="headerlink" href="#fastlowess.LowessResult.standard_errors" title="Link to this definition"></a></dt>
 <dd><p>Standard errors (if computed)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.x">
-<span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#fastLowess.LowessResult.x" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.x">
+<span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#fastlowess.LowessResult.x" title="Link to this definition"></a></dt>
 <dd><p>Sorted x values</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="fastLowess.LowessResult.y">
-<span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#fastLowess.LowessResult.y" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.LowessResult.y">
+<span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#fastlowess.LowessResult.y" title="Link to this definition"></a></dt>
 <dd><p>Smoothed y values</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="fastLowess.smooth">
-<span class="sig-prename descclassname"><span class="pre">fastLowess.</span></span><span class="sig-name descname"><span class="pre">smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.67</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tricube'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robustness_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bisquare'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_intervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_intervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_diagnostics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_residuals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_robustness_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_weight_fallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'use_local_mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_converge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_fractions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kfold'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastLowess.smooth" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.smooth">
+<span class="sig-prename descclassname"><span class="pre">fastlowess.</span></span><span class="sig-name descname"><span class="pre">smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.67</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tricube'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robustness_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bisquare'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'extend'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_intervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_intervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_diagnostics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_residuals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_robustness_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_weight_fallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'use_local_mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_converge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_fractions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kfold'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastlowess.smooth" title="Link to this definition"></a></dt>
 <dd><p>LOWESS smoothing with the batch adapter.</p>
 <p>This is the primary interface for LOWESS smoothing. Processes the entire
 dataset in memory with optional parallel execution.</p>
@@ -665,6 +664,7 @@ dataset in memory with optional parallel execution.</p>
 <li><p><strong>delta</strong> (<em>float</em><em>, </em><em>optional</em>) – Interpolation optimization threshold.</p></li>
 <li><p><strong>weight_function</strong> (<em>str</em><em>, </em><em>optional</em>) – Kernel function: “tricube”, “epanechnikov”, “gaussian”, “uniform”, “biweight”, “triangle”.</p></li>
 <li><p><strong>robustness_method</strong> (<em>str</em><em>, </em><em>optional</em>) – Robustness method: “bisquare”, “huber”, “talwar”.</p></li>
+<li><p><strong>boundary_policy</strong> (<em>str</em><em>, </em><em>optional</em>) – Handling of edge effects: “extend”, “reflect”, “zero” (default: “extend”).</p></li>
 <li><p><strong>confidence_intervals</strong> (<em>float</em><em>, </em><em>optional</em>) – Confidence level for confidence intervals (e.g., 0.95).</p></li>
 <li><p><strong>prediction_intervals</strong> (<em>float</em><em>, </em><em>optional</em>) – Confidence level for prediction intervals (e.g., 0.95).</p></li>
 <li><p><strong>return_diagnostics</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to compute RMSE, MAE, R², etc.</p></li>
@@ -672,7 +672,6 @@ dataset in memory with optional parallel execution.</p>
 <li><p><strong>return_robustness_weights</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to include robustness weights in output.</p></li>
 <li><p><strong>zero_weight_fallback</strong> (<em>str</em><em>, </em><em>optional</em>) – Fallback when all weights are zero: “use_local_mean”, “return_original”, “return_none”.</p></li>
 <li><p><strong>auto_converge</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance for auto-convergence (disabled by default).</p></li>
-<li><p><strong>max_iterations</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum robustness iterations (default: 20).</p></li>
 <li><p><strong>cv_fractions</strong> (<em>list</em><em> of </em><em>float</em><em>, </em><em>optional</em>) – Fractions to test for cross-validation (disabled by default).
 When provided, enables cross-validation to select optimal fraction.</p></li>
 <li><p><strong>cv_method</strong> (<em>str</em><em>, </em><em>optional</em>) – CV method: “loocv” (leave-one-out) or “kfold”. Default: “kfold”.</p></li>
@@ -683,14 +682,14 @@ When provided, enables cross-validation to select optimal fraction.</p></li>
 <dd class="field-even"><p>Result object with smoothed values and optional outputs.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#fastLowess.LowessResult" title="fastLowess.LowessResult">LowessResult</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#fastlowess.LowessResult" title="fastlowess.LowessResult">LowessResult</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="fastLowess.smooth_online">
-<span class="sig-prename descclassname"><span class="pre">fastLowess.</span></span><span class="sig-name descname"><span class="pre">smooth_online</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tricube'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robustness_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bisquare'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastLowess.smooth_online" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.smooth_online">
+<span class="sig-prename descclassname"><span class="pre">fastlowess.</span></span><span class="sig-name descname"><span class="pre">smooth_online</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tricube'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robustness_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bisquare'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'extend'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'full'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_converge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_robustness_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastlowess.smooth_online" title="Link to this definition"></a></dt>
 <dd><p>Online LOWESS with sliding window.</p>
 <p>Maintains a sliding window for incremental updates.</p>
 <dl class="field-list simple">
@@ -702,8 +701,13 @@ When provided, enables cross-validation to select optimal fraction.</p></li>
 <li><p><strong>window_capacity</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum points to retain in window (default: 100).</p></li>
 <li><p><strong>min_points</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum points before smoothing starts (default: 3).</p></li>
 <li><p><strong>iterations</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of robustness iterations (default: 3).</p></li>
+<li><p><strong>delta</strong> (<em>float</em><em>, </em><em>optional</em>) – Interpolation optimization threshold.</p></li>
 <li><p><strong>weight_function</strong> (<em>str</em><em>, </em><em>optional</em>) – Kernel function: “tricube”, “epanechnikov”, “gaussian”, “uniform”, “biweight”, “triangle”.</p></li>
 <li><p><strong>robustness_method</strong> (<em>str</em><em>, </em><em>optional</em>) – Robustness method: “bisquare”, “huber”, “talwar”.</p></li>
+<li><p><strong>boundary_policy</strong> (<em>str</em><em>, </em><em>optional</em>) – Handling of edge effects: “extend”, “reflect”, “zero” (default: “extend”).</p></li>
+<li><p><strong>update_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – Update strategy: “full” or “incremental” (default: “full”).</p></li>
+<li><p><strong>auto_converge</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance for auto-convergence (disabled by default).</p></li>
+<li><p><strong>return_robustness_weights</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to include robustness weights.</p></li>
 <li><p><strong>parallel</strong> (<em>bool</em><em>, </em><em>optional</em>) – Enable parallel execution (default: False for online).</p></li>
 </ul>
 </dd>
@@ -711,14 +715,14 @@ When provided, enables cross-validation to select optimal fraction.</p></li>
 <dd class="field-even"><p>Result object with smoothed values.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#fastLowess.LowessResult" title="fastLowess.LowessResult">LowessResult</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#fastlowess.LowessResult" title="fastlowess.LowessResult">LowessResult</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="fastLowess.smooth_streaming">
-<span class="sig-prename descclassname"><span class="pre">fastLowess.</span></span><span class="sig-name descname"><span class="pre">smooth_streaming</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tricube'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robustness_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bisquare'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastLowess.smooth_streaming" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="fastlowess.smooth_streaming">
+<span class="sig-prename descclassname"><span class="pre">fastlowess.</span></span><span class="sig-name descname"><span class="pre">smooth_streaming</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tricube'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robustness_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bisquare'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'extend'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_converge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_diagnostics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_robustness_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastlowess.smooth_streaming" title="Link to this definition"></a></dt>
 <dd><p>Streaming LOWESS for large datasets.</p>
 <p>Processes data in chunks to maintain constant memory usage.
 Calls process_chunk() followed by finalize() internally.</p>
@@ -731,8 +735,13 @@ Calls process_chunk() followed by finalize() internally.</p>
 <li><p><strong>chunk_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of each processing chunk (default: 5000).</p></li>
 <li><p><strong>overlap</strong> (<em>int</em><em>, </em><em>optional</em>) – Overlap between chunks (default: 10% of chunk_size).</p></li>
 <li><p><strong>iterations</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of robustness iterations (default: 3).</p></li>
+<li><p><strong>delta</strong> (<em>float</em><em>, </em><em>optional</em>) – Interpolation optimization threshold.</p></li>
 <li><p><strong>weight_function</strong> (<em>str</em><em>, </em><em>optional</em>) – Kernel function: “tricube”, “epanechnikov”, “gaussian”, “uniform”, “biweight”, “triangle”.</p></li>
 <li><p><strong>robustness_method</strong> (<em>str</em><em>, </em><em>optional</em>) – Robustness method: “bisquare”, “huber”, “talwar”.</p></li>
+<li><p><strong>boundary_policy</strong> (<em>str</em><em>, </em><em>optional</em>) – Handling of edge effects: “extend”, “reflect”, “zero” (default: “extend”).</p></li>
+<li><p><strong>auto_converge</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance for auto-convergence (disabled by default).</p></li>
+<li><p><strong>return_diagnostics</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to compute cumulative diagnostics across chunks.</p></li>
+<li><p><strong>return_robustness_weights</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to include robustness weights.</p></li>
 <li><p><strong>parallel</strong> (<em>bool</em><em>, </em><em>optional</em>) – Enable parallel execution (default: True).</p></li>
 </ul>
 </dd>
@@ -740,7 +749,7 @@ Calls process_chunk() followed by finalize() internally.</p>
 <dd class="field-even"><p>Result object with smoothed values.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#fastLowess.LowessResult" title="fastLowess.LowessResult">LowessResult</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#fastlowess.LowessResult" title="fastlowess.LowessResult">LowessResult</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -751,7 +760,7 @@ Calls process_chunk() followed by finalize() internally.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="benchmarks.html" class="btn btn-neutral float-left" title="Benchmarks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="execution_modes.html" class="btn btn-neutral float-left" title="Execution Modes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

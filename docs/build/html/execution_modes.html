@@ -6,20 +6,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Execution Modes &mdash; fastLowess 0.1.0 documentation</title>
+  <title>Execution Modes &mdash; fastlowess 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Benchmarks" href="benchmarks.html" />
+    <link rel="next" title="API Reference" href="api.html" />
     <link rel="prev" title="Advanced Usage" href="advanced_usage.html" /> 
 </head>
 
@@ -32,7 +32,7 @@
           
           
           <a href="index.html" class="icon icon-home">
-            fastLowess
+            fastlowess
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -55,7 +55,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#performance-tuning">Performance &amp; Tuning</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="benchmarks.html">Benchmarks</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -68,7 +67,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">fastLowess</a>
+          <a href="index.html">fastlowess</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -88,14 +87,14 @@
              
   <section id="execution-modes">
 <h1>Execution Modes<a class="headerlink" href="#execution-modes" title="Link to this heading"></a></h1>
-<p><cite>fastLowess</cite> offers three execution modes designed for different data scales and use cases. Each mode corresponds to an underlying “Adapter” in the Rust engine.</p>
+<p><cite>fastlowess</cite> offers three execution modes designed for different data scales and use cases. Each mode corresponds to an underlying “Adapter” in the Rust engine.</p>
 <section id="execution-mode-comparison">
 <h2>Execution Mode Comparison<a class="headerlink" href="#execution-mode-comparison" title="Link to this heading"></a></h2>
 <p><em>*Online mode defaults to sequential execution for minimal latency, but can be parallelized if needed.</em></p>
 </section>
 <section id="batch-mode-standard">
 <h2>1. Batch Mode (Standard)<a class="headerlink" href="#batch-mode-standard" title="Link to this heading"></a></h2>
-<p>This is the default mode used by <cite>fastLowess.smooth()</cite>. It processes the entire dataset in memory.</p>
+<p>This is the default mode used by <cite>fastlowess.smooth()</cite>. It processes the entire dataset in memory.</p>
 <ul class="simple">
 <li><p><strong>Best for:</strong> Standard analysis, exploratory data analysis, plotting.</p></li>
 <li><p><strong>Performance:</strong> Uses Rayon for multi-threaded execution.</p></li>
@@ -103,8 +102,8 @@
 </section>
 <section id="streaming-mode-large-datasets">
 <h2>2. Streaming Mode (Large Datasets)<a class="headerlink" href="#streaming-mode-large-datasets" title="Link to this heading"></a></h2>
-<p>For datasets that are too large to fit in memory or require efficient batch processing, use <cite>fastLowess.smooth_streaming()</cite>. This method processes data in chunks, maintaining constant memory usage.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">fastLowess</span>
+<p>For datasets that are too large to fit in memory or require efficient batch processing, use <cite>fastlowess.smooth_streaming()</cite>. This method processes data in chunks, maintaining constant memory usage.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">fastlowess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="c1"># 1. Create a large synthetic dataset (50k points)</span>
@@ -114,7 +113,7 @@
 
 <span class="c1"># 2. Process in chunks</span>
 <span class="c1"># This uses constant memory regardless of dataset size</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth_streaming</span><span class="p">(</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth_streaming</span><span class="p">(</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
     <span class="n">fraction</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
     <span class="n">chunk_size</span><span class="o">=</span><span class="mi">5_000</span><span class="p">,</span>   <span class="c1"># Process 5k points at a time</span>
@@ -131,8 +130,8 @@
 </section>
 <section id="online-mode-real-time">
 <h2>3. Online Mode (Real-time)<a class="headerlink" href="#online-mode-real-time" title="Link to this heading"></a></h2>
-<p>For real-time data streams, such as sensor data, use <cite>fastLowess.smooth_online()</cite>. This maintains a sliding window of the most recent data points.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">fastLowess</span>
+<p>For real-time data streams, such as sensor data, use <cite>fastlowess.smooth_online()</cite>. This maintains a sliding window of the most recent data points.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">fastlowess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 
@@ -145,7 +144,7 @@
 <span class="n">y</span> <span class="o">=</span> <span class="n">base_temp</span> <span class="o">+</span> <span class="n">daily_cycle</span> <span class="o">+</span> <span class="n">noise</span>
 
 <span class="c1"># 2. Process with sliding window (Real-time simulation)</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth_online</span><span class="p">(</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth_online</span><span class="p">(</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
     <span class="n">fraction</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
     <span class="n">window_capacity</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
@@ -164,7 +163,7 @@
 <section id="performance-tuning">
 <h2>Performance &amp; Tuning<a class="headerlink" href="#performance-tuning" title="Link to this heading"></a></h2>
 <p>### Parallel vs Sequential</p>
-<p>Batch and Streaming modes are parallel by default. <cite>fastLowess</cite> scales linearly with the number of cores for large datasets.</p>
+<p>Batch and Streaming modes are parallel by default. <cite>fastlowess</cite> scales linearly with the number of cores for large datasets.</p>
 <p><strong>Typical Speedup Factors (vs Single-threaded):</strong></p>
 <table class="docutils align-default">
 <thead>
@@ -191,7 +190,7 @@
 <p>### Delta Optimization</p>
 <p>For large datasets in Batch mode, you can enable <cite>delta</cite> optimization. This skips re-calculation for points that are very close to each other, using interpolation instead.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Delta optimization enabled</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
     <span class="n">fraction</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
     <span class="n">delta</span><span class="o">=</span><span class="mf">0.01</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="c1"># Interpolate within 1% range</span>
@@ -207,7 +206,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="advanced_usage.html" class="btn btn-neutral float-left" title="Advanced Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="benchmarks.html" class="btn btn-neutral float-right" title="Benchmarks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -1,13 +1,9 @@
 # Run all local checks (formatting, linting, building, tests, docs)
-check: fmt clippy build test doc examples
+check: fmt clippy build test doc examples maturin
 	@echo "All checks completed successfully!"
 
-# Run all checks including Python linting
-check-all: check lint-py
-	@echo "All checks (Rust + Python) completed successfully!"
-
 # Formatting
-fmt: fmt-rust fmt-py
+fmt: fmt-rust fmt-py fmt-fix fmt-fix-rust fmt-fix-py
 	@echo "Formatting check complete!"
 
 fmt-rust:
@@ -30,7 +26,7 @@ fmt-fix-py:
 	@ruff format fastlowess/ tests/
 
 # Linter
-clippy: clippy-default clippy-serial
+clippy: clippy-default clippy-serial lint-py lint-py-fix
 
 clippy-default:
 	@echo "Running clippy (default / parallel)..."
@@ -64,6 +60,8 @@ build-serial:
 	@echo "Build complete!"
 
 # Maturin (Python package)
+maturin: develop develop-release wheel wheel-release
+
 develop:
 	@echo "Building and installing Python package (development mode)..."
 	@maturin develop
@@ -98,7 +96,7 @@ test-python:
 	@echo "Python tests complete!"
 
 # Documentation
-doc: doc-default doc-serial
+doc: doc-default doc-serial doc-py
 	@echo "Documentation build complete!"
 
 doc-default:

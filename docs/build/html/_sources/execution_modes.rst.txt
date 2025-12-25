@@ -1,7 +1,7 @@
 Execution Modes
 ===============
 
-`fastLowess` offers three execution modes designed for different data scales and use cases. Each mode corresponds to an underlying "Adapter" in the Rust engine.
+`fastlowess` offers three execution modes designed for different data scales and use cases. Each mode corresponds to an underlying "Adapter" in the Rust engine.
 
 Execution Mode Comparison
 -------------------------
@@ -23,7 +23,7 @@ Execution Mode Comparison
 1. Batch Mode (Standard)
 ------------------------
 
-This is the default mode used by `fastLowess.smooth()`. It processes the entire dataset in memory.
+This is the default mode used by `fastlowess.smooth()`. It processes the entire dataset in memory.
 
 *   **Best for:** Standard analysis, exploratory data analysis, plotting.
 *   **Performance:** Uses Rayon for multi-threaded execution.
@@ -31,11 +31,11 @@ This is the default mode used by `fastLowess.smooth()`. It processes the entire 
 2. Streaming Mode (Large Datasets)
 ----------------------------------
 
-For datasets that are too large to fit in memory or require efficient batch processing, use `fastLowess.smooth_streaming()`. This method processes data in chunks, maintaining constant memory usage.
+For datasets that are too large to fit in memory or require efficient batch processing, use `fastlowess.smooth_streaming()`. This method processes data in chunks, maintaining constant memory usage.
 
 .. code-block:: python
 
-    import fastLowess
+    import fastlowess
     import numpy as np
 
     # 1. Create a large synthetic dataset (50k points)
@@ -45,7 +45,7 @@ For datasets that are too large to fit in memory or require efficient batch proc
 
     # 2. Process in chunks
     # This uses constant memory regardless of dataset size
-    result = fastLowess.smooth_streaming(
+    result = fastlowess.smooth_streaming(
         x, y,
         fraction=0.3,
         chunk_size=5_000,   # Process 5k points at a time
@@ -62,11 +62,11 @@ For datasets that are too large to fit in memory or require efficient batch proc
 3. Online Mode (Real-time)
 --------------------------
 
-For real-time data streams, such as sensor data, use `fastLowess.smooth_online()`. This maintains a sliding window of the most recent data points.
+For real-time data streams, such as sensor data, use `fastlowess.smooth_online()`. This maintains a sliding window of the most recent data points.
 
 .. code-block:: python
 
-    import fastLowess
+    import fastlowess
     import numpy as np
     import math
 
@@ -79,7 +79,7 @@ For real-time data streams, such as sensor data, use `fastLowess.smooth_online()
     y = base_temp + daily_cycle + noise
 
     # 2. Process with sliding window (Real-time simulation)
-    result = fastLowess.smooth_online(
+    result = fastlowess.smooth_online(
         x, y,
         fraction=0.4,
         window_capacity=12,
@@ -98,7 +98,7 @@ Performance & Tuning
 
 ### Parallel vs Sequential
 
-Batch and Streaming modes are parallel by default. `fastLowess` scales linearly with the number of cores for large datasets.
+Batch and Streaming modes are parallel by default. `fastlowess` scales linearly with the number of cores for large datasets.
 
 **Typical Speedup Factors (vs Single-threaded):**
 
@@ -119,7 +119,7 @@ For large datasets in Batch mode, you can enable `delta` optimization. This skip
 .. code-block:: python
 
     # Delta optimization enabled
-    result = fastLowess.smooth(
+    result = fastlowess.smooth(
         x, y,
         fraction=0.5,
         delta=0.01 * (x.max() - x.min()) # Interpolate within 1% range

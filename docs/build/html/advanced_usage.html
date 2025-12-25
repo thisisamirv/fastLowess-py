@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Advanced Usage &mdash; fastLowess 0.1.0 documentation</title>
+  <title>Advanced Usage &mdash; fastlowess 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -32,7 +32,7 @@
           
           
           <a href="index.html" class="icon icon-home">
-            fastLowess
+            fastlowess
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -47,20 +47,25 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Advanced Usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#robust-smoothing-handling-outliers">Robust Smoothing (Handling Outliers)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#robust-smoothing">Robust Smoothing</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#robustness-methods">Robustness Methods</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#uncertainty-quantification">Uncertainty Quantification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#boundary-policy">Boundary Policy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cross-validation">Cross-Validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#diagnostics">Diagnostics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#diagnostic-reference">Diagnostic Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#zero-weight-handling">Zero-Weight Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#kernel-selection">Kernel Selection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cross-validation-automatic-parameter-selection">Cross-Validation (Automatic Parameter Selection)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#zero-weight-handling">Zero Weight Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Zero Weight Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#boundary-policy-edge-handling">Boundary Policy (Edge Handling)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#auto-convergence">Auto-Convergence</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="execution_modes.html">Execution Modes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="benchmarks.html">Benchmarks</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -73,7 +78,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">fastLowess</a>
+          <a href="index.html">fastlowess</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -93,44 +98,13 @@
              
   <section id="advanced-usage">
 <h1>Advanced Usage<a class="headerlink" href="#advanced-usage" title="Link to this heading"></a></h1>
-<p>This guide covers advanced features of <cite>fastLowess</cite>, including robust smoothing, uncertainty quantification, and automatic parameter selection.</p>
-<section id="robust-smoothing-handling-outliers">
-<h2>Robust Smoothing (Handling Outliers)<a class="headerlink" href="#robust-smoothing-handling-outliers" title="Link to this heading"></a></h2>
-<p>Real-world data often contains outliers that can distort the smoothed curve. <cite>fastLowess</cite> implements iterative re-weighted least squares (IRLS) to robustly ignore these outliers.</p>
-<a class="reference internal image-reference" href="_images/robust_vs_standard_lowess.svg"><img alt="Robust vs Standard LOWESS" class="align-center" src="_images/robust_vs_standard_lowess.svg" style="width: 100%;" />
-</a>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">fastLowess</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="c1"># 1. Generate data with periodic outliers</span>
-<span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span>
-<span class="c1"># Add outliers to every 100th point</span>
-<span class="n">y</span><span class="p">[::</span><span class="mi">100</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">10.0</span>
-
-<span class="c1"># 2. Apply robust smoothing</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span>
-    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
-    <span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-    <span class="n">iterations</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>                 <span class="c1"># 5 iterations for strong robustness</span>
-    <span class="n">robustness_method</span><span class="o">=</span><span class="s2">&quot;bisquare&quot;</span><span class="p">,</span> <span class="c1"># &quot;bisquare&quot; (default), &quot;huber&quot;, or &quot;talwar&quot;</span>
-    <span class="n">return_robustness_weights</span><span class="o">=</span><span class="kc">True</span>
-<span class="p">)</span>
-
-<span class="c1"># 3. Identify downweighted points (outliers)</span>
-<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">robustness_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="c1"># Weights near 0 indicate outliers</span>
-    <span class="n">outliers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">robustness_weights</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Detected </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">outliers</span><span class="p">)</span><span class="si">}</span><span class="s2"> outliers&quot;</span><span class="p">)</span>
-
-<span class="c1"># Output:</span>
-<span class="c1"># Detected 10 outliers</span>
-</pre></div>
-</div>
+<p>This section details the advanced features of <code class="docutils literal notranslate"><span class="pre">fastlowess</span></code>, including robustness, adaptive optimization, and cross-validation.</p>
+<section id="robust-smoothing">
+<h2>Robust Smoothing<a class="headerlink" href="#robust-smoothing" title="Link to this heading"></a></h2>
+<p>The package provides multiple methods for handling outliers. By default, it uses <strong>Bisquare</strong> weighting with 3 robustness iterations.</p>
 <section id="robustness-methods">
 <h3>Robustness Methods<a class="headerlink" href="#robustness-methods" title="Link to this heading"></a></h3>
-<p><cite>fastLowess</cite> supports three methods for downweighting outliers:</p>
+<p><cite>fastlowess</cite> supports three methods for downweighting outliers:</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Method</p></th>
@@ -153,21 +127,102 @@
 </tr>
 </tbody>
 </table>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastlowess</span><span class="w"> </span><span class="kn">import</span> <span class="n">smooth</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
+    <span class="n">iterations</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">robustness_method</span><span class="o">=</span><span class="s2">&quot;talwar&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 </section>
 </section>
-<section id="uncertainty-quantification">
-<h2>Uncertainty Quantification<a class="headerlink" href="#uncertainty-quantification" title="Link to this heading"></a></h2>
-<p>You can compute <strong>confidence intervals</strong> (uncertainty in the smoothed mean) and <strong>prediction intervals</strong> (likely range for new observations).</p>
+<section id="boundary-policy">
+<h2>Boundary Policy<a class="headerlink" href="#boundary-policy" title="Link to this heading"></a></h2>
+<p>Control how the smoother behaves at the edges of the dataset to avoid boundary bias.</p>
+<ul class="simple">
+<li><p><strong>“extend”</strong> (default): Extends the boundary values (recommended for preserving trends).</p></li>
+<li><p><strong>“reflect”</strong>: Reflects values around the boundary.</p></li>
+<li><p><strong>“zero”</strong>: Pads with zeros.</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/robust_vs_standard_lowess.svg"><img alt="Robust vs Standard LOWESS" class="align-center" src="_images/robust_vs_standard_lowess.svg" style="width: 100%;" />
+</a>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Stop iterations if max change &lt; 1e-4</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">auto_converge</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="cross-validation">
+<h2>Cross-Validation<a class="headerlink" href="#cross-validation" title="Link to this heading"></a></h2>
+<p>Automatically select the best <code class="docutils literal notranslate"><span class="pre">fraction</span></code> from a list of candidates.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fractions</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">]</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
+    <span class="n">cv_fractions</span><span class="o">=</span><span class="n">fractions</span><span class="p">,</span>
+    <span class="n">cv_method</span><span class="o">=</span><span class="s2">&quot;loocv&quot;</span>  <span class="c1"># or &quot;kfold&quot;</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Optimal fraction: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">fraction_used</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="diagnostics">
+<h2>Diagnostics<a class="headerlink" href="#diagnostics" title="Link to this heading"></a></h2>
+<p>Enable <code class="docutils literal notranslate"><span class="pre">return_diagnostics</span></code> to get objective measures of fit quality.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">return_diagnostics</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">diag</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">diagnostics</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R-Squared: </span><span class="si">{</span><span class="n">diag</span><span class="o">.</span><span class="n">r_squared</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RMSE: </span><span class="si">{</span><span class="n">diag</span><span class="o">.</span><span class="n">rmse</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="diagnostic-reference">
+<h3>Diagnostic Reference<a class="headerlink" href="#diagnostic-reference" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Metric</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>RMSE</strong></p></td>
+<td><p>Root Mean Squared Error</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>MAE</strong></p></td>
+<td><p>Mean Absolute Error</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>R-squared</strong></p></td>
+<td><p>Coefficient of Determination</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>aic/aicc</strong></p></td>
+<td><p>Information Criteria (if applicable)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>eff_df</strong></p></td>
+<td><p>Effective Degrees of Freedom</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="zero-weight-handling">
+<h2>Zero-Weight Handling<a class="headerlink" href="#zero-weight-handling" title="Link to this heading"></a></h2>
+<p>In sparse regions where a neighborhood contains no points (or weights sum to zero), you can control the fallback behavior:</p>
+<ul class="simple">
+<li><p><strong>“use_local_mean”</strong> (default): Uses the mean of the raw neighborhood.</p></li>
+<li><p><strong>“return_original”</strong>: Returns the original Y value for that point.</p></li>
+<li><p><strong>“return_none”</strong>: Returns NaN.</p></li>
+</ul>
 <a class="reference internal image-reference" href="_images/confidence_vs_prediction_intervals.svg"><img alt="Confidence vs Prediction Intervals" class="align-center" src="_images/confidence_vs_prediction_intervals.svg" style="width: 100%;" />
 </a>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">fastLowess</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">fastlowess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">])</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.1</span><span class="p">,</span> <span class="mf">3.8</span><span class="p">,</span> <span class="mf">6.2</span><span class="p">,</span> <span class="mf">7.9</span><span class="p">,</span> <span class="mf">10.3</span><span class="p">,</span> <span class="mf">11.8</span><span class="p">,</span> <span class="mf">14.1</span><span class="p">,</span> <span class="mf">15.7</span><span class="p">])</span>
 
 <span class="c1"># Compute both Confidence and Prediction Intervals</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
     <span class="n">fraction</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
     <span class="n">confidence_intervals</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>      <span class="c1"># 95% CI for the mean</span>
@@ -199,7 +254,7 @@
 <section id="kernel-selection">
 <h2>Kernel Selection<a class="headerlink" href="#kernel-selection" title="Link to this heading"></a></h2>
 <p>You can choose different kernel functions via the <cite>weight_function</cite> parameter to control how neighboring points are weighted.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight_function</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight_function</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <table class="docutils align-default">
@@ -252,8 +307,8 @@
 </section>
 <section id="cross-validation-automatic-parameter-selection">
 <h2>Cross-Validation (Automatic Parameter Selection)<a class="headerlink" href="#cross-validation-automatic-parameter-selection" title="Link to this heading"></a></h2>
-<p>Choosing the right <cite>fraction</cite> (bandwidth) can be difficult. <cite>fastLowess</cite> can automatically select the optimal fraction using Cross-Validation.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">fastLowess</span>
+<p>Choosing the right <cite>fraction</cite> (bandwidth) can be difficult. <cite>fastlowess</cite> can automatically select the optimal fraction using Cross-Validation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">fastlowess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="c1"># 1. Generate noisy data</span>
@@ -262,7 +317,7 @@
 
 <span class="c1"># 2. Run Cross-Validation</span>
 <span class="c1"># Test different fractions (bandwidths) to find the best fit</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span>
     <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span>
     <span class="n">cv_fractions</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">],</span>  <span class="c1"># Candidates</span>
     <span class="n">cv_method</span><span class="o">=</span><span class="s2">&quot;kfold&quot;</span><span class="p">,</span>                  <span class="c1"># &quot;kfold&quot; (default) or &quot;loocv&quot;</span>
@@ -278,8 +333,8 @@
 </pre></div>
 </div>
 </section>
-<section id="zero-weight-handling">
-<h2>Zero Weight Handling<a class="headerlink" href="#zero-weight-handling" title="Link to this heading"></a></h2>
+<section id="id1">
+<h2>Zero Weight Handling<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
 <p>In rare cases (e.g., extremely sparse data or inappropriate bandwidth), a point may have no neighbors with positive weights. You can control the behavior with <cite>zero_weight_fallback</cite>:</p>
 <ul class="simple">
 <li><p><strong>“use_local_mean”</strong> (default): Use the mean of the neighborhood.</p></li>
@@ -296,7 +351,7 @@
 <li><p><strong>“zero”</strong>: Pad with zeros.</p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use reflective padding for better edge handling</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">boundary_policy</span><span class="o">=</span><span class="s2">&quot;reflect&quot;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">boundary_policy</span><span class="o">=</span><span class="s2">&quot;reflect&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -304,7 +359,7 @@
 <h2>Auto-Convergence<a class="headerlink" href="#auto-convergence" title="Link to this heading"></a></h2>
 <p>Automatically stop robustness iterations when the smoothed values converge.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Stop when the maximum change between iterations is &lt; 1e-6</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">fastLowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
     <span class="n">iterations</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
     <span class="n">auto_converge</span><span class="o">=</span><span class="mf">1e-6</span>

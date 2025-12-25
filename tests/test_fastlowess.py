@@ -461,5 +461,6 @@ class TestCrossValidation:
         assert result.cv_scores is not None
         assert len(result.cv_scores) == 1
 
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
