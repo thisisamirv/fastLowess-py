@@ -1,127 +1,127 @@
-# Benchmark Interpretation (fastLowess)
+# Benchmark Interpretation (fastlowess)
 
 ## Summary
 
-The `fastLowess` package demonstrates massive performance gains over Python's `statsmodels`, ranging from **12x to over 3800x** speedup. The addition of **parallel execution** (via Rust/Rayon) and optimized algorithm defaults makes it exceptionally well-suited for high-throughput data processing and large-scale datasets.
+The `fastlowess` package demonstrates massive performance gains over Python's `statsmodels`, ranging from **14x to over 2100x** speedup. The addition of **parallel execution** (via Rust/Rayon) and optimized algorithm defaults makes it exceptionally well-suited for high-throughput data processing and large-scale datasets.
 
 ## Category Comparison
 
 | Category         | Matched | Median Speedup | Mean Speedup |
 |------------------|---------|----------------|--------------|
-| **Scalability**  | 5       | **577.4x**     | 1375.0x      |
-| **Pathological** | 4       | **381.6x**     | 373.4x       |
-| **Iterations**   | 6       | **438.1x**     | 426.0x       |
-| **Fraction**     | 6       | **336.8x**     | 364.9x       |
-| **Financial**    | 4       | **242.1x**     | 263.5x       |
-| **Scientific**   | 4       | **165.1x**     | 207.5x       |
-| **Genomic**      | 4       | **23.1x**      | 22.7x        |
-| **Delta**        | 4       | **3.6x**       | 6.0x         |
+| **Scalability**  | 5       | **344.2x**     | 762.7x       |
+| **Pathological** | 4       | **353.8x**     | 348.7x       |
+| **Iterations**   | 6       | **222.3x**     | 223.9x       |
+| **Fraction**     | 6       | **208.7x**     | 214.8x       |
+| **Financial**    | 4       | **192.6x**     | 211.0x       |
+| **Scientific**   | 4       | **154.6x**     | 173.9x       |
+| **Genomic**      | 4       | **15.6x**      | 14.8x        |
+| **Delta**        | 4       | **3.8x**       | 5.9x         |
 
 ## Top 10 FastLowess Wins
 
-| Benchmark        | statsmodels | fastLowess | Speedup   |
-|------------------|-------------|------------|-----------|
-| scale_100000     | 43727.2ms   | 11.5ms     | **3808.9x** |
-| scale_50000      | 11159.9ms   | 5.9ms      | **1901.4x** |
-| scale_10000      | 663.1ms     | 1.1ms      | **577.4x**  |
-| fraction_0.05    | 197.2ms     | 0.4ms      | **556.5x**  |
-| financial_10000  | 497.1ms     | 1.0ms      | **518.8x**  |
-| iterations_0     | 74.2ms      | 0.2ms      | **492.9x**  |
-| clustered        | 267.8ms     | 0.6ms      | **472.9x**  |
-| iterations_1     | 148.5ms     | 0.3ms      | **471.5x**  |
-| scale_5000       | 229.9ms     | 0.5ms      | **469.0x**  |
-| scientific_10000 | 777.2ms     | 1.7ms      | **464.7x**  |
+| Benchmark        | statsmodels | fastlowess | Speedup     |
+|------------------|-------------|------------|-------------|
+| scale_100000     | 43727.2ms   | 20.0ms     | **2182.7x** |
+| scale_50000      | 11159.9ms   | 10.8ms     | **1035.5x** |
+| financial_10000  | 497.1ms     | 1.2ms      | **401.3x**  |
+| clustered        | 267.8ms     | 0.7ms      | **368.7x**  |
+| high_noise       | 726.9ms     | 2.1ms      | **353.9x**  |
+| constant_y       | 230.3ms     | 0.7ms      | **353.7x**  |
+| scale_10000      | 663.1ms     | 1.9ms      | **344.2x**  |
+| scientific_10000 | 777.2ms     | 2.3ms      | **337.6x**  |
+| extreme_outliers | 852.0ms     | 2.7ms      | **318.4x**  |
+| tricube          | 307.9ms     | 1.0ms      | **302.6x**  |
 
 ## Regressions
 
-**None identified.** `fastLowess` outperforms `statsmodels` in all matched benchmarks. The parallel implementation ensures that even at extreme scales (100k points), processing remains sub-20ms.
+**None identified.** `fastlowess` outperforms `statsmodels` in all matched benchmarks. The parallel implementation ensures that even at extreme scales (100k points), processing remains around 20ms.
 
 ## Detailed Results
 
 ### Scalability (1K - 100K points)
 
-| Size    | fastLowess | statsmodels | Speedup |
+| Size    | fastlowess | statsmodels | Speedup |
 |---------|------------|-------------|---------|
-| 1,000   | 0.26ms     | 30.4ms      | 118x    |
-| 5,000   | 0.49ms     | 229.9ms     | 469x    |
-| 10,000  | 1.15ms     | 663.1ms     | 577x    |
-| 50,000  | 5.87ms     | 11159.9ms   | 1901x   |
-| 100,000 | 11.48ms    | 43727.2ms   | 3809x   |
+| 1,000   | 0.37ms     | 30.4ms      | 81x     |
+| 5,000   | 1.35ms     | 229.9ms     | 170x    |
+| 10,000  | 1.93ms     | 663.1ms     | 344x    |
+| 50,000  | 10.78ms    | 11159.9ms   | 1035x   |
+| 100,000 | 20.03ms    | 43727.2ms   | 2183x   |
 
 ### Fraction Variations (n=5000)
 
-| Fraction | fastLowess | statsmodels | Speedup |
+| Fraction | fastlowess | statsmodels | Speedup |
 |----------|------------|-------------|---------|
-| 0.05     | 0.35ms     | 197.2ms     | 556x    |
-| 0.10     | 0.57ms     | 227.9ms     | 403x    |
-| 0.20     | 0.75ms     | 297.0ms     | 395x    |
-| 0.30     | 1.28ms     | 357.0ms     | 278x    |
-| 0.50     | 1.75ms     | 488.4ms     | 279x    |
-| 0.67     | 2.17ms     | 601.6ms     | 278x    |
+| 0.05     | 0.72ms     | 197.2ms     | 276x    |
+| 0.10     | 1.13ms     | 227.9ms     | 202x    |
+| 0.20     | 1.38ms     | 297.0ms     | 216x    |
+| 0.30     | 1.81ms     | 357.0ms     | 197x    |
+| 0.50     | 2.76ms     | 488.4ms     | 177x    |
+| 0.67     | 2.71ms     | 601.6ms     | 222x    |
 
 ### Robustness Iterations (n=5000)
 
-| Iterations | fastLowess | statsmodels | Speedup |
+| Iterations | fastlowess | statsmodels | Speedup |
 |------------|------------|-------------|---------|
-| 0          | 0.15ms     | 74.2ms      | 493x    |
-| 1          | 0.31ms     | 148.5ms     | 472x    |
-| 2          | 0.48ms     | 222.8ms     | 461x    |
-| 3          | 0.76ms     | 296.5ms     | 388x    |
-| 5          | 1.36ms     | 445.1ms     | 327x    |
-| 10         | 1.97ms     | 815.6ms     | 415x    |
+| 0          | 0.28ms     | 74.2ms      | 269x    |
+| 1          | 0.64ms     | 148.5ms     | 232x    |
+| 2          | 1.09ms     | 222.8ms     | 205x    |
+| 3          | 1.58ms     | 296.5ms     | 188x    |
+| 5          | 2.10ms     | 445.1ms     | 212x    |
+| 10         | 3.44ms     | 815.6ms     | 237x    |
 
 ### Delta Parameter (n=10000)
 
-| Delta    | fastLowess | statsmodels | Speedup |
+| Delta    | fastlowess | statsmodels | Speedup |
 |----------|------------|-------------|---------|
-| none (0) | 45.48ms    | 678.2ms     | 15x     |
-| small    | 0.54ms     | 2.28ms      | 4.2x    |
-| medium   | 0.43ms     | 1.27ms      | 2.9x    |
-| large    | 0.41ms     | 0.76ms      | 1.9x    |
+| none (0) | 48.40ms    | 678.2ms     | 14x     |
+| small    | 0.49ms     | 2.28ms      | 4.7x    |
+| medium   | 0.42ms     | 1.27ms      | 3.0x    |
+| large    | 0.40ms     | 0.76ms      | 1.9x    |
 
 ### Pathological Cases (n=5000)
 
-| Case             | fastLowess | statsmodels | Speedup |
+| Case             | fastlowess | statsmodels | Speedup |
 |------------------|------------|-------------|---------|
-| clustered        | 0.57ms     | 267.8ms     | 473x    |
-| constant_y       | 0.55ms     | 230.3ms     | 416x    |
-| extreme_outliers | 2.45ms     | 852.0ms     | 347x    |
-| high_noise       | 2.83ms     | 726.9ms     | 257x    |
+| clustered        | 0.73ms     | 267.8ms     | 369x    |
+| constant_y       | 0.65ms     | 230.3ms     | 354x    |
+| extreme_outliers | 2.68ms     | 852.0ms     | 318x    |
+| high_noise       | 2.05ms     | 726.9ms     | 354x    |
 
 ### Real-World Scenarios
 
 #### Financial Time Series
 
-| Size    | fastLowess | statsmodels | Speedup |
+| Size    | fastlowess | statsmodels | Speedup |
 |---------|------------|-------------|---------|
-| 500     | 0.20ms     | 10.4ms      | 51x     |
-| 1,000   | 0.25ms     | 22.2ms      | 87x     |
-| 5,000   | 0.43ms     | 170.9ms     | 397x    |
-| 10,000  | 0.96ms     | 497.1ms     | 519x    |
+| 500     | 0.18ms     | 10.4ms      | 57x     |
+| 1,000   | 0.21ms     | 22.2ms      | 104x    |
+| 5,000   | 0.61ms     | 170.9ms     | 281x    |
+| 10,000  | 1.24ms     | 497.1ms     | 401x    |
 
 #### Scientific Measurements
 
-| Size    | fastLowess | statsmodels | Speedup |
+| Size    | fastlowess | statsmodels | Speedup |
 |---------|------------|-------------|---------|
-| 500     | 0.40ms     | 14.1ms      | 35x     |
-| 1,000   | 0.53ms     | 31.6ms      | 60x     |
-| 5,000   | 0.99ms     | 268.5ms     | 270x    |
-| 10,000  | 1.67ms     | 777.2ms     | 465x    |
+| 500     | 0.29ms     | 14.1ms      | 49x     |
+| 1,000   | 0.44ms     | 31.6ms      | 72x     |
+| 5,000   | 1.13ms     | 268.5ms     | 237x    |
+| 10,000  | 2.30ms     | 777.2ms     | 338x    |
 
 #### Genomic Methylation (with delta=100)
 
-| Size    | fastLowess | statsmodels | Speedup |
+| Size    | fastlowess | statsmodels | Speedup |
 |---------|------------|-------------|---------|
-| 1,000   | 0.92ms     | 29.5ms      | 32x     |
-| 5,000   | 9.06ms     | 227.3ms     | 25x     |
-| 10,000  | 31.46ms    | 662.8ms     | 21x     |
-| 50,000  | 886.84ms   | 11205.2ms   | 13x     |
+| 1,000   | 1.85ms     | 29.5ms      | 16x     |
+| 5,000   | 14.89ms    | 227.3ms     | 15x     |
+| 10,000  | 40.36ms    | 662.8ms     | 16x     |
+| 50,000  | 974.48ms   | 11205.2ms   | 11.5x   |
 
 ## Notes
 
 - **Parallel Execution**: Enabled via Rust/Rayon.
 - Benchmarks use standard Python timing with warmup and 10 iterations.
 - Both use identical scenarios with reproducible RNG (seed=42).
-- Python package: `fastLowess` v0.2.0 (running on `fastLowess` v0.2.x rust crate).
+- Python package: `fastlowess` v0.3.0.
 - Reference: `statsmodels` v0.14.x.
-- Test date: 2025-12-21.
+- Test date: 2025-12-25.
