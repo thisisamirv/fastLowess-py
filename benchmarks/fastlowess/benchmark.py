@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Industry-level LOWESS benchmarks with JSON output for fastLowess.
+Industry-level LOWESS benchmarks with JSON output for fastlowess.
 
 Benchmarks are aligned with the statsmodels benchmarks to enable direct comparison.
-Results are written to benchmarks/output/fastLowess_benchmark.json.
+Results are written to benchmarks/output/fastlowess_benchmark.json.
 
 Run with: python3 benchmark.py
 """
@@ -11,7 +11,7 @@ Run with: python3 benchmark.py
 import json
 import time
 import numpy as np
-import fastLowess
+import fastlowess
 from pathlib import Path
 from typing import Tuple, List, Dict
 from dataclasses import dataclass, asdict
@@ -154,7 +154,7 @@ def benchmark_scalability(iterations: int = 10) -> List[BenchmarkResult]:
         x, y = generate_sine_data(size, seed=42)
         
         def run():
-            fastLowess.smooth(x, y, fraction=0.1, iterations=3)
+            fastlowess.smooth(x, y, fraction=0.1, iterations=3)
         
         result = run_benchmark(f"scale_{size}", size, run, iterations)
         results.append(result)
@@ -176,7 +176,7 @@ def benchmark_fraction(iterations: int = 10) -> List[BenchmarkResult]:
     
     for frac in fractions:
         def run(f=frac):
-            fastLowess.smooth(x, y, fraction=f, iterations=3)
+            fastlowess.smooth(x, y, fraction=f, iterations=3)
         
         result = run_benchmark(f"fraction_{frac}", size, run, iterations)
         results.append(result)
@@ -198,7 +198,7 @@ def benchmark_iterations(iterations: int = 10) -> List[BenchmarkResult]:
     
     for it in iter_values:
         def run(n=it):
-            fastLowess.smooth(x, y, fraction=0.2, iterations=n)
+            fastlowess.smooth(x, y, fraction=0.2, iterations=n)
         
         result = run_benchmark(f"iterations_{it}", size, run, iterations)
         results.append(result)
@@ -226,7 +226,7 @@ def benchmark_delta(iterations: int = 10) -> List[BenchmarkResult]:
     
     for name, delta in delta_configs:
         def run(d=delta):
-            fastLowess.smooth(x, y, fraction=0.2, iterations=2, delta=d)
+            fastlowess.smooth(x, y, fraction=0.2, iterations=2, delta=d)
         
         result = run_benchmark(name, size, run, iterations)
         results.append(result)
@@ -248,7 +248,7 @@ def benchmark_financial(iterations: int = 10) -> List[BenchmarkResult]:
         x, y = generate_financial_data(size, seed=42)
         
         def run():
-            fastLowess.smooth(x, y, fraction=0.1, iterations=2)
+            fastlowess.smooth(x, y, fraction=0.1, iterations=2)
         
         result = run_benchmark(f"financial_{size}", size, run, iterations)
         results.append(result)
@@ -270,7 +270,7 @@ def benchmark_scientific(iterations: int = 10) -> List[BenchmarkResult]:
         x, y = generate_scientific_data(size, seed=42)
         
         def run():
-            fastLowess.smooth(x, y, fraction=0.15, iterations=3)
+            fastlowess.smooth(x, y, fraction=0.15, iterations=3)
         
         result = run_benchmark(f"scientific_{size}", size, run, iterations)
         results.append(result)
@@ -292,7 +292,7 @@ def benchmark_genomic(iterations: int = 10) -> List[BenchmarkResult]:
         x, y = generate_genomic_data(size, seed=42)
         
         def run():
-            fastLowess.smooth(x, y, fraction=0.1, iterations=3, delta=100.0)
+            fastlowess.smooth(x, y, fraction=0.1, iterations=3, delta=100.0)
         
         result = run_benchmark(f"genomic_{size}", size, run, iterations)
         results.append(result)
@@ -314,7 +314,7 @@ def benchmark_pathological(iterations: int = 10) -> List[BenchmarkResult]:
     x_clustered, y_clustered = generate_clustered_data(size, seed=42)
     result = run_benchmark(
         "clustered", size,
-        lambda: fastLowess.smooth(x_clustered, y_clustered, fraction=0.3, iterations=2),
+        lambda: fastlowess.smooth(x_clustered, y_clustered, fraction=0.3, iterations=2),
         iterations
     )
     results.append(result)
@@ -324,7 +324,7 @@ def benchmark_pathological(iterations: int = 10) -> List[BenchmarkResult]:
     x_noisy, y_noisy = generate_high_noise_data(size, seed=42)
     result = run_benchmark(
         "high_noise", size,
-        lambda: fastLowess.smooth(x_noisy, y_noisy, fraction=0.5, iterations=5),
+        lambda: fastlowess.smooth(x_noisy, y_noisy, fraction=0.5, iterations=5),
         iterations
     )
     results.append(result)
@@ -334,7 +334,7 @@ def benchmark_pathological(iterations: int = 10) -> List[BenchmarkResult]:
     x_outlier, y_outlier = generate_outlier_data(size, seed=42)
     result = run_benchmark(
         "extreme_outliers", size,
-        lambda: fastLowess.smooth(x_outlier, y_outlier, fraction=0.2, iterations=10),
+        lambda: fastlowess.smooth(x_outlier, y_outlier, fraction=0.2, iterations=10),
         iterations
     )
     results.append(result)
@@ -345,7 +345,7 @@ def benchmark_pathological(iterations: int = 10) -> List[BenchmarkResult]:
     y_const = np.full(size, 5.0)
     result = run_benchmark(
         "constant_y", size,
-        lambda: fastLowess.smooth(x_const, y_const, fraction=0.2, iterations=2),
+        lambda: fastlowess.smooth(x_const, y_const, fraction=0.2, iterations=2),
         iterations
     )
     results.append(result)
@@ -368,7 +368,7 @@ def benchmark_weight_functions(iterations: int = 10) -> List[BenchmarkResult]:
     
     for wf in weight_fns:
         def run(w=wf):
-            fastLowess.smooth(x, y, fraction=0.2, iterations=3, weight_function=w)
+            fastlowess.smooth(x, y, fraction=0.2, iterations=3, weight_function=w)
         
         result = run_benchmark(wf, size, run, iterations)
         results.append(result)
@@ -413,7 +413,7 @@ def main():
     out_dir = benchmarks_dir / "output"
     out_dir.mkdir(parents=True, exist_ok=True)
     
-    out_path = out_dir / "fastLowess_benchmark.json"
+    out_path = out_dir / "fastlowess_benchmark.json"
     with open(out_path, "w") as f:
         json.dump(output, f, indent=2)
     

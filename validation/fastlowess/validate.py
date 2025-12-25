@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Python fastLowess validation runner with JSON output for comparison with statsmodels.
+Python fastlowess validation runner with JSON output for comparison with statsmodels.
 
 This validation program outputs results in JSON format compatible with the
-Rust fastLowess validation results.
+Rust fastlowess validation results.
 """
 
 import json
@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 
 import numpy as np
-import fastLowess
+import fastlowess
 
 
 def main():
@@ -225,27 +225,27 @@ def main():
     results = {}
 
     # Scenario 1: basic (default parameters)
-    result = fastLowess.smooth(x, y)
+    result = fastlowess.smooth(x, y)
     results["basic"] = format_result(result)
 
     # Scenario 2: small_fraction
-    result = fastLowess.smooth(x, y, fraction=0.2)
+    result = fastlowess.smooth(x, y, fraction=0.2)
     results["small_fraction"] = format_result(result)
 
     # Scenario 3: no_robust (iterations=0)
-    result = fastLowess.smooth(x, y, iterations=0)
+    result = fastlowess.smooth(x, y, iterations=0)
     results["no_robust"] = format_result(result)
 
     # Scenario 4: more_robust (iterations=5)
-    result = fastLowess.smooth(x, y, iterations=5)
+    result = fastlowess.smooth(x, y, iterations=5)
     results["more_robust"] = format_result(result)
 
     # Scenario 5: auto_converge
-    result = fastLowess.smooth(x, y, auto_converge=1e-4)
+    result = fastlowess.smooth(x, y, auto_converge=1e-4)
     results["auto_converge"] = format_result(result)
 
     # Scenario 6: cross_validate (k-fold)
-    result = fastLowess.smooth(
+    result = fastlowess.smooth(
         x, y,
         cv_fractions=[0.2, 0.4, 0.6],
         cv_method="kfold",
@@ -254,7 +254,7 @@ def main():
     results["cross_validate"] = format_result(result)
 
     # Scenario 7: kfold_cv (same as cross_validate)
-    result = fastLowess.smooth(
+    result = fastlowess.smooth(
         x, y,
         cv_fractions=[0.2, 0.4, 0.6],
         cv_method="kfold",
@@ -263,7 +263,7 @@ def main():
     results["kfold_cv"] = format_result(result)
 
     # Scenario 8: loocv
-    result = fastLowess.smooth(
+    result = fastlowess.smooth(
         x, y,
         cv_fractions=[0.2, 0.4, 0.6],
         cv_method="loocv",
@@ -271,11 +271,11 @@ def main():
     results["loocv"] = format_result(result)
 
     # Scenario 9: delta_zero
-    result = fastLowess.smooth(x, y, delta=0.0)
+    result = fastlowess.smooth(x, y, delta=0.0)
     results["delta_zero"] = format_result(result)
 
     # Scenario 10: with_all_diagnostics
-    result = fastLowess.smooth(
+    result = fastlowess.smooth(
         x, y,
         return_diagnostics=True,
         return_residuals=True,
@@ -291,7 +291,7 @@ def main():
     out_dir = script_dir.parent / "output"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    out_path = out_dir / "fastLowess_validate.json"
+    out_path = out_dir / "fastlowess_validate.json"
     with open(out_path, "w") as f:
         f.write(json_str)
 

@@ -116,7 +116,7 @@ def main():
     out_dir = workspace / "output"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    fastlowess_path = out_dir / "fastLowess_benchmark.json"
+    fastlowess_path = out_dir / "fastlowess_benchmark.json"
     stats_path = out_dir / "statsmodels_benchmark.json"
 
     if not fastlowess_path.exists() or not stats_path.exists():

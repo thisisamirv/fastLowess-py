@@ -1,11 +1,11 @@
 # FastLowess Validation & Benchmarking Workspace
 
-This workspace is dedicated to validating the correctness and benchmarking the performance of the [fastLowess](https://github.com/thisisamirv/fastLowess-py) python package against the reference Python implementation (`statsmodels`).
+This workspace is dedicated to validating the correctness and benchmarking the performance of the [fastlowess](https://github.com/thisisamirv/fastLowess-py) python package against the reference Python implementation (`statsmodels`).
 
-It installs the `fastLowess` package from the `develop` branch (git dependency) to ensure the latest changes are tested.
+It installs the `fastlowess` package from the `develop` branch (git dependency) to ensure the latest changes are tested.
 
 > [!IMPORTANT]
-> Before running benchmarks or validation, run `make install` to install the latest version of the `fastLowess` package from the git develop branch.
+> Before running benchmarks or validation, run `make install` to install the latest version of the `fastlowess` package from the git develop branch.
 
 ## structure
 
@@ -19,10 +19,10 @@ Benchmarks measure execution time across various scenarios (basic smoothing, rob
 ### 1. Run FastLowess Benchmarks
 
 ```bash
-python3 benchmarks/fastLowess/benchmark.py
+python3 benchmarks/fastlowess/benchmark.py
 ```
 
-*Output: `benchmarks/output/fastLowess_benchmark.json`*
+*Output: `benchmarks/output/fastlowess_benchmark.json`*
 
 ### 2. Run Statsmodels Benchmarks
 
@@ -46,15 +46,15 @@ python3 compare_benchmark.py
 
 ## How to Run Validation
 
-Validation ensures the `fastLowess` implementation produces results identical (or acceptable close) to `statsmodels`.
+Validation ensures the `fastlowess` implementation produces results identical (or acceptable close) to `statsmodels`.
 
 ### 1. Run FastLowess Validation
 
 ```bash
-python3 validation/fastLowess/validate.py
+python3 validation/fastlowess/validate.py
 ```
 
-*Output: `validation/output/fastLowess_validate.json`*
+*Output: `validation/output/fastlowess_validate.json`*
 
 ### 2. Run Statsmodels Validation
 
