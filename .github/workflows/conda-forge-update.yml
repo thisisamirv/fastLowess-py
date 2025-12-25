@@ -70,19 +70,8 @@ jobs:
             
             RESPONSE=$(curl -sL "https://pypi.org/pypi/fastlowess/$VERSION/json")
             
-            # extract SHA256 (handles missing keys/invalid JSON gracefully)
-            SHA256=$(echo "$RESPONSE" | python3 << 'EOF'
-import sys, json
-try:
-    d = json.load(sys.stdin)
-    for f in d.get('urls', []):
-        if f.get('packagetype') == 'sdist':
-            print(f['digests']['sha256'])
-            break
-except:
-    pass
-EOF
-)
+            # extract SHA256 using jq (handles missing keys gracefully)
+            SHA256=$(echo "$RESPONSE" | jq -r '.urls[]? | select(.packagetype == "sdist") | .digests.sha256 // empty' 2>/dev/null | head -1)
 
             if [ -n "$SHA256" ]; then
               echo "✅ Found SHA256: $SHA256"
