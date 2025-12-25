@@ -71,8 +71,7 @@ smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function="tricube",
     This is the primary interface for LOWESS smoothing. Processes the entire
     dataset in memory with optional parallel execution.
 
-    Parameters
-    ----------
+    **Parameters**
     x : array_like
         Independent variable values (1D array).
     y : array_like
@@ -164,13 +163,11 @@ smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function="tricube",
     cv_k : int, optional
         Number of folds for k-fold CV. Default: 5.
 
-    Returns
-    -------
+    **Returns**
     LowessResult
         Result object with smoothed values and optional outputs.
 
-    Examples
-    --------
+    **Examples**
     >>> import numpy as np
     >>> import fastlowess
     >>> x = np.linspace(0, 10, 100)
@@ -188,8 +185,7 @@ smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
     Processes data in chunks to maintain constant memory usage.
     Ideal for datasets that don't fit in memory or for batch pipelines.
 
-    Parameters
-    ----------
+    **Parameters**
     x : array_like
         Independent variable values.
     y : array_like
@@ -221,13 +217,11 @@ smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
     parallel : bool, optional
         Enable parallel execution. Default: True.
 
-    Returns
-    -------
+    **Returns**
     LowessResult
         Result object with smoothed values.
 
-    Examples
-    --------
+    **Examples**
     >>> # Process 1 million points efficiently
     >>> x = np.arange(1_000_000, dtype=float)
     >>> y = np.sin(x * 0.001) + np.random.normal(0, 0.1, 1_000_000)
@@ -244,8 +238,7 @@ smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,
     Maintains a sliding window for incremental updates. Ideal for
     real-time data streams or sensor data processing.
 
-    Parameters
-    ----------
+    **Parameters**
     x : array_like
         Independent variable values.
     y : array_like
@@ -275,14 +268,12 @@ smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,
     parallel : bool, optional
         Enable parallel execution. Default: False.
 
-    Returns
-    -------
+    **Returns**
     LowessResult
         Result object with smoothed values.
 
-    Examples
-    --------
-    >>> # Simulate real-time sensor data
+    **Examples**
+    >>> # Simmons real-time sensor data
     >>> x = np.arange(1000, dtype=float)
     >>> y = 20.0 + 5.0 * np.sin(x * 0.1) + np.random.normal(0, 1, 1000)
     >>> result = fastlowess.smooth_online(x, y, window_capacity=50)
@@ -294,8 +285,7 @@ Classes
 LowessResult
     Result object containing smoothed values and optional outputs.
 
-    Attributes
-    ----------
+    **Attributes**
     x : numpy.ndarray
         Sorted x values.
     y : numpy.ndarray
@@ -324,8 +314,7 @@ LowessResult
     cv_scores : numpy.ndarray or None
         Cross-validation scores if cross-validation was performed.
 
-    Examples
-    --------
+    **Examples**
     >>> result = fastlowess.smooth(x, y, confidence_intervals=0.95)
     >>> print(f"Smoothed values: {result.y}")
     >>> print(f"Confidence interval: [{result.confidence_lower}, {result.confidence_upper}]")
@@ -335,8 +324,7 @@ LowessResult
 Diagnostics
     Diagnostic statistics for assessing fit quality.
 
-    Attributes
-    ----------
+    **Attributes**
     rmse : float
         Root Mean Squared Error - average prediction error magnitude.
     mae : float
@@ -353,8 +341,7 @@ Diagnostics
     effective_df : float or None
         Effective degrees of freedom.
 
-    Examples
-    --------
+    **Examples**
     >>> result = fastlowess.smooth(x, y, return_diagnostics=True)
     >>> diag = result.diagnostics
     >>> print(f"RMSE: {diag.rmse:.4f}")

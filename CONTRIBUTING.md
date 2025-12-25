@@ -20,9 +20,13 @@ cd fastLowess-py
 git checkout -b feature/your-feature
 
 # Common commands
-make develop    # Build and install in development mode (maturin develop)
+make develop    # Build and install in development mode
+make check      # Run ALL checks: fmt, lint, build, test, docs, examples, install
 make test       # Run Python and Rust test suites
-make check      # Run all checks (formatters, linters, tests)
+make fmt        # Format code (Rust + Python)
+make clippy     # Run Rust linter and Python linter
+make doc        # Build Rust docs and Python (Sphinx) docs
+make examples   # Run all example scripts
 ```
 
 ### Prerequisites
@@ -30,6 +34,8 @@ make check      # Run all checks (formatters, linters, tests)
 - **Rust**: Latest stable (1.85.0+)
 - **Python**: 3.9+ with `pip`
 - **maturin**: `pip install maturin`
+- **ruff**: `pip install ruff` (for Python linting and formatting)
+- **Sphinx**: `pip install sphinx` (optional, for documentation)
 
 ## Pull Requests
 

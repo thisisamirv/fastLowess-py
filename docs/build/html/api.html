@@ -188,9 +188,12 @@ auto_converge=None, cv_fractions=None, cv_method=”kfold”, cv_k=5)</p>
 <p>LOWESS smoothing with the batch adapter.</p>
 <p>This is the primary interface for LOWESS smoothing. Processes the entire
 dataset in memory with optional parallel execution.</p>
+<p><strong>Parameters</strong>
+x : array_like</p>
+<blockquote>
+<div><p>Independent variable values (1D array).</p>
+</div></blockquote>
 <dl class="simple">
-<dt>x<span class="classifier">array_like</span></dt><dd><p>Independent variable values (1D array).</p>
-</dd>
 <dt>y<span class="classifier">array_like</span></dt><dd><p>Dependent variable values (1D array, same length as x).</p>
 </dd>
 <dt>fraction<span class="classifier">float, optional</span></dt><dd><p>Smoothing fraction - the proportion of data used for each local fit.
@@ -280,18 +283,18 @@ Default: “kfold”.</p>
 <dt>cv_k<span class="classifier">int, optional</span></dt><dd><p>Number of folds for k-fold CV. Default: 5.</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>LowessResult</dt><dd><p>Result object with smoothed values and optional outputs.</p>
-</dd>
-</dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">fastlowess</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">confidence_intervals</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Smoothed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2"> points&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<p><strong>Returns</strong>
+LowessResult</p>
+<blockquote>
+<div><p>Result object with smoothed values and optional outputs.</p>
+</div></blockquote>
+<p><strong>Examples</strong>
+&gt;&gt;&gt; import numpy as np
+&gt;&gt;&gt; import fastlowess
+&gt;&gt;&gt; x = np.linspace(0, 10, 100)
+&gt;&gt;&gt; y = 2 * x + np.random.normal(0, 1, 100)
+&gt;&gt;&gt; result = fastlowess.smooth(x, y, fraction=0.3, confidence_intervals=0.95)
+&gt;&gt;&gt; print(f”Smoothed {len(result.y)} points”)</p>
 </dd>
 <dt>smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,</dt><dd><blockquote>
 <div><p>iterations=3, delta=None, weight_function=”tricube”,
@@ -302,9 +305,12 @@ return_robustness_weights=False, parallel=True)</p>
 <p>Streaming LOWESS for large datasets.</p>
 <p>Processes data in chunks to maintain constant memory usage.
 Ideal for datasets that don’t fit in memory or for batch pipelines.</p>
+<p><strong>Parameters</strong>
+x : array_like</p>
+<blockquote>
+<div><p>Independent variable values.</p>
+</div></blockquote>
 <dl class="simple">
-<dt>x<span class="classifier">array_like</span></dt><dd><p>Independent variable values.</p>
-</dd>
 <dt>y<span class="classifier">array_like</span></dt><dd><p>Dependent variable values.</p>
 </dd>
 <dt>fraction<span class="classifier">float, optional</span></dt><dd><p>Smoothing fraction. Default: 0.3.</p>
@@ -334,16 +340,16 @@ Default: 10% of chunk_size.</p>
 <dt>parallel<span class="classifier">bool, optional</span></dt><dd><p>Enable parallel execution. Default: True.</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>LowessResult</dt><dd><p>Result object with smoothed values.</p>
-</dd>
-</dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Process 1 million points efficiently</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1_000_000</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">0.001</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1_000_000</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth_streaming</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
-</pre></div>
-</div>
+<p><strong>Returns</strong>
+LowessResult</p>
+<blockquote>
+<div><p>Result object with smoothed values.</p>
+</div></blockquote>
+<p><strong>Examples</strong>
+&gt;&gt;&gt; # Process 1 million points efficiently
+&gt;&gt;&gt; x = np.arange(1_000_000, dtype=float)
+&gt;&gt;&gt; y = np.sin(x * 0.001) + np.random.normal(0, 0.1, 1_000_000)
+&gt;&gt;&gt; result = fastlowess.smooth_streaming(x, y, chunk_size=10000)</p>
 </dd>
 <dt>smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,</dt><dd><blockquote>
 <div><p>iterations=3, delta=None, weight_function=”tricube”,
@@ -354,9 +360,12 @@ return_robustness_weights=False, parallel=False)</p>
 <p>Online LOWESS with sliding window.</p>
 <p>Maintains a sliding window for incremental updates. Ideal for
 real-time data streams or sensor data processing.</p>
+<p><strong>Parameters</strong>
+x : array_like</p>
+<blockquote>
+<div><p>Independent variable values.</p>
+</div></blockquote>
 <dl class="simple">
-<dt>x<span class="classifier">array_like</span></dt><dd><p>Independent variable values.</p>
-</dd>
 <dt>y<span class="classifier">array_like</span></dt><dd><p>Dependent variable values.</p>
 </dd>
 <dt>fraction<span class="classifier">float, optional</span></dt><dd><p>Smoothing fraction within the window. Default: 0.2.</p>
@@ -384,16 +393,16 @@ real-time data streams or sensor data processing.</p>
 <dt>parallel<span class="classifier">bool, optional</span></dt><dd><p>Enable parallel execution. Default: False.</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>LowessResult</dt><dd><p>Result object with smoothed values.</p>
-</dd>
-</dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Simulate real-time sensor data</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mf">20.0</span> <span class="o">+</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth_online</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">window_capacity</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
-</pre></div>
-</div>
+<p><strong>Returns</strong>
+LowessResult</p>
+<blockquote>
+<div><p>Result object with smoothed values.</p>
+</div></blockquote>
+<p><strong>Examples</strong>
+&gt;&gt;&gt; # Simmons real-time sensor data
+&gt;&gt;&gt; x = np.arange(1000, dtype=float)
+&gt;&gt;&gt; y = 20.0 + 5.0 * np.sin(x * 0.1) + np.random.normal(0, 1, 1000)
+&gt;&gt;&gt; result = fastlowess.smooth_online(x, y, window_capacity=50)</p>
 </dd>
 </dl>
 </section>
@@ -401,9 +410,12 @@ real-time data streams or sensor data processing.</p>
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
 <dl>
 <dt>LowessResult</dt><dd><p>Result object containing smoothed values and optional outputs.</p>
+<p><strong>Attributes</strong>
+x : numpy.ndarray</p>
+<blockquote>
+<div><p>Sorted x values.</p>
+</div></blockquote>
 <dl class="simple">
-<dt>x<span class="classifier">numpy.ndarray</span></dt><dd><p>Sorted x values.</p>
-</dd>
 <dt>y<span class="classifier">numpy.ndarray</span></dt><dd><p>Smoothed y values (same length as x).</p>
 </dd>
 <dt>fraction_used<span class="classifier">float</span></dt><dd><p>The smoothing fraction that was used.</p>
@@ -430,17 +442,19 @@ Values near 0 indicate likely outliers; values near 1 are well-fitted.</p>
 <dt>cv_scores<span class="classifier">numpy.ndarray or None</span></dt><dd><p>Cross-validation scores if cross-validation was performed.</p>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">confidence_intervals</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Smoothed values: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Confidence interval: [</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">confidence_lower</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">confidence_upper</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fraction used: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">fraction_used</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<p><strong>Examples</strong>
+&gt;&gt;&gt; result = fastlowess.smooth(x, y, confidence_intervals=0.95)
+&gt;&gt;&gt; print(f”Smoothed values: {result.y}”)
+&gt;&gt;&gt; print(f”Confidence interval: [{result.confidence_lower}, {result.confidence_upper}]”)
+&gt;&gt;&gt; print(f”Fraction used: {result.fraction_used}”)</p>
 </dd>
 <dt>Diagnostics</dt><dd><p>Diagnostic statistics for assessing fit quality.</p>
+<p><strong>Attributes</strong>
+rmse : float</p>
+<blockquote>
+<div><p>Root Mean Squared Error - average prediction error magnitude.</p>
+</div></blockquote>
 <dl class="simple">
-<dt>rmse<span class="classifier">float</span></dt><dd><p>Root Mean Squared Error - average prediction error magnitude.</p>
-</dd>
 <dt>mae<span class="classifier">float</span></dt><dd><p>Mean Absolute Error - average absolute deviation.</p>
 </dd>
 <dt>r_squared<span class="classifier">float</span></dt><dd><p>Coefficient of determination (R²) - proportion of variance explained.
@@ -455,13 +469,12 @@ Range: [0, 1], with 1 indicating perfect fit.</p>
 <dt>effective_df<span class="classifier">float or None</span></dt><dd><p>Effective degrees of freedom.</p>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">fastlowess</span><span class="o">.</span><span class="n">smooth</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">return_diagnostics</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">diag</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">diagnostics</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RMSE: </span><span class="si">{</span><span class="n">diag</span><span class="o">.</span><span class="n">rmse</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MAE: </span><span class="si">{</span><span class="n">diag</span><span class="o">.</span><span class="n">mae</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R²: </span><span class="si">{</span><span class="n">diag</span><span class="o">.</span><span class="n">r_squared</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<p><strong>Examples</strong>
+&gt;&gt;&gt; result = fastlowess.smooth(x, y, return_diagnostics=True)
+&gt;&gt;&gt; diag = result.diagnostics
+&gt;&gt;&gt; print(f”RMSE: {diag.rmse:.4f}”)
+&gt;&gt;&gt; print(f”MAE: {diag.mae:.4f}”)
+&gt;&gt;&gt; print(f”R²: {diag.r_squared:.4f}”)</p>
 </dd>
 </dl>
 </section>

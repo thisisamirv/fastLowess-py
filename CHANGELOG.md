@@ -15,6 +15,10 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive documentation updates in `README.md` highlighting robustness features and new benchmarks.
 - Updated example scripts (`batch_smoothing.py`, `online_smoothing.py`, `streaming_smoothing.py`) to save plots to `examples/plots/` and improved parameter tuning.
 
+### Fixed
+
+- Fixed documentation build errors.
+
 ## [0.2.0]
 
 - For changes to the core logic and the API, see the [lowess](https://github.com/av746/lowess) and [fastLowess](https://github.com/av746/fastLowess) crates.

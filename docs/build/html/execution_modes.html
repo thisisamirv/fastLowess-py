@@ -90,6 +90,36 @@
 <p><cite>fastlowess</cite> offers three execution modes designed for different data scales and use cases. Each mode corresponds to an underlying “Adapter” in the Rust engine.</p>
 <section id="execution-mode-comparison">
 <h2>Execution Mode Comparison<a class="headerlink" href="#execution-mode-comparison" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Mode</p></th>
+<th class="head"><p>Use Case</p></th>
+<th class="head"><p>Parallel</p></th>
+<th class="head"><p>Features</p></th>
+<th class="head"><p>Limitations</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Batch</p></td>
+<td><p>Dataset fits in memory (&lt;1M points)</p></td>
+<td><p>✅ Yes</p></td>
+<td><p>✅ Full (CV, Intervals, Diag)</p></td>
+<td><p>❌ High memory usage</p></td>
+</tr>
+<tr class="row-odd"><td><p>Streaming</p></td>
+<td><p>Very large datasets (&gt;1M points)</p></td>
+<td><p>✅ Yes</p></td>
+<td><p>✅ Low memory, Diag, Weights</p></td>
+<td><p>❌ No intervals, CV</p></td>
+</tr>
+<tr class="row-even"><td><p>Online</p></td>
+<td><p>Real-time streams, Sensor data</p></td>
+<td><p>❌ No*</p></td>
+<td><p>✅ Sliding window, Weights</p></td>
+<td><p>❌ Local only</p></td>
+</tr>
+</tbody>
+</table>
 <p><em>*Online mode defaults to sequential execution for minimal latency, but can be parallelized if needed.</em></p>
 </section>
 <section id="batch-mode-standard">

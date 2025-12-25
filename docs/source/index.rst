@@ -1,5 +1,5 @@
 fastlowess: High-performance LOWESS for Python
-============================================
+==============================================
 
 **High-performance parallel LOWESS (Locally Weighted Scatterplot Smoothing) for Python**
 

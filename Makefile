@@ -1,5 +1,5 @@
 # Run all local checks (formatting, linting, building, tests, docs)
-check: fmt clippy build test doc examples maturin
+check: fmt clippy build test doc examples maturin install
 	@echo "All checks completed successfully!"
 
 # Formatting
@@ -132,6 +132,12 @@ example_streaming:
 	@python examples/streaming_smoothing.py
 	@echo "Streaming example complete!"
 
+# Installation
+install:
+	@echo "Installing Python package..."
+	@pip3 install target/wheels/fastlowess-*.whl
+	@echo "Python package installed!"
+
 # Clean
 clean: clean-rust clean-python
 	@echo "Clean complete!"
@@ -154,6 +160,7 @@ clean-python:
 	@rm -rf tests/__pycache__
 	@rm -rf *.egg-info
 	@rm -rf .ruff_cache
+	@rm -rf *.so
 
 # Help
 help:
