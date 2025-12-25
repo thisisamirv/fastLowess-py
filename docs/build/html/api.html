@@ -178,22 +178,19 @@ without assuming a global functional form.</p>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
 <dl>
-<dt>smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function=”tricube”,</dt><dd><blockquote>
-<div><p>robustness_method=”bisquare”, boundary_policy=”extend”,
+<dt>smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function=”tricube”,</dt><dd><p>robustness_method=”bisquare”, boundary_policy=”extend”,
 confidence_intervals=None, prediction_intervals=None,
 return_diagnostics=False, return_residuals=False,
 return_robustness_weights=False, zero_weight_fallback=”use_local_mean”,
-auto_converge=None, cv_fractions=None, cv_method=”kfold”, cv_k=5)</p>
-</div></blockquote>
-<p>LOWESS smoothing with the batch adapter.</p>
+auto_converge=None, cv_fractions=None, cv_method=”kfold”, cv_k=5,
+parallel=True)
+LOWESS smoothing with the batch adapter.</p>
 <p>This is the primary interface for LOWESS smoothing. Processes the entire
 dataset in memory with optional parallel execution.</p>
-<p><strong>Parameters</strong>
-x : array_like</p>
-<blockquote>
-<div><p>Independent variable values (1D array).</p>
-</div></blockquote>
+<p><strong>Parameters</strong></p>
 <dl class="simple">
+<dt>x<span class="classifier">array_like</span></dt><dd><p>Independent variable values (1D array).</p>
+</dd>
 <dt>y<span class="classifier">array_like</span></dt><dd><p>Dependent variable values (1D array, same length as x).</p>
 </dd>
 <dt>fraction<span class="classifier">float, optional</span></dt><dd><p>Smoothing fraction - the proportion of data used for each local fit.
@@ -282,35 +279,34 @@ Default: “kfold”.</p>
 </dd>
 <dt>cv_k<span class="classifier">int, optional</span></dt><dd><p>Number of folds for k-fold CV. Default: 5.</p>
 </dd>
+<dt>parallel<span class="classifier">bool, optional</span></dt><dd><p>Enable parallel execution. Default: True.</p>
+</dd>
 </dl>
-<p><strong>Returns</strong>
-LowessResult</p>
-<blockquote>
-<div><p>Result object with smoothed values and optional outputs.</p>
-</div></blockquote>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>LowessResult</dt><dd><p>Result object with smoothed values and optional outputs.</p>
+</dd>
+</dl>
 <p><strong>Examples</strong>
 &gt;&gt;&gt; import numpy as np
 &gt;&gt;&gt; import fastlowess
 &gt;&gt;&gt; x = np.linspace(0, 10, 100)
 &gt;&gt;&gt; y = 2 * x + np.random.normal(0, 1, 100)
-&gt;&gt;&gt; result = fastlowess.smooth(x, y, fraction=0.3, confidence_intervals=0.95)
+&gt;&gt;&gt; result = fastlowess.smooth(x, y, fraction=0.3, confidence_intervals=0.95, parallel=True)
 &gt;&gt;&gt; print(f”Smoothed {len(result.y)} points”)</p>
 </dd>
-<dt>smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,</dt><dd><blockquote>
-<div><p>iterations=3, delta=None, weight_function=”tricube”,
+<dt>smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,</dt><dd><p>iterations=3, delta=None, weight_function=”tricube”,
 robustness_method=”bisquare”, boundary_policy=”extend”,
 auto_converge=None, return_diagnostics=False,
-return_robustness_weights=False, parallel=True)</p>
-</div></blockquote>
-<p>Streaming LOWESS for large datasets.</p>
+return_residuals=False, return_robustness_weights=False,
+zero_weight_fallback=”use_local_mean”, parallel=True)
+Streaming LOWESS for large datasets.</p>
 <p>Processes data in chunks to maintain constant memory usage.
 Ideal for datasets that don’t fit in memory or for batch pipelines.</p>
-<p><strong>Parameters</strong>
-x : array_like</p>
-<blockquote>
-<div><p>Independent variable values.</p>
-</div></blockquote>
+<p><strong>Parameters</strong></p>
 <dl class="simple">
+<dt>x<span class="classifier">array_like</span></dt><dd><p>Independent variable values.</p>
+</dd>
 <dt>y<span class="classifier">array_like</span></dt><dd><p>Dependent variable values.</p>
 </dd>
 <dt>fraction<span class="classifier">float, optional</span></dt><dd><p>Smoothing fraction. Default: 0.3.</p>
@@ -335,37 +331,39 @@ Default: 10% of chunk_size.</p>
 </dd>
 <dt>return_diagnostics<span class="classifier">bool, optional</span></dt><dd><p>Compute cumulative diagnostics across chunks. Default: False.</p>
 </dd>
+<dt>return_residuals<span class="classifier">bool, optional</span></dt><dd><p>Whether to include residuals in output. Default: False.</p>
+</dd>
 <dt>return_robustness_weights<span class="classifier">bool, optional</span></dt><dd><p>Include final robustness weights. Default: False.</p>
+</dd>
+<dt>zero_weight_fallback<span class="classifier">str, optional</span></dt><dd><p>Fallback when all weights are zero: “use_local_mean”,
+“return_original”, “return_none”. Default: “use_local_mean”.</p>
 </dd>
 <dt>parallel<span class="classifier">bool, optional</span></dt><dd><p>Enable parallel execution. Default: True.</p>
 </dd>
 </dl>
-<p><strong>Returns</strong>
-LowessResult</p>
-<blockquote>
-<div><p>Result object with smoothed values.</p>
-</div></blockquote>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>LowessResult</dt><dd><p>Result object with smoothed values.</p>
+</dd>
+</dl>
 <p><strong>Examples</strong>
 &gt;&gt;&gt; # Process 1 million points efficiently
 &gt;&gt;&gt; x = np.arange(1_000_000, dtype=float)
 &gt;&gt;&gt; y = np.sin(x * 0.001) + np.random.normal(0, 0.1, 1_000_000)
 &gt;&gt;&gt; result = fastlowess.smooth_streaming(x, y, chunk_size=10000)</p>
 </dd>
-<dt>smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,</dt><dd><blockquote>
-<div><p>iterations=3, delta=None, weight_function=”tricube”,
+<dt>smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,</dt><dd><p>iterations=3, delta=None, weight_function=”tricube”,
 robustness_method=”bisquare”, boundary_policy=”extend”,
 update_mode=”full”, auto_converge=None,
-return_robustness_weights=False, parallel=False)</p>
-</div></blockquote>
-<p>Online LOWESS with sliding window.</p>
+return_robustness_weights=False,
+zero_weight_fallback=”use_local_mean”, parallel=False)
+Online LOWESS with sliding window.</p>
 <p>Maintains a sliding window for incremental updates. Ideal for
 real-time data streams or sensor data processing.</p>
-<p><strong>Parameters</strong>
-x : array_like</p>
-<blockquote>
-<div><p>Independent variable values.</p>
-</div></blockquote>
+<p><strong>Parameters</strong></p>
 <dl class="simple">
+<dt>x<span class="classifier">array_like</span></dt><dd><p>Independent variable values.</p>
+</dd>
 <dt>y<span class="classifier">array_like</span></dt><dd><p>Dependent variable values.</p>
 </dd>
 <dt>fraction<span class="classifier">float, optional</span></dt><dd><p>Smoothing fraction within the window. Default: 0.2.</p>
@@ -390,14 +388,17 @@ x : array_like</p>
 </dd>
 <dt>return_robustness_weights<span class="classifier">bool, optional</span></dt><dd><p>Include final robustness weights. Default: False.</p>
 </dd>
+<dt>zero_weight_fallback<span class="classifier">str, optional</span></dt><dd><p>Fallback when all weights are zero: “use_local_mean”,
+“return_original”, “return_none”. Default: “use_local_mean”.</p>
+</dd>
 <dt>parallel<span class="classifier">bool, optional</span></dt><dd><p>Enable parallel execution. Default: False.</p>
 </dd>
 </dl>
-<p><strong>Returns</strong>
-LowessResult</p>
-<blockquote>
-<div><p>Result object with smoothed values.</p>
-</div></blockquote>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>LowessResult</dt><dd><p>Result object with smoothed values.</p>
+</dd>
+</dl>
 <p><strong>Examples</strong>
 &gt;&gt;&gt; # Simmons real-time sensor data
 &gt;&gt;&gt; x = np.arange(1000, dtype=float)
@@ -410,12 +411,10 @@ LowessResult</p>
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
 <dl>
 <dt>LowessResult</dt><dd><p>Result object containing smoothed values and optional outputs.</p>
-<p><strong>Attributes</strong>
-x : numpy.ndarray</p>
-<blockquote>
-<div><p>Sorted x values.</p>
-</div></blockquote>
+<p><strong>Attributes</strong></p>
 <dl class="simple">
+<dt>x<span class="classifier">numpy.ndarray</span></dt><dd><p>Sorted x values.</p>
+</dd>
 <dt>y<span class="classifier">numpy.ndarray</span></dt><dd><p>Smoothed y values (same length as x).</p>
 </dd>
 <dt>fraction_used<span class="classifier">float</span></dt><dd><p>The smoothing fraction that was used.</p>
@@ -449,12 +448,10 @@ Values near 0 indicate likely outliers; values near 1 are well-fitted.</p>
 &gt;&gt;&gt; print(f”Fraction used: {result.fraction_used}”)</p>
 </dd>
 <dt>Diagnostics</dt><dd><p>Diagnostic statistics for assessing fit quality.</p>
-<p><strong>Attributes</strong>
-rmse : float</p>
-<blockquote>
-<div><p>Root Mean Squared Error - average prediction error magnitude.</p>
-</div></blockquote>
+<p><strong>Attributes</strong></p>
 <dl class="simple">
+<dt>rmse<span class="classifier">float</span></dt><dd><p>Root Mean Squared Error - average prediction error magnitude.</p>
+</dd>
 <dt>mae<span class="classifier">float</span></dt><dd><p>Mean Absolute Error - average absolute deviation.</p>
 </dd>
 <dt>r_squared<span class="classifier">float</span></dt><dd><p>Coefficient of determination (R²) - proportion of variance explained.
@@ -663,7 +660,7 @@ parallel LOWESS smoothing with NumPy integration.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fastlowess.smooth">
-<span class="sig-prename descclassname"><span class="pre">fastlowess.</span></span><span class="sig-name descname"><span class="pre">smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.67</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tricube'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robustness_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bisquare'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'extend'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_intervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_intervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_diagnostics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_residuals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_robustness_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_weight_fallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'use_local_mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_converge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_fractions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kfold'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastlowess.smooth" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fastlowess.</span></span><span class="sig-name descname"><span class="pre">smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.67</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tricube'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robustness_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bisquare'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'extend'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_intervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_intervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_diagnostics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_residuals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_robustness_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_weight_fallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'use_local_mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_converge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_fractions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kfold'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastlowess.smooth" title="Link to this definition"></a></dt>
 <dd><p>LOWESS smoothing with the batch adapter.</p>
 <p>This is the primary interface for LOWESS smoothing. Processes the entire
 dataset in memory with optional parallel execution.</p>
@@ -702,7 +699,7 @@ When provided, enables cross-validation to select optimal fraction.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fastlowess.smooth_online">
-<span class="sig-prename descclassname"><span class="pre">fastlowess.</span></span><span class="sig-name descname"><span class="pre">smooth_online</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tricube'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robustness_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bisquare'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'extend'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'full'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_converge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_robustness_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastlowess.smooth_online" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fastlowess.</span></span><span class="sig-name descname"><span class="pre">smooth_online</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tricube'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robustness_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bisquare'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'extend'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'full'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_converge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_robustness_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_weight_fallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'use_local_mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastlowess.smooth_online" title="Link to this definition"></a></dt>
 <dd><p>Online LOWESS with sliding window.</p>
 <p>Maintains a sliding window for incremental updates.</p>
 <dl class="field-list simple">
@@ -735,7 +732,7 @@ When provided, enables cross-validation to select optimal fraction.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="fastlowess.smooth_streaming">
-<span class="sig-prename descclassname"><span class="pre">fastlowess.</span></span><span class="sig-name descname"><span class="pre">smooth_streaming</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tricube'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robustness_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bisquare'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'extend'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_converge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_diagnostics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_robustness_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastlowess.smooth_streaming" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">fastlowess.</span></span><span class="sig-name descname"><span class="pre">smooth_streaming</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tricube'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">robustness_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bisquare'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'extend'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_converge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_diagnostics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_residuals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_robustness_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_weight_fallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'use_local_mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastlowess.smooth_streaming" title="Link to this definition"></a></dt>
 <dd><p>Streaming LOWESS for large datasets.</p>
 <p>Processes data in chunks to maintain constant memory usage.
 Calls process_chunk() followed by finalize() internally.</p>

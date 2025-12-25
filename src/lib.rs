@@ -338,7 +338,8 @@ impl PyLowessResult {
     auto_converge=None,
     cv_fractions=None,
     cv_method="kfold",
-    cv_k=5
+    cv_k=5,
+    parallel=true
 ))]
 #[allow(clippy::too_many_arguments)]
 fn smooth<'py>(
@@ -360,6 +361,7 @@ fn smooth<'py>(
     cv_fractions: Option<Vec<f64>>,
     cv_method: &str,
     cv_k: usize,
+    parallel: bool,
 ) -> PyResult<PyLowessResult> {
     let x_slice = x.as_slice().map_err(to_py_error)?;
     let y_slice = y.as_slice().map_err(to_py_error)?;
@@ -376,6 +378,7 @@ fn smooth<'py>(
     builder = builder.robustness_method(rm);
     builder = builder.zero_weight_fallback(zwf);
     builder = builder.boundary_policy(bp);
+    builder = builder.parallel(parallel);
 
     if let Some(d) = delta {
         builder = builder.delta(d);
@@ -487,7 +490,9 @@ fn smooth<'py>(
     boundary_policy="extend",
     auto_converge=None,
     return_diagnostics=false,
+    return_residuals=false,
     return_robustness_weights=false,
+    zero_weight_fallback="use_local_mean",
     parallel=true
 ))]
 fn smooth_streaming<'py>(
@@ -503,7 +508,9 @@ fn smooth_streaming<'py>(
     boundary_policy: &str,
     auto_converge: Option<f64>,
     return_diagnostics: bool,
+    return_residuals: bool,
     return_robustness_weights: bool,
+    zero_weight_fallback: &str,
     parallel: bool,
 ) -> PyResult<PyLowessResult> {
     let x_slice = x.as_slice().map_err(to_py_error)?;
@@ -517,6 +524,7 @@ fn smooth_streaming<'py>(
 
     let wf = parse_weight_function(weight_function)?;
     let rm = parse_robustness_method(robustness_method)?;
+    let zwf = parse_zero_weight_fallback(zero_weight_fallback)?;
     let bp = parse_boundary_policy(boundary_policy)?;
 
     let mut builder = LowessBuilder::<f64>::new();
@@ -524,7 +532,18 @@ fn smooth_streaming<'py>(
     builder = builder.iterations(iterations);
     builder = builder.weight_function(wf);
     builder = builder.robustness_method(rm);
+    builder = builder.zero_weight_fallback(zwf);
     builder = builder.boundary_policy(bp);
+
+    if return_diagnostics {
+        builder = builder.return_diagnostics();
+    }
+    if return_residuals {
+        builder = builder.return_residuals();
+    }
+    if return_robustness_weights {
+        builder = builder.return_robustness_weights();
+    }
 
     let mut builder = builder.adapter(Streaming);
     builder = builder.chunk_size(chunk_size);
@@ -536,12 +555,6 @@ fn smooth_streaming<'py>(
     }
     if let Some(tol) = auto_converge {
         builder = builder.auto_converge(tol);
-    }
-    if return_diagnostics {
-        builder = builder.return_diagnostics(true);
-    }
-    if return_robustness_weights {
-        builder = builder.return_robustness_weights(true);
     }
 
     let mut processor = builder.build().map_err(to_py_error)?;
@@ -671,6 +684,7 @@ fn smooth_streaming<'py>(
     update_mode="full",
     auto_converge=None,
     return_robustness_weights=false,
+    zero_weight_fallback="use_local_mean",
     parallel=false
 ))]
 fn smooth_online<'py>(
@@ -687,6 +701,7 @@ fn smooth_online<'py>(
     update_mode: &str,
     auto_converge: Option<f64>,
     return_robustness_weights: bool,
+    zero_weight_fallback: &str,
     parallel: bool,
 ) -> PyResult<PyLowessResult> {
     let x_slice = x.as_slice().map_err(to_py_error)?;
@@ -695,6 +710,7 @@ fn smooth_online<'py>(
     let wf = parse_weight_function(weight_function)?;
     let rm = parse_robustness_method(robustness_method)?;
     let bp = parse_boundary_policy(boundary_policy)?;
+    let zwf = parse_zero_weight_fallback(zero_weight_fallback)?;
     let um = parse_update_mode(update_mode)?;
 
     let mut builder = LowessBuilder::<f64>::new();
@@ -702,6 +718,7 @@ fn smooth_online<'py>(
     builder = builder.iterations(iterations);
     builder = builder.weight_function(wf);
     builder = builder.robustness_method(rm);
+    builder = builder.zero_weight_fallback(zwf);
     builder = builder.boundary_policy(bp);
 
     let mut builder = builder.adapter(Online);

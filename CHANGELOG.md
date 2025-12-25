@@ -7,6 +7,11 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0]
 
+### Added
+
+- Added `return_residuals` argument to streaming adapter.
+- Added `zero_weight_fallback` argument to streaming and online adapters.
+
 ### Changed
 
 - Updated `fastLowess` dependency to v0.3.0, incorporating core engine improvements.
@@ -18,6 +23,7 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed documentation build errors.
+- Fixed a bug where the `parallel` argument was not exposed in the python binding.
 
 ## [0.2.0]
 

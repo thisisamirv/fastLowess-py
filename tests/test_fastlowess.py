@@ -29,6 +29,16 @@ class TestSmooth:
         assert len(result.x) == len(x)
         assert result.fraction_used == pytest.approx(0.5)
 
+    def test_basic_smooth_serial(self):
+        """Test basic smooth with parallel=False."""
+        x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+        y = np.array([2.0, 4.1, 5.9, 8.2, 9.8])
+
+        result = fastlowess.smooth(x, y, fraction=0.5, parallel=False)
+
+        assert isinstance(result, fastlowess.LowessResult)
+        assert len(result.y) == len(x)
+
     def test_lowess_with_diagnostics(self):
         """Test lowess with diagnostics enabled."""
         x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
@@ -206,9 +216,44 @@ class TestSmoothStreaming:
         start, end = 50, 150
         np.testing.assert_allclose(result.y[start:end], y[start:end], rtol=0.1)
 
+    def test_streaming_residuals(self):
+        """Test streaming with return_residuals=True."""
+        x = np.linspace(0, 100, 200)
+        y = np.sin(x / 10)
+
+        result = fastlowess.smooth_streaming(
+            x, y, fraction=0.1, chunk_size=50, return_residuals=True
+        )
+
+        assert isinstance(result, fastlowess.LowessResult)
+        assert result.residuals is not None
+        assert len(result.residuals) == len(x)
+        assert len(result.y) == len(x)
+
+    def test_streaming_zero_weight_fallback(self):
+        """Test streaming with zero_weight_fallback parameter."""
+        x = np.linspace(0, 100, 200)
+        y = np.sin(x)
+        # Just verifying the parameter is accepted and runs
+        result = fastlowess.smooth_streaming(
+            x, y, fraction=0.1, chunk_size=50, zero_weight_fallback="return_original"
+        )
+        assert len(result.y) == len(x)
+
 
 class TestSmoothOnline:
     """Tests for the smooth_online() function."""
+
+    def test_online_zero_weight_fallback(self):
+        """Test online with zero_weight_fallback parameter."""
+        x = np.arange(20, dtype=float)
+        y = x.copy()
+
+        # Verify parameter is accepted
+        result = fastlowess.smooth_online(
+            x, y, fraction=0.5, window_capacity=10, zero_weight_fallback="return_none"
+        )
+        assert len(result.y) == len(x)
 
     def test_online_basic(self):
         """Test basic online smoothing."""

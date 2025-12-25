@@ -172,7 +172,7 @@ fastlowess.smooth(
     # Convergence
     auto_converge=1e-4,
 
-    # Parallelism (CPU only)
+    # Parallelism
     parallel=True
 )
 ```

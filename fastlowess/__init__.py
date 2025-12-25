@@ -61,17 +61,19 @@ Functions
 ---------
 
 smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function="tricube",
-       robustness_method="bisquare", boundary_policy="extend",
-       confidence_intervals=None, prediction_intervals=None,
-       return_diagnostics=False, return_residuals=False,
-       return_robustness_weights=False, zero_weight_fallback="use_local_mean",
-       auto_converge=None, cv_fractions=None, cv_method="kfold", cv_k=5)
+    robustness_method="bisquare", boundary_policy="extend",
+    confidence_intervals=None, prediction_intervals=None,
+    return_diagnostics=False, return_residuals=False,
+    return_robustness_weights=False, zero_weight_fallback="use_local_mean",
+    auto_converge=None, cv_fractions=None, cv_method="kfold", cv_k=5,
+    parallel=True)
     LOWESS smoothing with the batch adapter.
 
     This is the primary interface for LOWESS smoothing. Processes the entire
     dataset in memory with optional parallel execution.
 
     **Parameters**
+
     x : array_like
         Independent variable values (1D array).
     y : array_like
@@ -162,8 +164,11 @@ smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function="tricube",
         Default: "kfold".
     cv_k : int, optional
         Number of folds for k-fold CV. Default: 5.
+    parallel : bool, optional
+        Enable parallel execution. Default: True.
 
     **Returns**
+
     LowessResult
         Result object with smoothed values and optional outputs.
 
@@ -172,20 +177,22 @@ smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function="tricube",
     >>> import fastlowess
     >>> x = np.linspace(0, 10, 100)
     >>> y = 2 * x + np.random.normal(0, 1, 100)
-    >>> result = fastlowess.smooth(x, y, fraction=0.3, confidence_intervals=0.95)
+    >>> result = fastlowess.smooth(x, y, fraction=0.3, confidence_intervals=0.95, parallel=True)
     >>> print(f"Smoothed {len(result.y)} points")
 
 smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
-                 iterations=3, delta=None, weight_function="tricube",
-                 robustness_method="bisquare", boundary_policy="extend",
-                 auto_converge=None, return_diagnostics=False,
-                 return_robustness_weights=False, parallel=True)
+    iterations=3, delta=None, weight_function="tricube",
+    robustness_method="bisquare", boundary_policy="extend",
+    auto_converge=None, return_diagnostics=False,
+    return_residuals=False, return_robustness_weights=False,
+    zero_weight_fallback="use_local_mean", parallel=True)
     Streaming LOWESS for large datasets.
 
     Processes data in chunks to maintain constant memory usage.
     Ideal for datasets that don't fit in memory or for batch pipelines.
 
     **Parameters**
+
     x : array_like
         Independent variable values.
     y : array_like
@@ -212,12 +219,18 @@ smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
         Adaptive convergence tolerance. Default: None.
     return_diagnostics : bool, optional
         Compute cumulative diagnostics across chunks. Default: False.
+    return_residuals : bool, optional
+        Whether to include residuals in output. Default: False.
     return_robustness_weights : bool, optional
         Include final robustness weights. Default: False.
+    zero_weight_fallback : str, optional
+        Fallback when all weights are zero: "use_local_mean",
+        "return_original", "return_none". Default: "use_local_mean".
     parallel : bool, optional
         Enable parallel execution. Default: True.
 
     **Returns**
+
     LowessResult
         Result object with smoothed values.
 
@@ -229,16 +242,18 @@ smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
 
 
 smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,
-              iterations=3, delta=None, weight_function="tricube",
-              robustness_method="bisquare", boundary_policy="extend",
-              update_mode="full", auto_converge=None,
-              return_robustness_weights=False, parallel=False)
+    iterations=3, delta=None, weight_function="tricube",
+    robustness_method="bisquare", boundary_policy="extend",
+    update_mode="full", auto_converge=None,
+    return_robustness_weights=False,
+    zero_weight_fallback="use_local_mean", parallel=False)
     Online LOWESS with sliding window.
 
     Maintains a sliding window for incremental updates. Ideal for
     real-time data streams or sensor data processing.
 
     **Parameters**
+
     x : array_like
         Independent variable values.
     y : array_like
@@ -265,10 +280,14 @@ smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,
         Adaptive convergence tolerance. Default: None.
     return_robustness_weights : bool, optional
         Include final robustness weights. Default: False.
+    zero_weight_fallback : str, optional
+        Fallback when all weights are zero: "use_local_mean",
+        "return_original", "return_none". Default: "use_local_mean".
     parallel : bool, optional
         Enable parallel execution. Default: False.
 
     **Returns**
+
     LowessResult
         Result object with smoothed values.
 
@@ -286,6 +305,7 @@ LowessResult
     Result object containing smoothed values and optional outputs.
 
     **Attributes**
+
     x : numpy.ndarray
         Sorted x values.
     y : numpy.ndarray
@@ -325,6 +345,7 @@ Diagnostics
     Diagnostic statistics for assessing fit quality.
 
     **Attributes**
+
     rmse : float
         Root Mean Squared Error - average prediction error magnitude.
     mae : float

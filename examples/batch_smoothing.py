@@ -31,9 +31,10 @@ def generate_sample_data(n_points=1000):
     # Gaussian noise
     y = y_true + np.random.normal(0, 1.5, n_points)
     
-    # Add significant outliers
-    outlier_indices = np.random.choice(n_points, size=20, replace=False)
-    y[outlier_indices] += np.random.uniform(10, 20, 20) * np.random.choice([-1, 1], 20)
+    # Add significant outliers (10% of data)
+    n_outliers = int(n_points * 0.1)
+    outlier_indices = np.random.choice(n_points, size=n_outliers, replace=False)
+    y[outlier_indices] += np.random.uniform(10, 20, n_outliers) * np.random.choice([-1, 1], n_outliers)
     
     return x, y, y_true
 
@@ -46,13 +47,14 @@ def main():
 
     # 2. Basic Smoothing (Default parameters)
     print("Running basic smoothing...")
-    res_basic = smooth(x, y, fraction=0.2)
+    # Use a smaller fraction (0.05) to capture the sine wave seasonality
+    res_basic = smooth(x, y, iterations=0, fraction=0.05)
     
     # 3. Robust Smoothing (IRLS)
     print("Running robust smoothing (3 iterations)...")
     res_robust = smooth(
         x, y, 
-        fraction=0.2, 
+        fraction=0.05, 
         iterations=3, 
         robustness_method="bisquare",
         return_robustness_weights=True
@@ -62,7 +64,7 @@ def main():
     print("Computing confidence and prediction intervals...")
     res_intervals = smooth(
         x, y, 
-        fraction=0.2, 
+        fraction=0.05, 
         confidence_intervals=0.95, 
         prediction_intervals=0.95,
         return_diagnostics=True
@@ -84,7 +86,7 @@ def main():
     plt.plot(x, y_true, 'k--', alpha=0.8, label='True Signal')
     
     # Basic Smoothing
-    plt.plot(x, res_basic.y, 'r-', linewidth=2, label=f'Basic LOWESS (f={res_basic.fraction_used})')
+    plt.plot(x, res_basic.y, 'r-', linewidth=2, label=f'Basic LOWESS (Non-robust)')
     
     # Robust Smoothing
     plt.plot(x, res_robust.y, 'g-', linewidth=2.5, label='Robust LOWESS (3 iters)')
