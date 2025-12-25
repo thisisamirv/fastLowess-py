@@ -16,6 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import fastlowess
 from fastlowess import smooth
+import os
 
 def generate_sample_data(n_points=1000):
     """
@@ -74,7 +75,9 @@ def main():
     print(f"Optimal fraction found: {res_cv.fraction_used}")
 
     # Plotting Results
-    plt.figure(figsize=(12, 8))
+    os.makedirs("examples/plots", exist_ok=True)
+    
+    fig1 = plt.figure(figsize=(12, 8))
     
     # Original Data
     plt.scatter(x, y, alpha=0.3, color='gray', s=10, label='Noisy Data (w/ Outliers)')
@@ -110,7 +113,7 @@ def main():
     plt.grid(True, alpha=0.3)
     
     # Subplot for robustness weights
-    plt.figure(figsize=(12, 3))
+    fig2 = plt.figure(figsize=(12, 3))
     plt.scatter(x, res_robust.robustness_weights, c=res_robust.robustness_weights, cmap='viridis', s=10)
     plt.title("Robustness Weights (Low weight = Outlier suspected)")
     plt.colorbar(label='Weight')
@@ -127,7 +130,7 @@ def main():
     r_ref = smooth(xl, yl, fraction=0.6, boundary_policy="reflect")
     r_zr = smooth(xl, yl, fraction=0.6, boundary_policy="zero")
 
-    plt.figure(figsize=(10, 5))
+    fig3 = plt.figure(figsize=(10, 5))
     plt.plot(xl, yl, 'k--', label='True Linear Trend')
     plt.plot(xl, r_ext.y, 'r-', label='Extend (Default) - constant padding')
     plt.plot(xl, r_ref.y, 'g-', label='Reflect - mirrored padding')
@@ -136,7 +139,12 @@ def main():
     plt.title("Effect of Boundary Policies on Linear Data (q=0.6)")
     plt.legend()
     plt.grid(True, alpha=0.2)
-    plt.show()
+    
+    print("\nSaving plots to examples/plots/...")
+    fig1.savefig("examples/plots/batch_main.png")
+    fig2.savefig("examples/plots/batch_weights.png")
+    fig3.savefig("examples/plots/batch_boundary.png")
+    print("Done!")
 
 if __name__ == "__main__":
     main()

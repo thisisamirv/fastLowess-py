@@ -9,9 +9,11 @@ use numpy::{PyArray1, PyReadonlyArray1};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
+use ::fastLowess::internals::api::{
+    BoundaryPolicy, RobustnessMethod, UpdateMode, WeightFunction, ZeroWeightFallback,
+};
 use ::fastLowess::prelude::{
-    Batch, BoundaryPolicy, CrossValidationStrategy, Lowess as LowessBuilder, LowessResult, Online,
-    RobustnessMethod, Streaming, UpdateMode, WeightFunction, ZeroWeightFallback,
+    Batch, KFold, LOOCV, Lowess as LowessBuilder, LowessResult, Online, Streaming,
 };
 
 // ============================================================================
@@ -405,9 +407,13 @@ fn smooth<'py>(
 
     // Cross-validation if fractions are provided
     if let Some(fractions) = cv_fractions {
-        let (cv_strategy, k_opt) = match cv_method.to_lowercase().as_str() {
-            "simple" | "loo" | "loocv" | "leave_one_out" => (CrossValidationStrategy::LOOCV, None),
-            "kfold" | "k_fold" | "k-fold" => (CrossValidationStrategy::KFold, Some(cv_k)),
+        match cv_method.to_lowercase().as_str() {
+            "simple" | "loo" | "loocv" | "leave_one_out" => {
+                builder = builder.cross_validate(LOOCV(&fractions));
+            }
+            "kfold" | "k_fold" | "k-fold" => {
+                builder = builder.cross_validate(KFold(cv_k, &fractions));
+            }
             _ => {
                 return Err(PyValueError::new_err(format!(
                     "Unknown CV method: {}. Valid options: loocv, kfold",
@@ -415,7 +421,6 @@ fn smooth<'py>(
                 )));
             }
         };
-        builder = builder.cross_validate(&fractions, cv_strategy, k_opt);
     }
 
     let result = builder

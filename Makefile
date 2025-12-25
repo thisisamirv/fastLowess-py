@@ -1,5 +1,5 @@
 # Run all local checks (formatting, linting, building, tests, docs)
-check: fmt clippy build test doc
+check: fmt clippy build test doc examples
 	@echo "All checks completed successfully!"
 
 # Run all checks including Python linting
@@ -85,7 +85,7 @@ wheel-release:
 	@echo "Wheel build (release) complete!"
 
 # Test
-test: test-python
+test: test-rust test-python
 
 test-rust:
 	@echo "Running Rust tests..."
@@ -96,14 +96,6 @@ test-python:
 	@echo "Running Python tests..."
 	@python -m pytest tests -v
 	@echo "Python tests complete!"
-
-test-python-fast:
-	@echo "Running Python tests (fast, no verbose)..."
-	@python -m pytest tests
-	@echo "Python tests complete!"
-
-test-all: test-rust test-python
-	@echo "All tests complete!"
 
 # Documentation
 doc: doc-default doc-serial
@@ -124,6 +116,24 @@ doc-py:
 	@cd docs && make html
 	@echo "Sphinx documentation build complete! Output is in docs/build/html/index.html"
 
+# Examples
+examples: example_batch example_online example_streaming
+
+example_batch:
+	@echo "Running batch example..."
+	@python examples/batch_smoothing.py
+	@echo "Batch example complete!"
+
+example_online:
+	@echo "Running online example..."
+	@python examples/online_smoothing.py
+	@echo "Online example complete!"
+
+example_streaming:
+	@echo "Running streaming example..."
+	@python examples/streaming_smoothing.py
+	@echo "Streaming example complete!"
+
 # Clean
 clean: clean-rust clean-python
 	@echo "Clean complete!"
@@ -131,9 +141,14 @@ clean: clean-rust clean-python
 clean-rust:
 	@echo "Performing cargo clean..."
 	@cargo clean
+	@rm -rf Cargo.lock
+	@rm -rf target
 
 clean-python:
 	@echo "Cleaning Python build artifacts..."
+	@rm -rf coverage_html
+	@rm -rf benchmarks
+	@rm -rf .benchmarks
 	@rm -rf target/wheels
 	@rm -rf .pytest_cache
 	@rm -rf __pycache__
@@ -168,7 +183,6 @@ help:
 	@echo "  test           - Run Python tests"
 	@echo "  test-rust      - Run Rust tests"
 	@echo "  test-python    - Run Python tests (verbose)"
-	@echo "  test-all       - Run all tests"
 	@echo "Other:"
 	@echo "  doc            - Build Rust documentation"
 	@echo "  doc-py         - Build Python (Sphinx) documentation"

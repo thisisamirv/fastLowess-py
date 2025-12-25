@@ -18,6 +18,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import fastlowess
 from fastlowess import smooth_online
+import os
 
 def main():
     print("=== fastlowess Online Smoothing Example ===")
@@ -57,7 +58,9 @@ def main():
     )
 
     # Plotting
-    plt.figure(figsize=(12, 7))
+    os.makedirs("examples/plots", exist_ok=True)
+    
+    fig1 = plt.figure(figsize=(12, 7))
     
     # Original Data
     plt.scatter(x, y, s=5, alpha=0.3, color='gray', label='Raw Sensor Stream')
@@ -77,7 +80,7 @@ def main():
     plt.grid(True, alpha=0.3)
     
     # Zoom In
-    plt.figure(figsize=(12, 4))
+    fig2 = plt.figure(figsize=(12, 4))
     mask = (x >= 400) & (x <= 500)
     plt.scatter(x[mask], y[mask], s=20, alpha=0.4, color='gray')
     plt.plot(x[mask], y_true[mask], 'k--')
@@ -88,7 +91,11 @@ def main():
     plt.grid(True, alpha=0.2)
     
     plt.tight_layout()
-    plt.show()
+    
+    print("\nSaving plots to examples/plots/...")
+    fig1.savefig("examples/plots/online_main.png")
+    fig2.savefig("examples/plots/online_zoom.png")
+    print("Done!")
 
 if __name__ == "__main__":
     main()

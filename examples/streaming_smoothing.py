@@ -13,13 +13,14 @@ import matplotlib.pyplot as plt
 import fastlowess
 from fastlowess import smooth_streaming, smooth
 import time
+import os
 
 def main():
     print("=== fastlowess Streaming Mode Example ===")
     
     # 1. Generate Very Large Dataset
-    # 500,000 points
-    n_points = 500_000
+    # 100,000 points
+    n_points = 100_000
     print(f"Generating large dataset: {n_points} points...")
     x = np.linspace(0, 100, n_points)
     y = np.cos(x * 0.1) + np.random.normal(0, 0.5, n_points)
@@ -38,8 +39,8 @@ def main():
     res_stream = smooth_streaming(
         x, y, 
         fraction=0.01, 
-        chunk_size=10000, 
-        overlap=1000,
+        chunk_size=2000, 
+        overlap=200,
         parallel=True
     )
     stream_time = time.time() - start
@@ -73,7 +74,9 @@ def main():
     plt.ylim(-2.5, 2.5)
     
     plt.tight_layout()
-    plt.show()
+    os.makedirs("examples/plots", exist_ok=True)
+    plt.savefig("examples/plots/streaming_smoothing.png")
+    print("\nPlot saved to examples/plots/streaming_smoothing.png")
 
 if __name__ == "__main__":
     main()
