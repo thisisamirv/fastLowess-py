@@ -45,14 +45,16 @@
               <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pip-installation">Pip Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-via-pypi">Install via PyPI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-via-conda">Install via Conda</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-from-source">Building from Source</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#verifying-installation">Verifying Installation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="execution_modes.html">Execution Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Parameter Reference</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -85,15 +87,24 @@
              
   <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
-<section id="prerequisites">
-<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">fastlowess</span></code> package can be installed via pip.</p>
+<section id="install-via-pypi">
+<h2>Install via PyPI<a class="headerlink" href="#install-via-pypi" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">fastlowess</span></code> package can be installed via pip:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>fastlowess
+</pre></div>
+</div>
 </section>
-<section id="pip-installation">
-<h2>Pip Installation<a class="headerlink" href="#pip-installation" title="Link to this heading"></a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>..<span class="w"> </span>code-block::<span class="w"> </span>bash
-
-<span class="w">    </span>maturin<span class="w"> </span>develop<span class="w"> </span>--release
+<section id="install-via-conda">
+<h2>Install via Conda<a class="headerlink" href="#install-via-conda" title="Link to this heading"></a></h2>
+<p>You can also install from conda-forge:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>fastlowess
+</pre></div>
+</div>
+</section>
+<section id="building-from-source">
+<h2>Building from Source<a class="headerlink" href="#building-from-source" title="Link to this heading"></a></h2>
+<p>To build from source, you will need Rust installed.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>maturin<span class="w"> </span>develop<span class="w"> </span>--release
 </pre></div>
 </div>
 </section>

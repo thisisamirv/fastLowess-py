@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "fastlowess"
-version = "0.3.0"
+version = "0.3.1"
 description = "High-level, fast LOWESS smoothing built on top of the fastLowess Rust crate."
 authors = [{ name = "Amir Valizadeh", email = "thisisamirv@gmail.com" }]
 license = { text = "AGPL-3.0-or-later OR Commercial" }

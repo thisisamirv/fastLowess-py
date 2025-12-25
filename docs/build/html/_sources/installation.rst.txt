@@ -1,19 +1,32 @@
 Installation
 ============
 
-Prerequisites
--------------
-The ``fastlowess`` package can be installed via pip.
-
-Pip Installation
+Install via PyPI
 ----------------
+
+The ``fastlowess`` package can be installed via pip:
 
 .. code-block:: bash
 
+    pip install fastlowess
 
-    .. code-block:: bash
+Install via Conda
+-----------------
 
-        maturin develop --release
+You can also install from conda-forge:
+
+.. code-block:: bash
+
+    conda install -c conda-forge fastlowess
+
+Building from Source
+--------------------
+
+To build from source, you will need Rust installed.
+
+.. code-block:: bash
+
+    maturin develop --release
 
 Verifying Installation
 ----------------------

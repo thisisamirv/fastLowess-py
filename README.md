@@ -17,6 +17,11 @@
 - **Parameter Selection**: Built-in cross-validation for automatic smoothing fraction selection.
 - **Production-Ready**: Comprehensive error handling, numerical stability, and high-performance numerical core.
 
+> [!IMPORTANT]
+> **Full Documentation & API Reference:**
+>
+> ## 📘 [fastlowess-py.readthedocs.io](https://fastlowess-py.readthedocs.io/)
+
 ## Robustness Advantages
 
 Built on the same core as `lowess`, this implementation is **more robust than statsmodels** due to two key design choices:
@@ -256,10 +261,6 @@ result = fastlowess.smooth_online(
 - **None**: Small datasets (n < 1000)
 - **0.01 × range(x)**: Good starting point for dense data
 - **Manual tuning**: Adjust based on data density
-
-## Documentation
-
-For full documentation, visit [fastlowess-py.readthedocs.io](https://fastlowess-py.readthedocs.io/).
 
 ## Examples
 

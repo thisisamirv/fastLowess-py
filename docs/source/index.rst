@@ -62,26 +62,26 @@ For precision in intervals, residual scale is computed using:
 Performance Advantages
 ----------------------
 
-Benchmarked against Python's ``statsmodels``. Achieves **12-3800x faster performance** across different tested scenarios. The parallel implementation ensures that even at extreme scales (100k points), processing remains sub-20ms.
+Benchmarked against Python's ``statsmodels``. Achieves **8.5x to 2800x faster performance** across different tested scenarios. The parallel implementation ensures that even at extreme scales (100k points), processing remains sub-20ms.
 
 +------------------+---------+----------------+--------------+
 | Category         | Matched | Median Speedup | Mean Speedup |
 +==================+=========+================+==============+
-| **Scalability**  | 5       | **577.4x**     | 1375.0x      |
+| **Scalability**  | 5       | **283.2x**     | 922.0x       |
 +------------------+---------+----------------+--------------+
-| **Pathological** | 4       | **381.6x**     | 373.4x       |
+| **Pathological** | 4       | **355.5x**     | 355.0x       |
 +------------------+---------+----------------+--------------+
-| **Iterations**   | 6       | **438.1x**     | 426.0x       |
+| **Iterations**   | 6       | **302.3x**     | 339.8x       |
 +------------------+---------+----------------+--------------+
-| **Fraction**     | 6       | **336.8x**     | 364.9x       |
+| **Fraction**     | 6       | **265.8x**     | 285.0x       |
 +------------------+---------+----------------+--------------+
-| **Financial**    | 4       | **242.1x**     | 263.5x       |
+| **Financial**    | 4       | **176.7x**     | 215.2x       |
 +------------------+---------+----------------+--------------+
-| **Scientific**   | 4       | **165.1x**     | 207.5x       |
+| **Scientific**   | 4       | **201.1x**     | 225.6x       |
 +------------------+---------+----------------+--------------+
-| **Genomic**      | 4       | **23.1x**      | 22.7x        |
+| **Genomic**      | 4       | **17.5x**      | 18.6x        |
 +------------------+---------+----------------+--------------+
-| **Delta**        | 4       | **3.6x**       | 6.0x         |
+| **Delta**        | 4       | **4.1x**       | 6.1x         |
 +------------------+---------+----------------+--------------+
 
 Top 10 Performance Wins
@@ -90,25 +90,25 @@ Top 10 Performance Wins
 +-------------------+-------------+-------------+------------+
 | Benchmark         | statsmodels | fastlowess  | Speedup    |
 +===================+=============+=============+============+
-| scale_100000      | 43727.2ms   | 11.5ms      | **3808.9x**|
+| scale_100000      | 27.71s      | 9.9ms       | **2799.5x**|
 +-------------------+-------------+-------------+------------+
-| scale_50000       | 11159.9ms   | 5.9ms       | **1901.4x**|
+| scale_50000       | 7.15s       | 5.7ms       | **1252.0x**|
 +-------------------+-------------+-------------+------------+
-| scale_10000       | 663.1ms     | 1.1ms       | **577.4x** |
+| iterations_0      | 48.5ms      | 0.1ms       | **488.0x** |
 +-------------------+-------------+-------------+------------+
-| fraction_0.05     | 197.2ms     | 0.4ms       | **556.5x** |
+| financial_10000   | 337.8ms     | 0.7ms       | **471.6x** |
 +-------------------+-------------+-------------+------------+
-| financial_10000   | 497.1ms     | 1.0ms       | **518.8x** |
+| scientific_10000  | 522.4ms     | 1.2ms       | **432.5x** |
 +-------------------+-------------+-------------+------------+
-| iterations_0      | 74.2ms      | 0.2ms       | **492.9x** |
+| clustered         | 172.2ms     | 0.4ms       | **426.1x** |
 +-------------------+-------------+-------------+------------+
-| clustered         | 267.8ms     | 0.6ms       | **472.9x** |
+| constant_y        | 141.2ms     | 0.4ms       | **379.6x** |
 +-------------------+-------------+-------------+------------+
-| iterations_1      | 148.5ms     | 0.3ms       | **471.5x** |
+| fraction_0.05     | 130.9ms     | 0.4ms       | **370.5x** |
 +-------------------+-------------+-------------+------------+
-| scale_5000        | 229.9ms     | 0.5ms       | **469.0x** |
+| iterations_2      | 149.6ms     | 0.4ms       | **362.2x** |
 +-------------------+-------------+-------------+------------+
-| scientific_10000  | 777.2ms     | 1.7ms       | **464.7x** |
+| tricube           | 188.9ms     | 0.6ms       | **335.3x** |
 +-------------------+-------------+-------------+------------+
 
 .. toctree::
@@ -117,8 +117,10 @@ Top 10 Performance Wins
 
    installation
    quickstart
+   examples
    advanced_usage
    execution_modes
+   parameters
 
 .. toctree::
    :maxdepth: 2

@@ -58,20 +58,33 @@ jobs:
       - name: Get SHA256 from PyPI
         id: sha256
         run: |
-          # Wait a bit for PyPI to be fully updated
-          sleep 30
-
           VERSION="${{ steps.version.outputs.version }}"
           echo "Fetching SHA256 for fastlowess version $VERSION..."
+          
+          MAX_RETRIES=40
+          SLEEP_SECONDS=15
+          SHA256=""
 
-          # Get SHA256 from PyPI JSON API
-          SHA256=$(curl -sL "https://pypi.org/pypi/fastlowess/$VERSION/json" | \
-            python3 -c "import sys, json; data = json.load(sys.stdin); \
-            sdist = [f for f in data['urls'] if f['packagetype'] == 'sdist']; \
-            print(sdist[0]['digests']['sha256'] if sdist else '')")
+          for ((i=1; i<=MAX_RETRIES; i++)); do
+            echo "Attempt $i/$MAX_RETRIES: Checking PyPI..."
+            
+            RESPONSE=$(curl -sL "https://pypi.org/pypi/fastlowess/$VERSION/json")
+            
+            # extract SHA256 (handles missing keys/invalid JSON gracefully)
+            SHA256=$(echo "$RESPONSE" | python3 -c "import sys, json; try: d=json.load(sys.stdin); print(next((f['digests']['sha256'] for f in d.get('urls',[]) if f['packagetype']=='sdist'), '')); except: print('')")
 
+            if [ -n "$SHA256" ]; then
+              echo "✅ Found SHA256: $SHA256"
+              break
+            fi
+            
+            echo "⚠️ Metadata not ready yet. Waiting ${SLEEP_SECONDS}s..."
+            sleep $SLEEP_SECONDS
+          done
+          
           if [ -z "$SHA256" ]; then
-            echo "❌ Failed to get SHA256 for version $VERSION"
+            echo "❌ Failed to get SHA256 for version $VERSION after retries."
+            echo "Response content was: $RESPONSE"
             exit 1
           fi
 
