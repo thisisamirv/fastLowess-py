@@ -23,19 +23,46 @@ Built on the same core as `lowess`, this implementation is **more robust than st
 
 ### MAD-Based Scale Estimation
 
-We use **Median Absolute Deviation (MAD)** for scale estimation, which is breakdown-point-optimal:
+For robustness weight calculations, this crate uses **Median Absolute Deviation (MAD)** for scale estimation:
 
-$$s = \text{median}(|r_i - \text{median}(r)|)$$
+```text
+s = median(|r_i - median(r)|)
+```
+
+In contrast, statsmodels uses median of absolute residuals:
+
+```text
+s = median(|r_i|)
+```
+
+**Why MAD is more robust:**
+
+- MAD is a **breakdown-point-optimal** estimator—it remains valid even when up to 50% of data are outliers.
+- The median-centering step removes asymmetric bias from residual distributions.
+- MAD provides consistent outlier detection regardless of whether residuals are centered around zero.
 
 ### Boundary Padding
 
-We apply **boundary policies** (Extend, Reflect, Zero) at dataset edges to maintain symmetric local neighborhoods, preventing the edge bias common in other implementations.
+This crate applies **boundary policies** (Extend, Reflect, Zero) at dataset edges:
+
+- **Extend**: Repeats edge values to maintain local neighborhood size.
+- **Reflect**: Mirrors data symmetrically around boundaries.
+- **Zero**: Pads with zeros (useful for signal processing).
+
+statsmodels does not apply boundary padding, which can lead to:
+
+- Biased estimates near boundaries due to asymmetric local neighborhoods.
+- Increased variance at the edges of the smoothed curve.
 
 ### Gaussian Consistency Factor
 
-For precision in intervals, residual scale is computed using:
+For interval estimation (confidence/prediction), residual scale is computed using:
 
-$$\hat{\sigma} = 1.4826 \times \text{MAD}$$
+```text
+sigma = 1.4826 * MAD
+```
+
+The factor 1.4826 = 1/Phi^-1(3/4) ensures consistency with the standard deviation under Gaussian assumptions.
 
 ## Performance Advantages
 
@@ -46,11 +73,11 @@ Benchmarked against Python's `statsmodels`. Achieves **12-3800x faster performan
 | Category         | Matched | Median Speedup | Mean Speedup |
 | :--------------- | :------ | :------------- | :----------- |
 | **Scalability**  | 5       | **577.4x**     | 1375.0x      |
-| **Pathological** | 4       | **381.6x**     | 373.4x       |
-| **Iterations**   | 6       | **438.1x**     | 426.0x       |
-| **Fraction**     | 6       | **336.8x**     | 364.9x       |
 | **Financial**    | 4       | **242.1x**     | 263.5x       |
+| **Iterations**   | 6       | **438.1x**     | 426.0x       |
+| **Pathological** | 4       | **381.6x**     | 373.4x       |
 | **Scientific**   | 4       | **165.1x**     | 207.5x       |
+| **Fraction**     | 6       | **336.8x**     | 364.9x       |
 | **Genomic**      | 4       | **23.1x**      | 22.7x        |
 | **Delta**        | 4       | **3.6x**       | 6.0x         |
 
@@ -91,8 +118,8 @@ conda install -c conda-forge fastlowess
 import numpy as np
 import fastlowess
 
-x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
-y = np.array([2.0, 4.1, 5.9, 8.2, 9.8])
+x = np.linspace(0, 10, 100)
+y = np.sin(x) + np.random.normal(0, 0.2, 100)
 
 # Basic smoothing (parallel CPU by default)
 result = fastlowess.smooth(x, y, fraction=0.3)
@@ -100,29 +127,14 @@ result = fastlowess.smooth(x, y, fraction=0.3)
 print(f"Smoothed values: {result.y}")
 ```
 
-## Common Use Cases
-
-### 1. Robust Smoothing (Handle Outliers)
+## Smoothing Parameters
 
 ```python
-# Use robust iterations to downweight outliers
-result = fastlowess.smooth(
+import fastlowess
+
+fastlowess.smooth(
     x, y,
-    fraction=0.7,
-    iterations=5,  # Robust iterations
-    robustness_method="bisquare",  # "bisquare", "huber", or "talwar"
-    return_robustness_weights=True
-)
-
-# Identify outliers (weights < 0.1)
-outliers = np.where(result.robustness_weights < 0.1)[0]
-```
-
-### 2. Uncertainty Quantification
-
-```python
-result = fastlowess.smooth(
-    x, y,
+    # Smoothing span (0, 1]
     fraction=0.5,
 
     # Robustness iterations
@@ -208,7 +220,6 @@ result = fastlowess.smooth_online(
     x, y,
     fraction=0.2,
     window_capacity=100,
-    min_points=3,
     update_mode="incremental" # or "full"
 )
 ```
@@ -244,6 +255,7 @@ result = fastlowess.smooth_online(
 
 - **None**: Small datasets (n < 1000)
 - **0.01 × range(x)**: Good starting point for dense data
+- **Manual tuning**: Adjust based on data density
 
 ## Documentation
 
@@ -270,8 +282,8 @@ Check [Validation](https://github.com/thisisamirv/fastLowess-py/tree/bench/valid
 
 ## Related Work
 
-- [lowess (Rust core)](https://github.com/thisisamirv/lowess)
-- [fastlowess (R wrapper)](https://github.com/thisisamirv/fastlowess-R)
+- [fastLowess (Rust core)](https://github.com/thisisamirv/fastLowess)
+- [fastLowess-R (R wrapper)](https://github.com/thisisamirv/fastlowess-R)
 
 ## Contributing
 
