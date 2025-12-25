@@ -91,7 +91,7 @@ jobs:
           echo "sha256=$SHA256" >> $GITHUB_OUTPUT
           echo "SHA256: $SHA256"
 
-      - name: Fork and clone feedstock
+      - name: Clone feedstock fork
         env:
           GH_TOKEN: ${{ secrets.CONDA_FORGE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
@@ -99,10 +99,17 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Fork the feedstock if not already forked
-          gh repo fork conda-forge/fastlowess-feedstock --clone=true --remote=true || true
+          # Clone the user's fork (assumes fork already exists at thisisamirv/fastlowess-feedstock)
+          # If you need to use a different account, update this URL
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/thisisamirv/fastlowess-feedstock.git"
 
           cd fastlowess-feedstock
+
+          # Add conda-forge as upstream and fetch latest
+          git remote add upstream https://github.com/conda-forge/fastlowess-feedstock.git
+          git fetch upstream
+          git checkout main
+          git merge upstream/main --no-edit || true
 
       - name: Update recipe
         env:
