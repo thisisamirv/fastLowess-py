@@ -8,12 +8,13 @@
 use numpy::{PyArray1, PyReadonlyArray1};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use std::fmt::Display;
 
 use ::fastLowess::internals::api::{
-    BoundaryPolicy, RobustnessMethod, UpdateMode, WeightFunction, ZeroWeightFallback,
+    BoundaryPolicy, RobustnessMethod, ScalingMethod, UpdateMode, WeightFunction, ZeroWeightFallback,
 };
 use ::fastLowess::prelude::{
-    Batch, KFold, LOOCV, Lowess as LowessBuilder, LowessResult, Online, Streaming,
+    Batch, KFold, LOOCV, Lowess as LowessBuilder, LowessResult, MAD, MAR, Online, Streaming,
 };
 
 // ============================================================================
@@ -21,7 +22,7 @@ use ::fastLowess::prelude::{
 // ============================================================================
 
 /// Convert a LowessError to a PyErr
-fn to_py_error(e: impl std::fmt::Display) -> PyErr {
+fn to_py_error(e: impl Display) -> PyErr {
     PyValueError::new_err(e.to_string())
 }
 
@@ -74,8 +75,21 @@ fn parse_boundary_policy(name: &str) -> PyResult<BoundaryPolicy> {
         "extend" | "pad" => Ok(BoundaryPolicy::Extend),
         "reflect" | "mirror" => Ok(BoundaryPolicy::Reflect),
         "zero" | "none" => Ok(BoundaryPolicy::Zero),
+        "noboundary" => Ok(BoundaryPolicy::NoBoundary),
         _ => Err(PyValueError::new_err(format!(
-            "Unknown boundary policy: {}. Valid options: extend, reflect, zero",
+            "Unknown boundary policy: {}. Valid options: extend, reflect, zero, noboundary",
+            name
+        ))),
+    }
+}
+
+/// Parse scaling method from string
+fn parse_scaling_method(name: &str) -> PyResult<ScalingMethod> {
+    match name.to_lowercase().as_str() {
+        "mad" => Ok(MAD),
+        "mar" => Ok(MAR),
+        _ => Err(PyValueError::new_err(format!(
+            "Unknown scaling method: {}. Valid options: mad, mar",
             name
         ))),
     }
@@ -292,8 +306,10 @@ impl PyLowessResult {
 ///     Kernel function: "tricube", "epanechnikov", "gaussian", "uniform", "biweight", "triangle".
 /// robustness_method : str, optional
 ///     Robustness method: "bisquare", "huber", "talwar".
+/// scaling_method : str, optional
+///     Scaling method for robustness: "mad", "mar" (default: "mad").
 /// boundary_policy : str, optional
-///     Handling of edge effects: "extend", "reflect", "zero" (default: "extend").
+///     Handling of edge effects: "extend", "reflect", "zero", "noboundary" (default: "extend").
 /// confidence_intervals : float, optional
 ///     Confidence level for confidence intervals (e.g., 0.95).
 /// prediction_intervals : float, optional
@@ -328,6 +344,7 @@ impl PyLowessResult {
     delta=None,
     weight_function="tricube",
     robustness_method="bisquare",
+    scaling_method="mad",
     boundary_policy="extend",
     confidence_intervals=None,
     prediction_intervals=None,
@@ -350,6 +367,7 @@ fn smooth<'py>(
     delta: Option<f64>,
     weight_function: &str,
     robustness_method: &str,
+    scaling_method: &str,
     boundary_policy: &str,
     confidence_intervals: Option<f64>,
     prediction_intervals: Option<f64>,
@@ -368,6 +386,7 @@ fn smooth<'py>(
 
     let wf = parse_weight_function(weight_function)?;
     let rm = parse_robustness_method(robustness_method)?;
+    let sm = parse_scaling_method(scaling_method)?;
     let zwf = parse_zero_weight_fallback(zero_weight_fallback)?;
     let bp = parse_boundary_policy(boundary_policy)?;
 
@@ -376,6 +395,7 @@ fn smooth<'py>(
     builder = builder.iterations(iterations);
     builder = builder.weight_function(wf);
     builder = builder.robustness_method(rm);
+    builder = builder.scaling_method(sm);
     builder = builder.zero_weight_fallback(zwf);
     builder = builder.boundary_policy(bp);
     builder = builder.parallel(parallel);
@@ -461,8 +481,10 @@ fn smooth<'py>(
 ///     Kernel function: "tricube", "epanechnikov", "gaussian", "uniform", "biweight", "triangle".
 /// robustness_method : str, optional
 ///     Robustness method: "bisquare", "huber", "talwar".
+/// scaling_method : str, optional
+///     Scaling method for robustness: "mad", "mar" (default: "mad").
 /// boundary_policy : str, optional
-///     Handling of edge effects: "extend", "reflect", "zero" (default: "extend").
+///     Handling of edge effects: "extend", "reflect", "zero", "noboundary" (default: "extend").
 /// auto_converge : float, optional
 ///     Tolerance for auto-convergence (disabled by default).
 /// return_diagnostics : bool, optional
@@ -487,6 +509,7 @@ fn smooth<'py>(
     delta=None,
     weight_function="tricube",
     robustness_method="bisquare",
+    scaling_method="mad",
     boundary_policy="extend",
     auto_converge=None,
     return_diagnostics=false,
@@ -505,6 +528,7 @@ fn smooth_streaming<'py>(
     delta: Option<f64>,
     weight_function: &str,
     robustness_method: &str,
+    scaling_method: &str,
     boundary_policy: &str,
     auto_converge: Option<f64>,
     return_diagnostics: bool,
@@ -524,6 +548,7 @@ fn smooth_streaming<'py>(
 
     let wf = parse_weight_function(weight_function)?;
     let rm = parse_robustness_method(robustness_method)?;
+    let sm = parse_scaling_method(scaling_method)?;
     let zwf = parse_zero_weight_fallback(zero_weight_fallback)?;
     let bp = parse_boundary_policy(boundary_policy)?;
 
@@ -532,6 +557,7 @@ fn smooth_streaming<'py>(
     builder = builder.iterations(iterations);
     builder = builder.weight_function(wf);
     builder = builder.robustness_method(rm);
+    builder = builder.scaling_method(sm);
     builder = builder.zero_weight_fallback(zwf);
     builder = builder.boundary_policy(bp);
 
@@ -655,7 +681,7 @@ fn smooth_streaming<'py>(
 /// robustness_method : str, optional
 ///     Robustness method: "bisquare", "huber", "talwar".
 /// boundary_policy : str, optional
-///     Handling of edge effects: "extend", "reflect", "zero" (default: "extend").
+///     Handling of edge effects: "extend", "reflect", "zero", "noboundary" (default: "extend").
 /// update_mode : str, optional
 ///     Update strategy: "full" or "incremental" (default: "full").
 /// auto_converge : float, optional
@@ -680,6 +706,7 @@ fn smooth_streaming<'py>(
     delta=None,
     weight_function="tricube",
     robustness_method="bisquare",
+    scaling_method="mad",
     boundary_policy="extend",
     update_mode="full",
     auto_converge=None,
@@ -697,6 +724,7 @@ fn smooth_online<'py>(
     delta: Option<f64>,
     weight_function: &str,
     robustness_method: &str,
+    scaling_method: &str,
     boundary_policy: &str,
     update_mode: &str,
     auto_converge: Option<f64>,
@@ -709,6 +737,7 @@ fn smooth_online<'py>(
 
     let wf = parse_weight_function(weight_function)?;
     let rm = parse_robustness_method(robustness_method)?;
+    let sm = parse_scaling_method(scaling_method)?;
     let bp = parse_boundary_policy(boundary_policy)?;
     let zwf = parse_zero_weight_fallback(zero_weight_fallback)?;
     let um = parse_update_mode(update_mode)?;
@@ -718,6 +747,7 @@ fn smooth_online<'py>(
     builder = builder.iterations(iterations);
     builder = builder.weight_function(wf);
     builder = builder.robustness_method(rm);
+    builder = builder.scaling_method(sm);
     builder = builder.zero_weight_fallback(zwf);
     builder = builder.boundary_policy(bp);
 

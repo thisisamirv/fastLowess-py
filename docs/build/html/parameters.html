@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Parameter Reference &mdash; fastlowess 0.2.0 documentation</title>
+  <title>Parameter Reference &mdash; fastlowess 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/documentation_options.js?v=6c02275b"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -46,6 +46,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="advanced_usage.html">Advanced Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="execution_modes.html">Execution Modes</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Parameter Reference</a><ul>
@@ -146,33 +147,42 @@
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td><p><strong>boundary_policy</strong></p></td>
+<tr class="row-even"><td><p><strong>scaling_method</strong></p></td>
+<td><p>String. Method for robustness scale estimation.</p>
+<ul class="simple">
+<li><p><strong>“mad”</strong> (default): Median Absolute Deviation.</p></li>
+<li><p><strong>“mar”</strong>: Median Absolute Residual.</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p><strong>boundary_policy</strong></p></td>
 <td><p>String. Handling of edge effects.</p>
 <ul class="simple">
 <li><p><strong>“extend”</strong> (default): Replicates first/last values. Preserves trends.</p></li>
 <li><p><strong>“reflect”</strong>: Mirrors data.</p></li>
 <li><p><strong>“zero”</strong>: Zero padding.</p></li>
+<li><p><strong>“noboundary”</strong>: No padding.</p></li>
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td><p><strong>delta</strong></p></td>
+<tr class="row-even"><td><p><strong>delta</strong></p></td>
 <td><p>Float or None. Interpolation threshold. Points within <code class="docutils literal notranslate"><span class="pre">delta</span></code> of the last computed point are interpolated.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code> (automatic for large N). Set manually (e.g., 0.01 * range) for performance tuning.</p>
 </td>
 </tr>
-<tr class="row-even"><td><p><strong>parallel</strong></p></td>
+<tr class="row-odd"><td><p><strong>parallel</strong></p></td>
 <td><p>Boolean. Enable multi-threaded execution via Rayon. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>return_diagnostics</strong></p></td>
+<tr class="row-even"><td><p><strong>return_diagnostics</strong></p></td>
 <td><p>Boolean. Calculate R², RMSE, etc. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>return_residuals</strong></p></td>
+<tr class="row-odd"><td><p><strong>return_residuals</strong></p></td>
 <td><p>Boolean. Include residuals (y - smoothed) in result. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>return_robustness_weights</strong></p></td>
+<tr class="row-even"><td><p><strong>return_robustness_weights</strong></p></td>
 <td><p>Boolean. Include final robust weights in result. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>zero_weight_fallback</strong></p></td>
+<tr class="row-odd"><td><p><strong>zero_weight_fallback</strong></p></td>
 <td><p>String. Behavior when a point has 0 total weight.</p>
 <ul class="simple">
 <li><p><strong>“use_local_mean”</strong> (default)</p></li>
@@ -181,22 +191,22 @@
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td><p><strong>auto_converge</strong></p></td>
+<tr class="row-even"><td><p><strong>auto_converge</strong></p></td>
 <td><p>Float or None. Stop iterations if max change &lt; tolerance. Default: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>confidence_intervals</strong></p></td>
+<tr class="row-odd"><td><p><strong>confidence_intervals</strong></p></td>
 <td><p>Float (0.0 - 1.0) or None. Confidence level (e.g., 0.95). Default: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>prediction_intervals</strong></p></td>
+<tr class="row-even"><td><p><strong>prediction_intervals</strong></p></td>
 <td><p>Float (0.0 - 1.0) or None. Prediction level (e.g., 0.95). Default: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>cv_fractions</strong></p></td>
+<tr class="row-odd"><td><p><strong>cv_fractions</strong></p></td>
 <td><p>List of floats or None. Candidates for Cross-Validation. Default: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>cv_method</strong></p></td>
+<tr class="row-even"><td><p><strong>cv_method</strong></p></td>
 <td><p>String. “loocv” (Leave-One-Out) or “kfold”. Default: “kfold”.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>cv_k</strong></p></td>
+<tr class="row-odd"><td><p><strong>cv_k</strong></p></td>
 <td><p>Integer. Number of folds for k-fold CV. Default: 5.</p></td>
 </tr>
 </tbody>
@@ -240,22 +250,25 @@
 <tr class="row-odd"><td><p><strong>robustness_method</strong></p></td>
 <td><p>See <strong>smooth()</strong> above.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>boundary_policy</strong></p></td>
+<tr class="row-even"><td><p><strong>scaling_method</strong></p></td>
 <td><p>See <strong>smooth()</strong> above.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>return_diagnostics</strong></p></td>
+<tr class="row-odd"><td><p><strong>boundary_policy</strong></p></td>
+<td><p>See <strong>smooth()</strong> above.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>return_diagnostics</strong></p></td>
 <td><p>Boolean. Cumulative diagnostics over chunks. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>return_residuals</strong></p></td>
+<tr class="row-odd"><td><p><strong>return_residuals</strong></p></td>
 <td><p>Boolean. Include residuals. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>return_robustness_weights</strong></p></td>
+<tr class="row-even"><td><p><strong>return_robustness_weights</strong></p></td>
 <td><p>Boolean. Include robust weights. Default: <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>zero_weight_fallback</strong></p></td>
+<tr class="row-odd"><td><p><strong>zero_weight_fallback</strong></p></td>
 <td><p>See <strong>smooth()</strong> above.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>auto_converge</strong></p></td>
+<tr class="row-even"><td><p><strong>auto_converge</strong></p></td>
 <td><p>See <strong>smooth()</strong> above.</p></td>
 </tr>
 </tbody>
@@ -307,13 +320,16 @@
 <tr class="row-even"><td><p><strong>robustness_method</strong></p></td>
 <td><p>See <strong>smooth()</strong> above.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>boundary_policy</strong></p></td>
+<tr class="row-odd"><td><p><strong>scaling_method</strong></p></td>
 <td><p>See <strong>smooth()</strong> above.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>return_robustness_weights</strong></p></td>
+<tr class="row-even"><td><p><strong>boundary_policy</strong></p></td>
+<td><p>See <strong>smooth()</strong> above.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>return_robustness_weights</strong></p></td>
 <td><p>Boolean. Include robust weights.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>zero_weight_fallback</strong></p></td>
+<tr class="row-even"><td><p><strong>zero_weight_fallback</strong></p></td>
 <td><p>See <strong>smooth()</strong> above.</p></td>
 </tr>
 </tbody>

@@ -61,7 +61,7 @@ Functions
 ---------
 
 smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function="tricube",
-    robustness_method="bisquare", boundary_policy="extend",
+    robustness_method="bisquare", scaling_method="mad", boundary_policy="extend",
     confidence_intervals=None, prediction_intervals=None,
     return_diagnostics=False, return_residuals=False,
     return_robustness_weights=False, zero_weight_fallback="use_local_mean",
@@ -118,12 +118,19 @@ smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function="tricube",
         - "huber": Less aggressive downweighting
         - "talwar": Hard rejection of outliers
 
+    scaling_method : str, optional
+        Method for scale estimation. Options:
+
+        - "mad" (default): Median Absolute Deviation (robust to 50% outliers)
+        - "mar": Median Absolute Residual (classic statsmodels behavior)
+
     boundary_policy : str, optional
         Handling of edge effects (default: "extend"). Options:
 
         - "extend": Extend boundary values (retains trend)
         - "reflect": Reflect values around boundary
         - "zero": Pad with zeros
+        - "noboundary": No padding (may produce artifacts at edges)
 
     confidence_intervals : float, optional
         Confidence level for confidence intervals (e.g., 0.95 for 95%).
@@ -182,7 +189,7 @@ smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function="tricube",
 
 smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
     iterations=3, delta=None, weight_function="tricube",
-    robustness_method="bisquare", boundary_policy="extend",
+    robustness_method="bisquare", scaling_method="mad", boundary_policy="extend",
     auto_converge=None, return_diagnostics=False,
     return_residuals=False, return_robustness_weights=False,
     zero_weight_fallback="use_local_mean", parallel=True)
@@ -213,8 +220,10 @@ smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
         "uniform", "biweight", "triangle". Default: "tricube".
     robustness_method : str, optional
         Robustness method: "bisquare", "huber", "talwar". Default: "bisquare".
+    scaling_method : str, optional
+        Scale estimation: "mad", "mar". Default: "mad".
     boundary_policy : str, optional
-        Boundary handling: "extend", "reflect", "zero". Default: "extend".
+        Boundary handling: "extend", "reflect", "zero", "noboundary". Default: "extend".
     auto_converge : float, optional
         Adaptive convergence tolerance. Default: None.
     return_diagnostics : bool, optional
@@ -243,7 +252,7 @@ smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,
 
 smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,
     iterations=3, delta=None, weight_function="tricube",
-    robustness_method="bisquare", boundary_policy="extend",
+    robustness_method="bisquare", scaling_method="mad", boundary_policy="extend",
     update_mode="full", auto_converge=None,
     return_robustness_weights=False,
     zero_weight_fallback="use_local_mean", parallel=False)
@@ -272,8 +281,10 @@ smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,
         Kernel function. Default: "tricube".
     robustness_method : str, optional
         Robustness method. Default: "bisquare".
+    scaling_method : str, optional
+        Scale estimation. Default: "mad".
     boundary_policy : str, optional
-        Boundary handling: "extend", "reflect", "zero". Default: "extend".
+        Boundary handling: "extend", "reflect", "zero", "noboundary". Default: "extend".
     update_mode : str, optional
         Update strategy: "full" or "incremental". Default: "full".
     auto_converge : float, optional
@@ -429,6 +440,7 @@ __all__ = [
     "smooth_online",
     "LowessResult",
     "Diagnostics",
+    "__version__",
 ]
 
-__version__ = "0.3.1"
+from .__version__ import __version__

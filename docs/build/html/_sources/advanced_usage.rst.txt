@@ -33,6 +33,24 @@ Robustness Methods
        robustness_method="talwar"
    )
 
+Scaling Methods (Scale Estimation)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Scale estimation determines how residuals are scaled before computing robustness weights.
+
++------------+---------------------------+----------------------------------------+
+| Method     | Description               | Use Case                               |
++============+===========================+========================================+
+| **MAD**    | Median Absolute Deviation | **Default**. Robust to 50% outliers.   |
++------------+---------------------------+----------------------------------------+
+| **MAR**    | Median Absolute Residual  | Classic statsmodels behavior.          |
++------------+---------------------------+----------------------------------------+
+
+.. code-block:: python
+
+   # Use MAR scaling to match legacy systems
+   result = smooth(x, y, scaling_method="mar")
+
 Auto-Convergence
 ^^^^^^^^^^^^^^^^
 
@@ -56,6 +74,7 @@ Control how the smoother behaves at the edges of the dataset to avoid boundary b
 *   **"extend"** (default): Extends the boundary values (recommended for preserving trends).
 *   **"reflect"**: Reflects values around the boundary.
 *   **"zero"**: Pads with zeros (useful for signal processing).
+*   **"noboundary"**: No padding. Can be faster but may exhibit edge effects.
 
 .. code-block:: python
 

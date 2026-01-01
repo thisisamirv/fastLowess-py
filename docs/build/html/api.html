@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; fastlowess 0.2.0 documentation</title>
+  <title>API Reference &mdash; fastlowess 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/documentation_options.js?v=6c02275b"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -180,7 +180,7 @@ without assuming a global functional form.</p>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
 <dl>
-<dt>smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function=”tricube”,</dt><dd><p>robustness_method=”bisquare”, boundary_policy=”extend”,
+<dt>smooth(x, y, fraction=0.67, iterations=3, delta=None, weight_function=”tricube”,</dt><dd><p>robustness_method=”bisquare”, scaling_method=”mad”, boundary_policy=”extend”,
 confidence_intervals=None, prediction_intervals=None,
 return_diagnostics=False, return_residuals=False,
 return_robustness_weights=False, zero_weight_fallback=”use_local_mean”,
@@ -235,11 +235,18 @@ Default: None (automatic: 1% of x-range for large datasets).</p>
 <li><p>“talwar”: Hard rejection of outliers</p></li>
 </ul>
 </dd>
+<dt>scaling_method<span class="classifier">str, optional</span></dt><dd><p>Method for scale estimation. Options:</p>
+<ul class="simple">
+<li><p>“mad” (default): Median Absolute Deviation (robust to 50% outliers)</p></li>
+<li><p>“mar”: Median Absolute Residual (classic statsmodels behavior)</p></li>
+</ul>
+</dd>
 <dt>boundary_policy<span class="classifier">str, optional</span></dt><dd><p>Handling of edge effects (default: “extend”). Options:</p>
 <ul class="simple">
 <li><p>“extend”: Extend boundary values (retains trend)</p></li>
 <li><p>“reflect”: Reflect values around boundary</p></li>
 <li><p>“zero”: Pad with zeros</p></li>
+<li><p>“noboundary”: No padding (may produce artifacts at edges)</p></li>
 </ul>
 </dd>
 <dt>confidence_intervals<span class="classifier">float, optional</span></dt><dd><p>Confidence level for confidence intervals (e.g., 0.95 for 95%).
@@ -298,7 +305,7 @@ Default: “kfold”.</p>
 &gt;&gt;&gt; print(f”Smoothed {len(result.y)} points”)</p>
 </dd>
 <dt>smooth_streaming(x, y, fraction=0.3, chunk_size=5000, overlap=None,</dt><dd><p>iterations=3, delta=None, weight_function=”tricube”,
-robustness_method=”bisquare”, boundary_policy=”extend”,
+robustness_method=”bisquare”, scaling_method=”mad”, boundary_policy=”extend”,
 auto_converge=None, return_diagnostics=False,
 return_residuals=False, return_robustness_weights=False,
 zero_weight_fallback=”use_local_mean”, parallel=True)
@@ -327,7 +334,9 @@ Default: 10% of chunk_size.</p>
 </dd>
 <dt>robustness_method<span class="classifier">str, optional</span></dt><dd><p>Robustness method: “bisquare”, “huber”, “talwar”. Default: “bisquare”.</p>
 </dd>
-<dt>boundary_policy<span class="classifier">str, optional</span></dt><dd><p>Boundary handling: “extend”, “reflect”, “zero”. Default: “extend”.</p>
+<dt>scaling_method<span class="classifier">str, optional</span></dt><dd><p>Scale estimation: “mad”, “mar”. Default: “mad”.</p>
+</dd>
+<dt>boundary_policy<span class="classifier">str, optional</span></dt><dd><p>Boundary handling: “extend”, “reflect”, “zero”, “noboundary”. Default: “extend”.</p>
 </dd>
 <dt>auto_converge<span class="classifier">float, optional</span></dt><dd><p>Adaptive convergence tolerance. Default: None.</p>
 </dd>
@@ -355,7 +364,7 @@ Default: 10% of chunk_size.</p>
 &gt;&gt;&gt; result = fastlowess.smooth_streaming(x, y, chunk_size=10000)</p>
 </dd>
 <dt>smooth_online(x, y, fraction=0.2, window_capacity=100, min_points=3,</dt><dd><p>iterations=3, delta=None, weight_function=”tricube”,
-robustness_method=”bisquare”, boundary_policy=”extend”,
+robustness_method=”bisquare”, scaling_method=”mad”, boundary_policy=”extend”,
 update_mode=”full”, auto_converge=None,
 return_robustness_weights=False,
 zero_weight_fallback=”use_local_mean”, parallel=False)
@@ -382,7 +391,9 @@ real-time data streams or sensor data processing.</p>
 </dd>
 <dt>robustness_method<span class="classifier">str, optional</span></dt><dd><p>Robustness method. Default: “bisquare”.</p>
 </dd>
-<dt>boundary_policy<span class="classifier">str, optional</span></dt><dd><p>Boundary handling: “extend”, “reflect”, “zero”. Default: “extend”.</p>
+<dt>scaling_method<span class="classifier">str, optional</span></dt><dd><p>Scale estimation. Default: “mad”.</p>
+</dd>
+<dt>boundary_policy<span class="classifier">str, optional</span></dt><dd><p>Boundary handling: “extend”, “reflect”, “zero”, “noboundary”. Default: “extend”.</p>
 </dd>
 <dt>update_mode<span class="classifier">str, optional</span></dt><dd><p>Update strategy: “full” or “incremental”. Default: “full”.</p>
 </dd>

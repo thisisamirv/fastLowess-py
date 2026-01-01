@@ -47,12 +47,18 @@ Parameters for ``fastlowess.smooth()`` (Batch Mode).
        * **"bisquare"** (default): Smooth descent to zero.
        * **"huber"**: Linear penalty tails.
        * **"talwar"**: Hard cut-off.
+   * - **scaling_method**
+     - String. Method for robustness scale estimation.
+       
+       * **"mad"** (default): Median Absolute Deviation.
+       * **"mar"**: Median Absolute Residual.
    * - **boundary_policy**
      - String. Handling of edge effects.
        
        * **"extend"** (default): Replicates first/last values. Preserves trends.
        * **"reflect"**: Mirrors data.
        * **"zero"**: Zero padding.
+       * **"noboundary"**: No padding.
    * - **delta**
      - Float or None. Interpolation threshold. Points within ``delta`` of the last computed point are interpolated.
        
@@ -113,6 +119,8 @@ Parameters for ``fastlowess.smooth_streaming()`` (Streaming Mode).
      - See **smooth()** above.
    * - **robustness_method**
      - See **smooth()** above.
+   * - **scaling_method**
+     - See **smooth()** above.
    * - **boundary_policy**
      - See **smooth()** above.
    * - **return_diagnostics**
@@ -159,6 +167,8 @@ Parameters for ``fastlowess.smooth_online()`` (Online/Real-time Mode).
    * - **weight_function**
      - See **smooth()** above.
    * - **robustness_method**
+     - See **smooth()** above.
+   * - **scaling_method**
      - See **smooth()** above.
    * - **boundary_policy**
      - See **smooth()** above.
