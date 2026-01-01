@@ -131,6 +131,18 @@ jobs:
           # Reset build number to 0 for new version
           sed -i "s/number: .*/number: 0/" recipe/meta.yaml
 
+          # Update license field
+          sed -i "s/license: .*/license: MIT AND Apache-2.0/" recipe/meta.yaml
+
+          # Update license_file to use dual license files (multi-line replacement)
+          # First, find the license_file section and replace LICENSE with LICENSE-MIT
+          sed -i "/license_file:/,/THIRDPARTY.yml/ s/- LICENSE$/- LICENSE-MIT/" recipe/meta.yaml
+          
+          # Then add LICENSE-APACHE after LICENSE-MIT if it doesn't exist
+          if ! grep -q "LICENSE-APACHE" recipe/meta.yaml; then
+            sed -i "/- LICENSE-MIT/a\    - LICENSE-APACHE" recipe/meta.yaml
+          fi
+
           # Show the changes
           echo "=== Updated meta.yaml ==="
           cat recipe/meta.yaml
