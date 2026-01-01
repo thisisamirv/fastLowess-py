@@ -127,121 +127,227 @@
 </section>
 <section id="performance-advantages">
 <h2>Performance Advantages<a class="headerlink" href="#performance-advantages" title="Link to this heading"></a></h2>
-<p>Benchmarked against Python’s <code class="docutils literal notranslate"><span class="pre">statsmodels</span></code>. Achieves <strong>8.5x to 2800x faster performance</strong> across different tested scenarios. The parallel implementation ensures that even at extreme scales (100k points), processing remains sub-20ms.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">fastlowess</span></code> Python package demonstrates massive performance gains over Python’s <code class="docutils literal notranslate"><span class="pre">statsmodels</span></code> and R’s <code class="docutils literal notranslate"><span class="pre">stats::lowess</span></code>. The benchmarks compare <code class="docutils literal notranslate"><span class="pre">fastlowess</span></code> (both Serial and Parallel execution modes) against these standard implementations.</p>
+<p>The results show that <code class="docutils literal notranslate"><span class="pre">fastlowess</span></code> is the decisive winner across all benchmarks, achieving an <strong>average speedup of 280x</strong> and a <strong>maximum speedup of 1169x</strong>.</p>
+<p>The table below shows speedups relative to the <strong>statsmodels baseline</strong>.</p>
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Category</p></th>
-<th class="head"><p>Matched</p></th>
-<th class="head"><p>Median Speedup</p></th>
-<th class="head"><p>Mean Speedup</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><strong>Scalability</strong></p></td>
-<td><p>5</p></td>
-<td><p><strong>283.2x</strong></p></td>
-<td><p>922.0x</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Pathological</strong></p></td>
-<td><p>4</p></td>
-<td><p><strong>355.5x</strong></p></td>
-<td><p>355.0x</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Iterations</strong></p></td>
-<td><p>6</p></td>
-<td><p><strong>302.3x</strong></p></td>
-<td><p>339.8x</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Fraction</strong></p></td>
-<td><p>6</p></td>
-<td><p><strong>265.8x</strong></p></td>
-<td><p>285.0x</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Financial</strong></p></td>
-<td><p>4</p></td>
-<td><p><strong>176.7x</strong></p></td>
-<td><p>215.2x</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Scientific</strong></p></td>
-<td><p>4</p></td>
-<td><p><strong>201.1x</strong></p></td>
-<td><p>225.6x</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Genomic</strong></p></td>
-<td><p>4</p></td>
-<td><p><strong>17.5x</strong></p></td>
-<td><p>18.6x</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Delta</strong></p></td>
-<td><p>4</p></td>
-<td><p><strong>4.1x</strong></p></td>
-<td><p>6.1x</p></td>
-</tr>
-</tbody>
-</table>
-<section id="top-10-performance-wins">
-<h3>Top 10 Performance Wins<a class="headerlink" href="#top-10-performance-wins" title="Link to this heading"></a></h3>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Benchmark</p></th>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
 <th class="head"><p>statsmodels</p></th>
+<th class="head"><p>R</p></th>
 <th class="head"><p>fastlowess</p></th>
-<th class="head"><p>Speedup</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>scale_100000</p></td>
-<td><p>27.71s</p></td>
-<td><p>9.9ms</p></td>
-<td><p><strong>2799.5x</strong></p></td>
+<tr class="row-even"><td><p>clustered</p></td>
+<td><p>162.77ms</p></td>
+<td><p>[82.8x]²</p></td>
+<td><p>[170-432x]¹</p></td>
 </tr>
-<tr class="row-odd"><td><p>scale_50000</p></td>
-<td><p>7.15s</p></td>
-<td><p>5.7ms</p></td>
-<td><p><strong>1252.0x</strong></p></td>
+<tr class="row-odd"><td><p>constant_y</p></td>
+<td><p>133.63ms</p></td>
+<td><p>[92.3x]²</p></td>
+<td><p>[176-372x]¹</p></td>
 </tr>
-<tr class="row-even"><td><p>iterations_0</p></td>
-<td><p>48.5ms</p></td>
-<td><p>0.1ms</p></td>
-<td><p><strong>488.0x</strong></p></td>
+<tr class="row-even"><td><p>delta_large</p></td>
+<td><p>0.51ms</p></td>
+<td><p>[0.8x]²</p></td>
+<td><p>[3.3-2.0x]¹</p></td>
 </tr>
-<tr class="row-odd"><td><p>financial_10000</p></td>
-<td><p>337.8ms</p></td>
-<td><p>0.7ms</p></td>
-<td><p><strong>471.6x</strong></p></td>
+<tr class="row-odd"><td><p>delta_medium</p></td>
+<td><p>0.79ms</p></td>
+<td><p>[1.3x]²</p></td>
+<td><p>[3.7-3.3x]¹</p></td>
 </tr>
-<tr class="row-even"><td><p>scientific_10000</p></td>
-<td><p>522.4ms</p></td>
-<td><p>1.2ms</p></td>
-<td><p><strong>432.5x</strong></p></td>
+<tr class="row-even"><td><p>delta_none</p></td>
+<td><p>414.86ms</p></td>
+<td><p>[2.5x]²</p></td>
+<td><p>[3.2-16x]¹</p></td>
 </tr>
-<tr class="row-odd"><td><p>clustered</p></td>
-<td><p>172.2ms</p></td>
-<td><p>0.4ms</p></td>
-<td><p><strong>426.1x</strong></p></td>
+<tr class="row-odd"><td><p>delta_small</p></td>
+<td><p>1.45ms</p></td>
+<td><p>[1.7x]²</p></td>
+<td><p>[3.6-4.4x]¹</p></td>
 </tr>
-<tr class="row-even"><td><p>constant_y</p></td>
-<td><p>141.2ms</p></td>
-<td><p>0.4ms</p></td>
-<td><p><strong>379.6x</strong></p></td>
+<tr class="row-even"><td><p>extreme_outliers</p></td>
+<td><p>488.96ms</p></td>
+<td><p>[106.4x]²</p></td>
+<td><p>[168-373x]¹</p></td>
+</tr>
+<tr class="row-odd"><td><p>financial_1000</p></td>
+<td><p>13.55ms</p></td>
+<td><p>[76.6x]²</p></td>
+<td><p>[135-105x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>financial_10000</p></td>
+<td><p>302.20ms</p></td>
+<td><p>[168.3x]²</p></td>
+<td><p>[379-480x]¹</p></td>
+</tr>
+<tr class="row-odd"><td><p>financial_500</p></td>
+<td><p>6.49ms</p></td>
+<td><p>[58.0x]¹</p></td>
+<td><p>[92-54x]²</p></td>
+</tr>
+<tr class="row-even"><td><p>financial_5000</p></td>
+<td><p>103.94ms</p></td>
+<td><p>[117.3x]²</p></td>
+<td><p>[252-336x]¹</p></td>
 </tr>
 <tr class="row-odd"><td><p>fraction_0.05</p></td>
-<td><p>130.9ms</p></td>
-<td><p>0.4ms</p></td>
-<td><p><strong>370.5x</strong></p></td>
+<td><p>122.00ms</p></td>
+<td><p>[177.6x]²</p></td>
+<td><p>[376-274x]¹</p></td>
 </tr>
-<tr class="row-even"><td><p>iterations_2</p></td>
-<td><p>149.6ms</p></td>
-<td><p>0.4ms</p></td>
-<td><p><strong>362.2x</strong></p></td>
+<tr class="row-even"><td><p>fraction_0.1</p></td>
+<td><p>140.59ms</p></td>
+<td><p>[112.8x]²</p></td>
+<td><p>[252-219x]¹</p></td>
 </tr>
-<tr class="row-odd"><td><p>tricube</p></td>
-<td><p>188.9ms</p></td>
-<td><p>0.6ms</p></td>
-<td><p><strong>335.3x</strong></p></td>
+<tr class="row-odd"><td><p>fraction_0.2</p></td>
+<td><p>181.57ms</p></td>
+<td><p>[85.3x]²</p></td>
+<td><p>[180-283x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>fraction_0.3</p></td>
+<td><p>220.98ms</p></td>
+<td><p>[84.8x]²</p></td>
+<td><p>[151-304x]¹</p></td>
+</tr>
+<tr class="row-odd"><td><p>fraction_0.5</p></td>
+<td><p>296.47ms</p></td>
+<td><p>[80.9x]²</p></td>
+<td><p>[125-366x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>fraction_0.67</p></td>
+<td><p>362.59ms</p></td>
+<td><p>[83.1x]²</p></td>
+<td><p>[115-428x]¹</p></td>
+</tr>
+<tr class="row-odd"><td><p>genomic_1000</p></td>
+<td><p>17.82ms</p></td>
+<td><p>[15.9x]²</p></td>
+<td><p>[16-23x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>genomic_10000</p></td>
+<td><p>399.90ms</p></td>
+<td><p>[3.6x]²</p></td>
+<td><p>[4.5-18x]¹</p></td>
+</tr>
+<tr class="row-odd"><td><p>genomic_5000</p></td>
+<td><p>138.49ms</p></td>
+<td><p>[5.0x]²</p></td>
+<td><p>[6.1-21x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>genomic_50000</p></td>
+<td><p>6776.57ms</p></td>
+<td><p>[2.4x]²</p></td>
+<td><p>[3.1-12x]¹</p></td>
+</tr>
+<tr class="row-odd"><td><p>high_noise</p></td>
+<td><p>435.85ms</p></td>
+<td><p>[132.6x]²</p></td>
+<td><p>[118-381x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>iterations_0</p></td>
+<td><p>45.18ms</p></td>
+<td><p>[128.4x]²</p></td>
+<td><p>[212-497x]¹</p></td>
+</tr>
+<tr class="row-odd"><td><p>iterations_1</p></td>
+<td><p>94.10ms</p></td>
+<td><p>[114.3x]²</p></td>
+<td><p>[195-460x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>iterations_10</p></td>
+<td><p>495.65ms</p></td>
+<td><p>[116.0x]²</p></td>
+<td><p>[172-428x]¹</p></td>
+</tr>
+<tr class="row-odd"><td><p>iterations_2</p></td>
+<td><p>135.48ms</p></td>
+<td><p>[109.0x]²</p></td>
+<td><p>[180-399x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>iterations_3</p></td>
+<td><p>181.56ms</p></td>
+<td><p>[108.8x]²</p></td>
+<td><p>[178-408x]¹</p></td>
+</tr>
+<tr class="row-odd"><td><p>iterations_5</p></td>
+<td><p>270.58ms</p></td>
+<td><p>[110.4x]²</p></td>
+<td><p>[174-356x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>scale_1000</p></td>
+<td><p>17.95ms</p></td>
+<td><p>[82.6x]¹</p></td>
+<td><p>[131-51x]²</p></td>
+</tr>
+<tr class="row-odd"><td><p>scale_10000</p></td>
+<td><p>408.13ms</p></td>
+<td><p>[178.1x]²</p></td>
+<td><p>[378-270x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>scale_5000</p></td>
+<td><p>139.81ms</p></td>
+<td><p>[133.6x]²</p></td>
+<td><p>[254-224x]¹</p></td>
+</tr>
+<tr class="row-odd"><td><p>scale_50000</p></td>
+<td><p>6798.58ms</p></td>
+<td><p>[661.0x]²</p></td>
+<td><p>[987-1169x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>scientific_1000</p></td>
+<td><p>19.04ms</p></td>
+<td><p>[70.1x]²</p></td>
+<td><p>[103-75x]¹</p></td>
+</tr>
+<tr class="row-odd"><td><p>scientific_10000</p></td>
+<td><p>479.57ms</p></td>
+<td><p>[190.7x]²</p></td>
+<td><p>[316-461x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>scientific_500</p></td>
+<td><p>8.59ms</p></td>
+<td><p>[49.6x]¹</p></td>
+<td><p>[69-45x]²</p></td>
+</tr>
+<tr class="row-odd"><td><p>scientific_5000</p></td>
+<td><p>161.42ms</p></td>
+<td><p>[124.9x]²</p></td>
+<td><p>[205-273x]¹</p></td>
+</tr>
+<tr class="row-even"><td><p>scale_100000**</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>1-1.5x</p></td>
 </tr>
 </tbody>
 </table>
+<p>* <strong>fastlowess</strong>: Shows speedup range <code class="docutils literal notranslate"><span class="pre">[Serial-Parallel]</span></code>. E.g., <code class="docutils literal notranslate"><span class="pre">[12-48x]</span></code> means 12x speedup (Sequential) and 48x speedup (Parallel).</p>
+<p>** <strong>Large Scale</strong>: <code class="docutils literal notranslate"><span class="pre">fastlowess</span> <span class="pre">(Serial)</span></code> is the baseline (1x).</p>
+<p>¹ Winner (Fastest implementation)</p>
+<p>² Runner-up (Second fastest implementation)</p>
+<p><strong>Key Takeaways</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Dominant Performance</strong>: <code class="docutils literal notranslate"><span class="pre">fastlowess</span></code> is consistently the fastest implementation. Even in <strong>Serial</strong> mode, it significantly outperforms <code class="docutils literal notranslate"><span class="pre">statsmodels</span></code> and <code class="docutils literal notranslate"><span class="pre">R</span></code>.</p></li>
+<li><p><strong>Parallel Scaling</strong>:</p>
+<ul class="simple">
+<li><p><strong>Large Datasets</strong>: Parallel execution provides massive gains. For example, <code class="docutils literal notranslate"><span class="pre">scale_50000</span></code> shows a jump from ~987x (Serial) to ~1169x (Parallel) speedup.</p></li>
+<li><p><strong>Small Datasets</strong>: For very small datasets (e.g., <code class="docutils literal notranslate"><span class="pre">scale_1000</span></code>, <code class="docutils literal notranslate"><span class="pre">financial_500</span></code>), Serial execution is often faster than Parallel due to thread overhead (e.g., <code class="docutils literal notranslate"><span class="pre">[131-51x]</span></code>).</p></li>
+</ul>
+</li>
+<li><p><strong>R vs Statsmodels</strong>: <code class="docutils literal notranslate"><span class="pre">R</span></code> is a strong runner-up, generally ~80-150x faster than <code class="docutils literal notranslate"><span class="pre">statsmodels</span></code>, but <code class="docutils literal notranslate"><span class="pre">fastlowess</span></code> extends this lead further.</p></li>
+<li><p><strong>Handling Complex Cases</strong>: <code class="docutils literal notranslate"><span class="pre">fastlowess</span></code> maintains its performance advantage even in pathological cases like <code class="docutils literal notranslate"><span class="pre">high_noise</span></code> and <code class="docutils literal notranslate"><span class="pre">extreme_outliers</span></code>.</p></li>
+</ol>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -314,7 +420,6 @@
 </li>
 </ul>
 </div>
-</section>
 </section>
 </section>
 <section id="indices-and-tables">
