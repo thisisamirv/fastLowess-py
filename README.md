@@ -72,72 +72,82 @@ The factor 1.4826 = 1/Phi^-1(3/4) ensures consistency with the standard deviatio
 
 ## Performance Advantages
 
-The `fastLowess` crate demonstrates massive performance gains over Python's `statsmodels`. The Rust CPU backend is the decisive winner across almost all standard benchmarks, often achieving **multi-hundred-fold speedups**.
+The `fastlowess` Python package demonstrates massive performance gains over Python's `statsmodels` and R's `stats::lowess`. The benchmarks compare `fastlowess` (both Serial and Parallel execution modes) against these standard implementations.
 
-The table below shows speedups relative to the **baseline**.
+The results show that `fastlowess` is the decisive winner across all benchmarks, achieving an **average speedup of 280x** and a **maximum speedup of 1169x**.
 
-- **Standard Benchmarks**: Baseline is `statsmodels` (Python).
-- **Large Scale Benchmarks**: Baseline is `Rust (Serial)` (1x), as `statsmodels` times out.
+The table below shows speedups relative to the **statsmodels baseline**.
 
-| Name                  | statsmodels |      R      |  Rust (CPU)*  | Rust (GPU)|
-|-----------------------|-------------|-------------|---------------|-----------|
-| clustered             |  162.77ms   |  [82.8x]²   |  [203-433x]¹  |   32.4x   |
-| constant_y            |  133.63ms   |  [92.3x]²   |  [212-410x]¹  |   17.5x   |
-| delta_large           |   0.51ms    |   [0.8x]²   |  [3.8-2.2x]¹  |   0.1x    |
-| delta_medium          |   0.79ms    |   [1.3x]²   |  [4.4-3.4x]¹  |   0.1x    |
-| delta_none            |  414.86ms   |    2.5x     |  [3.8-13x]²   | [63.5x]¹  |
-| delta_small           |   1.45ms    |   [1.7x]²   |  [4.3-4.5x]¹  |   0.2x    |
-| extreme_outliers      |  488.96ms   |  [106.4x]²  |  [201-388x]¹  |   28.9x   |
-| financial_1000        |   13.55ms   |  [76.6x]²   |  [145-108x]¹  |   4.7x    |
-| financial_10000       |  302.20ms   |  [168.3x]²  |  [453-611x]¹  |   26.3x   |
-| financial_500         |   6.49ms    |  [58.0x]¹   |  [113-58x]²   |   2.7x    |
-| financial_5000        |  103.94ms   |  [117.3x]²  |  [296-395x]¹  |   14.1x   |
-| fraction_0.05         |  122.00ms   |  [177.6x]²  |  [421-350x]¹  |   14.5x   |
-| fraction_0.1          |  140.59ms   |  [112.8x]²  |  [291-366x]¹  |   15.9x   |
-| fraction_0.2          |  181.57ms   |  [85.3x]²   |  [210-419x]¹  |   19.3x   |
-| fraction_0.3          |  220.98ms   |  [84.8x]²   |  [168-380x]¹  |   22.4x   |
-| fraction_0.5          |  296.47ms   |  [80.9x]²   |  [146-415x]¹  |   27.3x   |
-| fraction_0.67         |  362.59ms   |  [83.1x]²   |  [129-413x]¹  |   32.0x   |
-| genomic_1000          |   17.82ms   |  [15.9x]²   |   [19-33x]¹   |   6.5x    |
-| genomic_10000         |  399.90ms   |    3.6x     |  [5.3-16x]²   | [70.3x]¹  |
-| genomic_5000          |  138.49ms   |    5.0x     |  [7.0-19x]²   | [34.8x]¹  |
-| genomic_50000         |  6776.57ms  |    2.4x     |  [3.5-11x]²   | [269.2x]¹ |
-| high_noise            |  435.85ms   |  [132.6x]²  |  [134-375x]¹  |   32.3x   |
-| iterations_0          |   45.18ms   |  [128.4x]²  |  [266-405x]¹  |   10.6x   |
-| iterations_1          |   94.10ms   |  [114.3x]²  |  [236-384x]¹  |   14.4x   |
-| iterations_10         |  495.65ms   |  [116.0x]²  |  [204-369x]¹  |   27.0x   |
-| iterations_2          |  135.48ms   |  [109.0x]²  |  [219-432x]¹  |   16.6x   |
-| iterations_3          |  181.56ms   |  [108.8x]²  |  [213-382x]¹  |   18.7x   |
-| iterations_5          |  270.58ms   |  [110.4x]²  |  [208-345x]¹  |   22.7x   |
-| scale_1000            |   17.95ms   |  [82.6x]²   |  [150-107x]¹  |   8.1x    |
-| scale_10000           |  408.13ms   |  [178.1x]²  |  [433-552x]¹  |   76.3x   |
-| scale_5000            |  139.81ms   |  [133.6x]²  |  [289-401x]¹  |   28.8x   |
-| scale_50000           |  6798.58ms  |  [661.0x]²  | [1077-1264x]¹ |  277.2x   |
-| scientific_1000       |   19.04ms   |  [70.1x]²   |  [113-115x]¹  |   5.4x    |
-| scientific_10000      |  479.57ms   |  [190.7x]²  |  [370-663x]¹  |   35.2x   |
-| scientific_500        |   8.59ms    |  [49.6x]²   |   [91-52x]¹   |   3.2x    |
-| scientific_5000       |  161.42ms   |  [124.9x]²  |  [244-427x]¹  |   17.9x   |
-| scale_100000**        |      -      |      -      |    1-1.3x     |   0.3x    |
-| scale_1000000**       |      -      |      -      |    1-1.3x     |   0.3x    |
-| scale_2000000**       |      -      |      -      |    1-1.5x     |   0.3x    |
-| scale_250000**        |      -      |      -      |    1-1.4x     |   0.3x    |
-| scale_500000**        |      -      |      -      |    1-1.3x     |   0.3x    |
+| Name                  | statsmodels |      R      |  fastlowess   |
+|-----------------------|-------------|-------------|---------------|
+| clustered             |  162.77ms   |  [82.8x]²   |  [170-432x]¹  |
+| constant_y            |  133.63ms   |  [92.3x]²   |  [176-372x]¹  |
+| delta_large           |   0.51ms    |   [0.8x]²   |  [3.3-2.0x]¹  |
+| delta_medium          |   0.79ms    |   [1.3x]²   |  [3.7-3.3x]¹  |
+| delta_none            |  414.86ms   |   [2.5x]²   |  [3.2-16x]¹   |
+| delta_small           |   1.45ms    |   [1.7x]²   |  [3.6-4.4x]¹  |
+| extreme_outliers      |  488.96ms   |  [106.4x]²  |  [168-373x]¹  |
+| financial_1000        |   13.55ms   |  [76.6x]²   |  [135-105x]¹  |
+| financial_10000       |  302.20ms   |  [168.3x]²  |  [379-480x]¹  |
+| financial_500         |   6.49ms    |  [58.0x]¹   |   [92-54x]²   |
+| financial_5000        |  103.94ms   |  [117.3x]²  |  [252-336x]¹  |
+| fraction_0.05         |  122.00ms   |  [177.6x]²  |  [376-274x]¹  |
+| fraction_0.1          |  140.59ms   |  [112.8x]²  |  [252-219x]¹  |
+| fraction_0.2          |  181.57ms   |  [85.3x]²   |  [180-283x]¹  |
+| fraction_0.3          |  220.98ms   |  [84.8x]²   |  [151-304x]¹  |
+| fraction_0.5          |  296.47ms   |  [80.9x]²   |  [125-366x]¹  |
+| fraction_0.67         |  362.59ms   |  [83.1x]²   |  [115-428x]¹  |
+| genomic_1000          |   17.82ms   |  [15.9x]²   |   [16-23x]¹   |
+| genomic_10000         |  399.90ms   |   [3.6x]²   |  [4.5-18x]¹   |
+| genomic_5000          |  138.49ms   |   [5.0x]²   |  [6.1-21x]¹   |
+| genomic_50000         |  6776.57ms  |   [2.4x]²   |  [3.1-12x]¹   |
+| high_noise            |  435.85ms   |  [132.6x]²  |  [118-381x]¹  |
+| iterations_0          |   45.18ms   |  [128.4x]²  |  [212-497x]¹  |
+| iterations_1          |   94.10ms   |  [114.3x]²  |  [195-460x]¹  |
+| iterations_10         |  495.65ms   |  [116.0x]²  |  [172-428x]¹  |
+| iterations_2          |  135.48ms   |  [109.0x]²  |  [180-399x]¹  |
+| iterations_3          |  181.56ms   |  [108.8x]²  |  [178-408x]¹  |
+| iterations_5          |  270.58ms   |  [110.4x]²  |  [174-356x]¹  |
+| scale_1000            |   17.95ms   |  [82.6x]¹   |  [131-51x]²   |
+| scale_10000           |  408.13ms   |  [178.1x]²  |  [378-270x]¹  |
+| scale_5000            |  139.81ms   |  [133.6x]²  |  [254-224x]¹  |
+| scale_50000           |  6798.58ms  |  [661.0x]²  | [987-1169x]¹  |
+| scientific_1000       |   19.04ms   |  [70.1x]²   |  [103-75x]¹   |
+| scientific_10000      |  479.57ms   |  [190.7x]²  |  [316-461x]¹  |
+| scientific_500        |   8.59ms    |  [49.6x]¹   |   [69-45x]²   |
+| scientific_5000       |  161.42ms   |  [124.9x]²  |  [205-273x]¹  |
+| scale_100000**        |      -      |      -      |    1-1.5x     |
 
-\* **Rust (CPU)**: Shows range `Seq - Par`. E.g., `12-48x` means 12x speedup (Sequential) and 48x speedup (Parallel). Rank determined by Parallel speedup.
-\*\* **Large Scale**: `Rust (Serial)` is the baseline (1x).
+\* **fastlowess**: Shows speedup range `[Serial-Parallel]`. E.g., `[12-48x]` means 12x speedup (Sequential) and 48x speedup (Parallel).
+
+\*\* **Large Scale**: `fastlowess (Serial)` is the baseline (1x).
 
 ¹ Winner (Fastest implementation)
+
 ² Runner-up (Second fastest implementation)
 
-**Key Takeaways**:
+**Key Takeaways**::
 
-1. **Rust (Parallel CPU)** is the dominant performer for general-purpose workloads, consistently achieving the highest speedups (often 300x-500x over statsmodels).
-2. **R (stats::lowess)** is a very strong runner-up, frequently outperforming statsmodels by ~80-150x, but generally trailing Rust Parallel.
-3. **Rust (GPU)** excels in specific high-compute scenarios (e.g., `genomic` with large datasets or `delta_none` where interpolation is skipped), but carries overhead that makes it slower than the highly optimized CPU backend for smaller datasets.
-4. **Large Scale Scaling**: At very large scales (100k - 2M points), the parallel CPU backend maintains a modest lead (1.3x - 1.5x) over the sequential CPU backend, likely bottlenecked by memory bandwidth rather than compute.
-5. **Small vs Large Delta**: Setting `delta=0` (no interpolation, `delta_none`) allows the GPU to shine (63.5x speedup), outperforming both CPU variants due to the massive O(N²) interaction workload being parallelized across thousands of GPU cores.
+1. **Dominant Performance**: `fastlowess` is consistently the fastest implementation. Even in **Serial** mode, it significantly outperforms `statsmodels` and `R`.
+2. **Parallel Scaling**:
+    - **Large Datasets**: Parallel execution provides massive gains. For example, `scale_50000` shows a jump from ~987x (Serial) to ~1169x (Parallel) speedup.
+    - **Small Datasets**: For very small datasets (e.g., `scale_1000`, `financial_500`), Serial execution is often faster than Parallel due to thread overhead (e.g., `[131-51x]`).
+3. **R vs Statsmodels**: `R` is a strong runner-up, generally ~80-150x faster than `statsmodels`, but `fastlowess` extends this lead further.
+4. **Handling Complex Cases**: `fastlowess` maintains its performance advantage even in pathological cases like `high_noise` and `extreme_outliers`.
 
-Check [Benchmarks for fastLowess](https://github.com/thisisamirv/fastLowess/tree/bench/benchmarks) for detailed results and reproducible benchmarking code.
+Check [Benchmarks for fastLowess](https://github.com/thisisamirv/fastLowess-py/tree/bench/benchmarks) for detailed results and reproducible benchmarking code.
+
+## Validation
+
+The `fastlowess` package is a **numerical twin** of R's `lowess` implementation:
+
+| Aspect          | Status         | Details                                    |
+|-----------------|----------------|--------------------------------------------|
+| **Accuracy**    | ✅ EXACT MATCH | Max diff < 1e-12 across all scenarios      |
+| **Consistency** | ✅ PERFECT     | 15/15 scenarios pass with strict tolerance |
+| **Robustness**  | ✅ VERIFIED    | Robust smoothing matches R exactly         |
+
+Check [Validation](https://github.com/thisisamirv/fastLowess-py/tree/bench/validation) for detailed scenario results.
 
 ## Installation
 
@@ -307,15 +317,6 @@ python examples/batch_smoothing.py
 python examples/online_smoothing.py
 python examples/streaming_smoothing.py
 ```
-
-## Validation
-
-Validated against:
-
-- **Python (statsmodels)**: Passed on 44 distinct test scenarios.
-- **Original Paper**: Reproduces Cleveland (1979) results.
-
-Check [Validation](https://github.com/thisisamirv/fastLowess-py/tree/bench/validation) for more information. Small variations in results are expected due to differences in scale estimation and padding.
 
 ## Related Work
 

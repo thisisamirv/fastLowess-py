@@ -40,7 +40,8 @@ include = [
     "Cargo.toml",
     "pyproject.toml",
     "README.md",
-    "LICENSE",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
     "CHANGELOG.md",
 ]
 

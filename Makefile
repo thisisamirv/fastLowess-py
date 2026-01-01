@@ -1,5 +1,5 @@
 # Run all local checks (formatting, linting, building, tests, docs)
-check: fmt clippy build test doc examples maturin install
+check: fmt clippy build maturin install test doc examples
 	@echo "All checks completed successfully!"
 
 # Formatting
